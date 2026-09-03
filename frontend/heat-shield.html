@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEAT SHIELD — Extreme Heat Early Warning & Action System</title>
+    <meta name="description" content="Municipal Heatwave Intelligence & Early Warning Decision Support System. Pilot: Chandrapur District, MH.">
+    
+    <!-- Premium Fonts: Plus Jakarta Sans, Inter, Noto Sans Devanagari -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet & Chart.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    
+    <!-- Translations Script -->
+    <script src="translations.js"></script>
+
+    <style>
+        :root {
+            /* World-Class Executive Light Slate Theme */
+            --bg-page: #f8fafc;
+            --sidebar-bg: #0f172a;
+            --sidebar-text: #94a3b8;
+            --sidebar-hover: #1e293b;
+            --sidebar-active-bg: rgba(234, 88, 12, 0.15);
+            --sidebar-active-text: #fb923c;
+
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --card-sub: #f8fafc;
+            --card-sub-hover: #f1f5f9;
+
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #94a3b8;
+
+            --risk-extreme: #dc2626;
+            --risk-extreme-bg: #fef2f2;
+            --risk-extreme-border: #fecaca;
+
+            --risk-danger: #ea580c;
+            --risk-danger-bg: #fff7ed;
+            --risk-danger-border: #ffedd5;
+
+            --risk-caution: #d97706;
+            --risk-caution-bg: #fffbeb;
+            --risk-caution-border: #fef3c7;
+
+            --risk-safe: #16a34a;
+            --risk-safe-bg: #f0fdf4;
+            --risk-safe-border: #bbf7d0;
+
+            --brand-primary: #ea580c;
+            --brand-primary-hover: #c2410c;
+
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            font-size: 13.5px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Sidebar Navigation */
+        aside.sidebar {
+            width: 255px;
+            background-color: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 30;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.06);
+        }
+
+        .brand-block {
+            padding: 22px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ea580c, #f97316);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            box-shadow: 0 4px 14px rgba(234, 88, 12, 0.4);
+            flex-shrink: 0;
+        }
+
+        .brand-title h1 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.4px;
+        }
+
+        .brand-title p {
+            font-size: 11px;
+            color: var(--sidebar-text);
+            line-height: 1.2;
+        }
+
+        .nav-list {
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            color: var(--sidebar-text);
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--sidebar-hover);
+            color: #ffffff;
+        }
+
+        .nav-btn.active {
+            background-color: var(--sidebar-active-bg);
+            color: var(--sidebar-active-text);
+            font-weight: 600;
+            border-left: 3.5px solid var(--brand-primary);
+        }
+
+        .nav-btn .icon { width: 20px; text-align: center; font-size: 16px; }
+
+        .sidebar-foot {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            font-size: 11.5px;
+            color: var(--sidebar-text);
+        }
+
+        /* Workspace Main */
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Header */
+        header.top-header {
+            height: 64px;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--card-border);
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .pill-location {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--card-sub);
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+        }
+
+        .pill-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--risk-safe);
+            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+        }
+
+        .dot.offline {
+            background-color: var(--risk-danger);
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        /* Language Toggle Switcher */
+        .lang-switch {
+            display: flex;
+            background: var(--card-sub);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            padding: 2px;
+        }
+
+        .lang-opt {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .lang-opt.active {
+            background: #ffffff;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-alert-global {
+            background-color: var(--risk-extreme);
+            color: white;
+            border: none;
+            padding: 9px 18px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 3px 10px rgba(220, 38, 38, 0.25);
+            transition: all 0.15s ease;
+        }
+
+        .btn-alert-global:hover {
+            background-color: #b91c1c;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(220, 38, 38, 0.35);
+        }
+
+        /* Main Viewport Body */
+        .page-body {
+            flex: 1;
+            padding: 24px 28px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .tab-content.active { display: flex; }
+
+        /* Command Banner */
+        .cmd-banner {
+            background-color: #ffffff;
+            border: 1px solid var(--card-border);
+            border-left: 5px solid var(--risk-extreme);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .cmd-info h3 {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .cmd-info h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--risk-extreme);
+            margin: 2px 0 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cmd-info p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* KPI Cards Grid */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 900px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+
+        .kpi-card {
+            background-color: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 18px 20px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .kpi-card label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+        }
+
+        .kpi-card .val {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        /* Executive 2-Column Balanced Dashboard Layout */
+        .dashboard-main-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+        }
+
+        @media (max-width: 1100px) { .dashboard-main-grid { grid-template-columns: 1fr; } }
+
+        .card-box {
+            background-color: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 12px;
+        }
+
+        .card-head h3 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Fixed Map Container Box in Control Center */
+        .map-box-container {
+            width: 100%;
+            height: 320px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--card-border);
+            overflow: hidden;
+            position: relative;
+        }
+
+        #overviewPreviewMap {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .action-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .action-list li {
+            font-size: 13px;
+            color: var(--text-primary);
+            background-color: var(--card-sub);
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            border-left: 3.5px solid var(--brand-primary);
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .action-list li span.act-num {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Minimal Crisp Table */
+        table.tbl {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        table.tbl th {
+            text-align: left;
+            padding: 10px 12px;
+            background-color: var(--card-sub);
+            color: var(--text-secondary);
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        table.tbl td {
+            padding: 12px;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-primary);
+        }
+
+        table.tbl tr:hover td { background-color: var(--card-sub-hover); }
+
+        /* Badges */
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .tag.Extreme { background-color: var(--risk-extreme-bg); color: var(--risk-extreme); border: 1px solid var(--risk-extreme-border); }
+        .tag.Danger { background-color: var(--risk-danger-bg); color: var(--risk-danger); border: 1px solid var(--risk-danger-border); }
+        .tag.Caution { background-color: var(--risk-caution-bg); color: var(--risk-caution); border: 1px solid var(--risk-caution-border); }
+        .tag.Safe { background-color: var(--risk-safe-bg); color: var(--risk-safe); border: 1px solid var(--risk-safe-border); }
+
+        .btn-btn {
+            background-color: var(--card-sub);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-btn:hover { background-color: var(--card-border); }
+
+        /* GIS Grid */
+        .gis-grid {
+            display: grid;
+            grid-template-columns: 240px 1fr 310px;
+            gap: 16px;
+            height: calc(100vh - 135px);
+        }
+
+        @media (max-width: 1050px) { .gis-grid { grid-template-columns: 1fr; height: auto; } }
+
+        #fullMap {
+            width: 100%;
+            height: 100%;
+            min-height: 350px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--card-border);
+        }
+
+        /* Driver Callout Cards */
+        .driver-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background-color: var(--card-sub);
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--card-border);
+        }
+
+        .driver-card .icon { font-size: 18px; flex-shrink: 0; }
+        .driver-card p.title { font-weight: 700; color: var(--text-primary); font-size: 12.5px; }
+        .driver-card p.desc { color: var(--text-secondary); font-size: 11.5px; }
+
+        /* Preparedness Table */
+        .prep-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .prep-table td {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        /* Technical Accordion */
+        .tech-accordion {
+            background-color: var(--card-sub);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .tech-accordion.active { display: flex; flex-direction: column; gap: 10px; }
+
+        /* Simulator Controls */
+        .sim-tag {
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-weight: 700;
+            font-size: 11px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .sim-slider {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .sim-slider label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .sim-slider input[type="range"] {
+            width: 100%;
+            accent-color: var(--brand-primary);
+            cursor: pointer;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal-box {
+            background-color: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            width: 90%; max-width: 480px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-box h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; color: var(--text-primary); font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <!-- LEFT NAVIGATION SIDEBAR -->
+    <aside class="sidebar">
+        <div>
+            <div class="brand-block">
+                <div class="brand-logo">🛡️</div>
+                <div class="brand-title">
+                    <h1 data-i18n="brand_title">HEAT SHIELD</h1>
+                    <p data-i18n="brand_tagline">Extreme Heat Early Warning & Action System</p>
+                </div>
+            </div>
+
+            <nav class="nav-list">
+                <div class="nav-btn active" onclick="showTab('overview', this)">
+                    <span class="icon">📊</span> <span data-i18n="nav_overview">Control Center</span>
+                </div>
+                <div class="nav-btn" onclick="showTab('map', this)">
+                    <span class="icon">🗺️</span> <span data-i18n="nav_map">Risk Map</span>
+                </div>
+                <div class="nav-btn" onclick="showTab('details', this)">
+                    <span class="icon">🔍</span> <span data-i18n="nav_wards">Priority Wards</span>
+                </div>
+                <div class="nav-btn" onclick="showTab('forecast', this)">
+                    <span class="icon">📈</span> <span data-i18n="nav_forecast">5-Day Forecast</span>
+                </div>
+                <div class="nav-btn" onclick="showTab('simulator', this)">
+                    <span class="icon">🧪</span> <span data-i18n="nav_simulator">What-If Simulator</span>
+                </div>
+                <div class="nav-btn" onclick="showTab('alerts', this)">
+                    <span class="icon">🚨</span> <span data-i18n="nav_alerts">Alert Center</span>
+                </div>
+                <div class="nav-btn" onclick="showTab('actions', this)">
+                    <span class="icon">📋</span> <span data-i18n="nav_actions">Action Center</span>
+                </div>
+                <div class="nav-btn" onclick="showTab('settings', this)">
+                    <span class="icon">⚙️</span> <span data-i18n="nav_settings">Settings</span>
+                </div>
+            </nav>
+        </div>
+
+        <div class="sidebar-foot">
+            <p><strong>Pilot Region:</strong> <span data-i18n="pilot_location">Chandrapur District, MH</span></p>
+            <p style="margin-top: 2px;">Municipal Command Platform</p>
+        </div>
+    </aside>
+
+    <!-- RIGHT WORKSPACE AREA -->
+    <div class="workspace">
+        <!-- TOP HEADER -->
+        <header class="top-header">
+            <div class="header-meta">
+                <div class="pill-location">
+                    <span>📍</span> <span data-i18n="pilot_location">Chandrapur District, MH</span>
+                </div>
+                <div class="pill-status">
+                    <div class="dot" id="sysDot"></div>
+                    <span id="sysStatus" data-i18n="status_operational">System Operational</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="lang-switch">
+                    <button class="lang-opt active" id="btnEn" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-opt" id="btnMr" onclick="switchLanguage('mr')">मराठी</button>
+                </div>
+                <button class="btn-alert-global" onclick="openAlertModal()">
+                    <span>⚡</span> <span data-i18n="btn_emergency_alert">TRIGGER EMERGENCY ALERT</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN BODY VIEWPORT -->
+        <div class="page-body">
+
+            <!-- 1. OVERVIEW / CONTROL CENTER TAB -->
+            <div class="tab-content active" id="tab-overview">
+                <!-- Command Banner -->
+                <div class="cmd-banner">
+                    <div class="cmd-info">
+                        <h3 data-i18n="cmd_header">DISTRICT HEAT RISK STATUS</h3>
+                        <h2><span data-i18n="cmd_extreme">EXTREME HEAT EMERGENCY</span> — 81 / 100</h2>
+                        <p><span data-i18n="cmd_sub">6 of 8 municipal wards require immediate intervention</span> • <span data-i18n="lbl_last_updated">Last updated</span>: <span id="lblTime">03 Sep 2026, 08:00</span></p>
+                    </div>
+                </div>
+
+                <!-- KPIs -->
+                <div class="kpi-row">
+                    <div class="kpi-card">
+                        <label data-i18n="kpi_monitored">Monitored Wards</label>
+                        <div class="val">8</div>
+                    </div>
+                    <div class="kpi-card">
+                        <label data-i18n="kpi_high_risk">High-Risk Wards</label>
+                        <div class="val" style="color: var(--risk-extreme);">6</div>
+                    </div>
+                    <div class="kpi-card">
+                        <label data-i18n="kpi_peak_score">Peak Risk Score</label>
+                        <div class="val" style="color: var(--risk-extreme);">82 / 100</div>
+                    </div>
+                    <div class="kpi-card">
+                        <label data-i18n="kpi_pop_risk">Population at Risk</label>
+                        <div class="val" style="color: var(--risk-danger);">785,000</div>
+                    </div>
+                </div>
+
+                <!-- Executive 2-Column Dashboard Layout -->
+                <div class="dashboard-main-grid">
+                    <!-- Left Main Column: Priority Wards + GIS Spatial Map -->
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <!-- Ranked Wards Table -->
+                        <div class="card-box">
+                            <div class="card-head">
+                                <h3 data-i18n="sec_ranked_wards">RANKED PRIORITY WARDS</h3>
+                                <button class="btn-btn" onclick="showTab('map')" data-i18n="btn_view_map">Open Interactive GIS Map →</button>
+                            </div>
+                            <table class="tbl">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="col_rank">#</th>
+                                        <th data-i18n="col_ward">Ward / Taluka</th>
+                                        <th data-i18n="col_risk">Risk Tier</th>
+                                        <th data-i18n="col_score">Score</th>
+                                        <th data-i18n="col_temp">Temp</th>
+                                        <th data-i18n="col_wbgt">WBGT</th>
+                                        <th data-i18n="col_driver">Primary Risk Driver</th>
+                                        <th data-i18n="col_action">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="overviewTbody">
+                                    <!-- Injected by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Perfectly Fitted GIS Preview Map -->
+                        <div class="card-box">
+                            <div class="card-head">
+                                <h3 data-i18n="sec_district_preview">GIS SPATIAL RISK PREVIEW</h3>
+                                <button class="btn-btn" onclick="showTab('map')" data-i18n="btn_view_map">Open Interactive GIS Map →</button>
+                            </div>
+                            <div class="map-box-container">
+                                <div id="overviewPreviewMap"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Priority Actions Queue & Risk Factors -->
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <!-- Priority Actions List -->
+                        <div class="card-box">
+                            <div class="card-head">
+                                <h3 data-i18n="sec_priority_actions">PRIORITY MUNICIPAL ACTIONS</h3>
+                            </div>
+                            <ul class="action-list">
+                                <li>
+                                    <span class="act-num">1. Emergency Cooling Centers</span>
+                                    <span style="color: var(--text-secondary);" data-i18n="act_1">Activate emergency cooling centers across central Chandrapur</span>
+                                </li>
+                                <li>
+                                    <span class="act-num">2. Work Suspension Advisory</span>
+                                    <span style="color: var(--text-secondary);" data-i18n="act_2">Enforce outdoor work suspension (11:00 AM – 4:00 PM)</span>
+                                </li>
+                                <li>
+                                    <span class="act-num">3. Hospital Preparedness Alert</span>
+                                    <span style="color: var(--text-secondary);" data-i18n="act_3">Alert district emergency health facilities for heat stroke admissions</span>
+                                </li>
+                            </ul>
+                            <button class="btn-btn" style="margin-top: auto; width: 100%; text-align: center;" onclick="showTab('actions')" data-i18n="btn_view_actions">View All Response Actions →</button>
+                        </div>
+
+                        <!-- District Response Preparedness Card -->
+                        <div class="card-box">
+                            <div class="card-head">
+                                <h3 data-i18n="sec_prep">RESPONSE PREPAREDNESS STATUS</h3>
+                            </div>
+                            <table class="prep-table">
+                                <tr><td><span data-i18n="prep_cooling">Cooling Centers</span></td><td style="text-align: right;"><span class="tag Safe" data-i18n="st_active">ACTIVE</span></td></tr>
+                                <tr><td><span data-i18n="prep_water">Hydration Stations</span></td><td style="text-align: right;"><span class="tag Safe" data-i18n="st_active">ACTIVE</span></td></tr>
+                                <tr><td><span data-i18n="prep_work">Work Hours Advisory</span></td><td style="text-align: right;"><span class="tag Caution" data-i18n="st_issued">ISSUED</span></td></tr>
+                                <tr><td><span data-i18n="prep_hospitals">Hospital Alert</span></td><td style="text-align: right;"><span class="tag Caution" data-i18n="st_pending">PENDING</span></td></tr>
+                                <tr><td><span data-i18n="prep_elderly">Elderly Welfare Checks</span></td><td style="text-align: right;"><span class="tag Extreme" data-i18n="st_not_started">NOT STARTED</span></td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. WARD RISK MAP TAB -->
+            <div class="tab-content" id="tab-map">
+                <div class="card-head" style="border: none; padding-bottom: 0;">
+                    <div>
+                        <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px;" data-i18n="map_title">GIS SPATIAL RISK MAP</h2>
+                        <p style="color: var(--text-secondary); font-size: 12px;" data-i18n="map_sub">Identify high-risk spatial clusters and vulnerability zones</p>
+                    </div>
+                </div>
+
+                <div class="gis-grid">
+                    <!-- Filters -->
+                    <div class="card-box">
+                        <h4 style="font-size: 12px; color: var(--text-primary);" data-i18n="map_filter_hdr">Risk Tier Filter</h4>
+                        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+                            <button class="btn-btn" style="text-align: left;" onclick="filterGisMap('All')" data-i18n="filter_all">All Wards (8)</button>
+                            <button class="btn-btn" style="text-align: left; border-left: 3.5px solid var(--risk-extreme);" onclick="filterGisMap('Extreme')" data-i18n="filter_extreme">Extreme Risk</button>
+                            <button class="btn-btn" style="text-align: left; border-left: 3.5px solid var(--risk-danger);" onclick="filterGisMap('Danger')" data-i18n="filter_danger">Danger Risk</button>
+                            <button class="btn-btn" style="text-align: left; border-left: 3.5px solid var(--risk-caution);" onclick="filterGisMap('Caution')" data-i18n="filter_caution">Caution Risk</button>
+                            <button class="btn-btn" style="text-align: left; border-left: 3.5px solid var(--risk-safe);" onclick="filterGisMap('Safe')" data-i18n="filter_safe">Safe Level</button>
+                        </div>
+                    </div>
+
+                    <!-- GIS Map Container -->
+                    <div id="fullMap"></div>
+
+                    <!-- Selected Ward Side Panel -->
+                    <div class="card-box" id="mapSidePanel">
+                        <span class="tag Extreme" id="mapBadge">Extreme</span>
+                        <h3 id="mapWardTitle" style="font-size: 16px; color: var(--text-primary); margin-top: 4px;">Chandrapur City</h3>
+                        <p style="font-size: 12px; color: var(--text-secondary);">Risk Score: <b id="mapScore" style="color: var(--text-primary);">82 / 100</b></p>
+                        
+                        <div style="margin-top: 10px; font-size: 12px;">
+                            <p>Temp: <b id="mapTemp">47°C</b> | WBGT: <b id="mapWbgt">42.5°C</b></p>
+                        </div>
+
+                        <div style="margin-top: 14px; border-top: 1px solid var(--card-border); padding-top: 10px;">
+                            <h4 style="font-size: 11px; color: var(--text-secondary); font-weight: 700;" data-i18n="map_why_hdr">WHY IS THIS WARD AT RISK?</h4>
+                            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;" id="mapDriversList">
+                                <!-- Injected by JS -->
+                            </div>
+                        </div>
+
+                        <button class="btn-btn" style="margin-top: auto; padding: 10px; width: 100%;" onclick="goToSelectedWardDetails()" data-i18n="btn_inspect_ward">Open Ward Analysis →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. PRIORITY WARDS / WARD DETAILS TAB -->
+            <div class="tab-content" id="tab-details">
+                <div class="card-head">
+                    <div>
+                        <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px;" data-i18n="wards_title">WARD RISK ANALYSIS</h2>
+                        <p style="color: var(--text-secondary); font-size: 12px;" data-i18n="wards_sub">In-depth thermal stress, demographic vulnerability, and response status</p>
+                    </div>
+                    <select id="selWardDetail" onchange="loadWardDetailView(this.value)" style="background: #ffffff; color: var(--text-primary); border: 1px solid var(--card-border); padding: 8px 14px; border-radius: var(--radius-sm); font-weight: 600;">
+                        <!-- Injected -->
+                    </select>
+                </div>
+
+                <!-- Header Info -->
+                <div class="card-box" style="flex-direction: row; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 id="detTitle" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; color: var(--text-primary);">CHANDRAPUR CITY</h2>
+                        <p id="detSub" style="color: var(--text-secondary); font-size: 12px;">Population: 320,000</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span id="detBadge" class="tag Extreme" style="font-size: 12px; padding: 4px 12px;">EXTREME</span>
+                        <h2 id="detScore" style="font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-primary); margin-top: 2px;">82 / 100</h2>
+                    </div>
+                </div>
+
+                <!-- 3 Metric Columns -->
+                <div class="kpi-row" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="card-box">
+                        <h4 style="font-size: 12px; color: var(--text-secondary);" data-i18n="sec_current">CURRENT WEATHER</h4>
+                        <p><span data-i18n="lbl_temp">Temperature</span>: <b id="detTempVal">47°C</b></p>
+                        <p><span data-i18n="lbl_rh">Relative Humidity</span>: <b id="detRhVal">28%</b></p>
+                        <p><span data-i18n="lbl_wind">Wind Speed</span>: <b id="detWindVal">12 km/h</b></p>
+                        <p><span data-i18n="lbl_solar">Solar Load</span>: <b id="detSolarVal">940 W/m²</b></p>
+                    </div>
+                    <div class="card-box">
+                        <h4 style="font-size: 12px; color: var(--text-secondary);" data-i18n="sec_heat_stress">THERMAL STRESS</h4>
+                        <p><span data-i18n="lbl_wbgt">WBGT Index</span>: <b id="detWbgtVal" style="color: var(--risk-extreme);">42.5°C</b></p>
+                        <p><span data-i18n="lbl_hi">Heat Index</span>: <b id="detHiVal">52°C</b></p>
+                        <p><span data-i18n="lbl_app_temp">Apparent Temp</span>: <b id="detAppVal">46.5°C</b></p>
+                        <p><span data-i18n="lbl_htsi">Blended HTSI</span>: <b id="detHtsiVal">42.6°C</b></p>
+                    </div>
+                    <div class="card-box">
+                        <h4 style="font-size: 12px; color: var(--text-secondary);" data-i18n="sec_vulnerability">DEMOGRAPHICS</h4>
+                        <p><span data-i18n="lbl_elderly">Elderly Population</span>: <b id="detElderlyVal">10.5%</b></p>
+                        <p><span data-i18n="lbl_workers">Outdoor Workers</span>: <b id="detWorkersVal">36.0%</b></p>
+                        <p><span data-i18n="lbl_green">Green Cover</span>: <b id="detGreenVal">6.5%</b></p>
+                    </div>
+                </div>
+
+                <!-- Drivers & Preparedness Split -->
+                <div class="grid-split">
+                    <div class="card-box">
+                        <h3 data-i18n="sec_why_risk">RISK DRIVER BREAKDOWN</h3>
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;" id="detDriversBox">
+                            <!-- Injected by JS -->
+                        </div>
+
+                        <!-- Technical Details Accordion -->
+                        <button class="btn-btn" style="margin-top: 10px;" onclick="toggleTechAccordion()" id="btnTechToggle" data-i18n="btn_tech_details">Show Technical Metrics & Formulas</button>
+                        <div class="tech-accordion" id="techAccordion">
+                            <p style="font-weight: 700; color: var(--text-primary);">Underlying Formulas & Calculation Methodology:</p>
+                            <p>• <b>NWS Heat Index:</b> Rothfusz 9-parameter regression equation using C-to-F ambient temperature & relative humidity.</p>
+                            <p>• <b>Australian BOM WBGT:</b> <code>0.567 * T + 0.393 * e + 3.94</code> where vapor pressure <code>e = (RH/100) * 6.105 * exp(17.27*T / (237.7+T))</code>.</p>
+                            <p>• <b>Blended HTSI (60% Weight):</b> <code>0.5 * SolarAdjustedWBGT + 0.3 * ApparentTemp + 0.2 * HeatIndex</code> normalized linearly over range [25°C, 50°C].</p>
+                            <p>• <b>Demographic Component (40% Weight):</b> <code>0.4 * ElderlyPct + 0.4 * OutdoorWorkersPct + 0.2 * (100 - GreenCoverPct)</code>.</p>
+                        </div>
+                    </div>
+
+                    <div class="card-box">
+                        <h3 data-i18n="sec_prep">RESPONSE PREPAREDNESS STATUS</h3>
+                        <table class="prep-table">
+                            <tr><td><span data-i18n="prep_cooling">Cooling Centers</span></td><td style="text-align: right;"><span class="tag Safe" data-i18n="st_active">ACTIVE</span></td></tr>
+                            <tr><td><span data-i18n="prep_water">Hydration Stations</span></td><td style="text-align: right;"><span class="tag Safe" data-i18n="st_active">ACTIVE</span></td></tr>
+                            <tr><td><span data-i18n="prep_work">Work Hours Advisory</span></td><td style="text-align: right;"><span class="tag Caution" data-i18n="st_issued">ISSUED</span></td></tr>
+                            <tr><td><span data-i18n="prep_hospitals">Hospital Alert</span></td><td style="text-align: right;"><span class="tag Caution" data-i18n="st_pending">PENDING</span></td></tr>
+                            <tr><td><span data-i18n="prep_elderly">Elderly Welfare Checks</span></td><td style="text-align: right;"><span class="tag Extreme" data-i18n="st_not_started">NOT STARTED</span></td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. FORECAST TAB -->
+            <div class="tab-content" id="tab-forecast">
+                <div class="card-head">
+                    <div>
+                        <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px;" data-i18n="forecast_title">5-DAY HEAT RISK OUTLOOK</h2>
+                        <p style="color: var(--text-secondary); font-size: 12px;" data-i18n="forecast_sub">Predictive multi-day trend modeling to enable early response planning</p>
+                    </div>
+                </div>
+
+                <div class="card-box" style="border-left: 4px solid var(--brand-primary);">
+                    <p style="font-size: 13.5px; color: var(--text-primary); font-weight: 500;" data-i18n="forecast_interpretation">
+                        Extreme heat risk is projected to persist for the next 72 hours across central Chandrapur.
+                    </p>
+                </div>
+
+                <div class="kpi-row" style="grid-template-columns: repeat(5, 1fr);">
+                    <div class="kpi-card" style="text-align: center;">
+                        <label data-i18n="lbl_today">Today</label>
+                        <div class="val" style="color: var(--risk-extreme);">82</div>
+                        <span class="tag Extreme" data-i18n="risk_extreme">Extreme</span>
+                    </div>
+                    <div class="kpi-card" style="text-align: center;">
+                        <label data-i18n="lbl_tomorrow">Tomorrow</label>
+                        <div class="val" style="color: var(--risk-extreme);">84</div>
+                        <span class="tag Extreme" data-i18n="risk_extreme">Extreme</span>
+                    </div>
+                    <div class="kpi-card" style="text-align: center;">
+                        <label data-i18n="lbl_day3">Day 3</label>
+                        <div class="val" style="color: var(--risk-extreme);">85</div>
+                        <span class="tag Extreme" data-i18n="risk_extreme">Extreme</span>
+                    </div>
+                    <div class="kpi-card" style="text-align: center;">
+                        <label data-i18n="lbl_day4">Day 4</label>
+                        <div class="val" style="color: var(--risk-extreme);">81</div>
+                        <span class="tag Extreme" data-i18n="risk_extreme">Extreme</span>
+                    </div>
+                    <div class="kpi-card" style="text-align: center;">
+                        <label data-i18n="lbl_day5">Day 5</label>
+                        <div class="val" style="color: var(--risk-danger);">74</div>
+                        <span class="tag Danger" data-i18n="risk_danger">Danger</span>
+                    </div>
+                </div>
+
+                <div class="card-box" style="height: 280px;">
+                    <canvas id="forecastChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 5. WHAT-IF SIMULATOR TAB -->
+            <div class="tab-content" id="tab-simulator">
+                <div>
+                    <span class="sim-tag" data-i18n="sim_badge">SIMULATION MODE</span>
+                    <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px;" data-i18n="sim_title">WHAT-IF SCENARIO SIMULATOR</h2>
+                    <p style="color: var(--text-secondary); font-size: 12px;" data-i18n="sim_sub">Simulate meteorological & infrastructure changes to assess projected risk impacts.</p>
+                </div>
+
+                <div class="grid-split">
+                    <div class="card-box">
+                        <h4 style="font-size: 12px; color: var(--text-primary);" data-i18n="sim_weather_hdr">Meteorological Inputs</h4>
+                        <div class="sim-slider">
+                            <label><span data-i18n="lbl_temp">Temperature</span> <b id="lblSimTemp">46.5°C</b></label>
+                            <input type="range" id="inSimTemp" min="25" max="52" step="0.5" value="46.5" oninput="runSim()">
+                        </div>
+                        <div class="sim-slider">
+                            <label><span data-i18n="lbl_rh">Humidity</span> <b id="lblSimRh">30%</b></label>
+                            <input type="range" id="inSimRh" min="10" max="90" step="1" value="30" oninput="runSim()">
+                        </div>
+                        <div class="sim-slider">
+                            <label><span data-i18n="lbl_solar">Solar Load</span> <b id="lblSimSolar">920 W/m²</b></label>
+                            <input type="range" id="inSimSolar" min="200" max="1100" step="10" value="920" oninput="runSim()">
+                        </div>
+
+                        <h4 style="font-size: 12px; color: var(--text-primary); margin-top: 10px;" data-i18n="sim_infra_hdr">Vulnerability & Infrastructure</h4>
+                        <div class="sim-slider">
+                            <label><span data-i18n="lbl_workers">Outdoor Workers</span> <b id="lblSimWorkers">38%</b></label>
+                            <input type="range" id="inSimWorkers" min="0" max="70" step="1" value="38" oninput="runSim()">
+                        </div>
+                        <div class="sim-slider">
+                            <label><span data-i18n="lbl_green">Green Cover</span> <b id="lblSimGreen">8%</b></label>
+                            <input type="range" id="inSimGreen" min="0" max="60" step="1" value="8" oninput="runSim()">
+                        </div>
+                    </div>
+
+                    <div class="card-box" style="text-align: center; justify-content: center;">
+                        <div style="display: flex; justify-content: center; gap: 36px;">
+                            <div>
+                                <p style="font-size: 11px; color: var(--text-secondary); font-weight: 700;" data-i18n="sim_curr_risk">CURRENT RISK</p>
+                                <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; color: var(--text-primary);">74</h2>
+                            </div>
+                            <div style="border-left: 1px solid var(--card-border); padding-left: 36px;">
+                                <p style="font-size: 11px; color: var(--text-secondary); font-weight: 700;" data-i18n="sim_proj_risk">SIMULATED RISK</p>
+                                <h2 id="simOutVal" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; color: var(--risk-extreme);">82</h2>
+                            </div>
+                        </div>
+
+                        <p id="simDeltaText" style="font-size: 12px; color: var(--risk-extreme); font-weight: 600; margin-top: 12px;">+8 points increase</p>
+
+                        <div style="text-align: left; margin-top: 18px; border-top: 1px solid var(--card-border); padding-top: 12px;">
+                            <h4 style="font-size: 11px; color: var(--text-secondary);" data-i18n="sim_why_hdr">WHY DID RISK CHANGE?</h4>
+                            <p style="font-size: 12px; color: var(--text-primary); margin-top: 4px;" data-i18n="sim_why_desc">Increased solar load combined with ambient temperature rise pushed WBGT into extreme threshold.</p>
+                        </div>
+
+                        <div style="text-align: left; margin-top: 12px; background-color: var(--card-sub); padding: 12px; border-radius: var(--radius-sm);">
+                            <h4 style="font-size: 11px; color: var(--text-secondary);" data-i18n="sim_rec_hdr">PREPAREDNESS RECOMMENDATION</h4>
+                            <p style="font-size: 12px; color: var(--text-primary); margin-top: 2px;" data-i18n="sim_rec_desc">Under this simulated scenario, cooling centers must open 2 hours earlier and hydration distribution expanded.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. ALERT CENTER TAB -->
+            <div class="tab-content" id="tab-alerts">
+                <div class="card-head">
+                    <div>
+                        <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px;" data-i18n="alerts_title">ALERT CENTER</h2>
+                        <p style="color: var(--text-secondary); font-size: 12px;" data-i18n="alerts_sub">Operational warning management, emergency broadcasts, and audit log</p>
+                    </div>
+                </div>
+
+                <div class="kpi-row" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="kpi-card">
+                        <label data-i18n="kpi_active_alerts">Active Warnings</label>
+                        <div class="val" style="color: var(--risk-extreme);">6</div>
+                    </div>
+                    <div class="kpi-card">
+                        <label data-i18n="kpi_awaiting_act">Awaiting Response</label>
+                        <div class="val" style="color: var(--risk-danger);">2</div>
+                    </div>
+                    <div class="kpi-card">
+                        <label data-i18n="kpi_dispatched_today">Dispatched Today</label>
+                        <div class="val">14</div>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <h3 data-i18n="alerts_active_hdr">ACTIVE EMERGENCY WARNINGS</h3>
+                    <table class="tbl">
+                        <thead>
+                            <tr>
+                                <th data-i18n="col_severity">Severity</th>
+                                <th data-i18n="col_target">Target Ward</th>
+                                <th data-i18n="col_score">Score</th>
+                                <th data-i18n="col_time">Time</th>
+                                <th data-i18n="col_trigger">Trigger Condition</th>
+                                <th data-i18n="col_mgmt">Management</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="tag Extreme" data-i18n="risk_extreme">Extreme</span></td>
+                                <td>Chandrapur City</td>
+                                <td>82 / 100</td>
+                                <td>22:15</td>
+                                <td>WBGT crossed 34°C threshold</td>
+                                <td>
+                                    <button class="btn-btn" onclick="alert('Alert Acknowledged')" data-i18n="btn_ack">Acknowledge</button>
+                                    <button class="btn-btn" onclick="alert('Alert Resolved')" data-i18n="btn_resolve">Resolve</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="tag Danger" data-i18n="risk_danger">Danger</span></td>
+                                <td>Ballarpur</td>
+                                <td>80 / 100</td>
+                                <td>18:30</td>
+                                <td>Heat Index 50°C Warning</td>
+                                <td>
+                                    <button class="btn-btn" onclick="alert('Alert Acknowledged')" data-i18n="btn_ack">Acknowledge</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 7. ACTION CENTER TAB -->
+            <div class="tab-content" id="tab-actions">
+                <div class="card-head">
+                    <div>
+                        <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px;" data-i18n="actions_title">ACTION CENTER</h2>
+                        <p style="color: var(--text-secondary); font-size: 12px;" data-i18n="actions_sub">Standard Operating Procedures (SOP) organized by timeline urgency</p>
+                    </div>
+                </div>
+
+                <div class="grid-split" style="grid-template-columns: repeat(2, 1fr);">
+                    <div class="card-box">
+                        <h4 style="color: var(--risk-extreme);" data-i18n="act_imm_hdr">IMMEDIATE (0 – 2 HOURS)</h4>
+                        <ul class="action-list">
+                            <li>Activate emergency cooling centers in Chandrapur City & Brahmapuri</li>
+                            <li>Enforce mandatory outdoor work suspension (11:00 AM – 4:00 PM)</li>
+                        </ul>
+                        <div style="display: flex; gap: 8px; margin-top: 10px;">
+                            <button class="btn-btn" onclick="alert('Advisory copied to clipboard')" data-i18n="btn_copy">Copy Advisory Text</button>
+                            <button class="btn-btn" style="background-color: var(--brand-primary); color: white; border: none;" onclick="openAlertModal()" data-i18n="btn_send">Broadcast Alert SMS</button>
+                        </div>
+                    </div>
+
+                    <div class="card-box">
+                        <h4 style="color: var(--risk-danger);" data-i18n="act_6h_hdr">NEXT 6 HOURS</h4>
+                        <ul class="action-list">
+                            <li>Deploy hydration vans to major bus stands and coal field hubs</li>
+                            <li>Dispatch volunteers for elderly welfare checks in Ballarpur</li>
+                        </ul>
+                        <div style="display: flex; gap: 8px; margin-top: 10px;">
+                            <button class="btn-btn" onclick="alert('Advisory copied to clipboard')" data-i18n="btn_copy">Copy Advisory Text</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. SETTINGS TAB -->
+            <div class="tab-content" id="tab-settings">
+                <div class="card-head">
+                    <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px;" data-i18n="settings_title">SYSTEM SETTINGS</h2>
+                </div>
+                <div class="card-box" style="max-width: 480px;">
+                    <label data-i18n="settings_lang" style="font-weight: 600;">Default Control Room Language</label>
+                    <select id="settingsLang" onchange="switchLanguage(this.value)" style="background: #ffffff; color: var(--text-primary); border: 1px solid var(--card-border); padding: 8px; border-radius: var(--radius-sm);">
+                        <option value="en">English</option>
+                        <option value="mr">मराठी (Marathi)</option>
+                    </select>
+
+                    <label style="margin-top: 12px; font-weight: 600;" data-i18n="settings_api">Backend FastAPI Endpoint</label>
+                    <input type="text" value="http://127.0.0.1:8000" readonly style="background: var(--card-sub); color: var(--text-secondary); border: 1px solid var(--card-border); padding: 8px; border-radius: var(--radius-sm);">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMATION OVERLAY -->
+    <div class="modal-overlay" id="alertModal">
+        <div class="modal-box">
+            <h3 data-i18n="modal_title">🚨 CONFIRM EMERGENCY ALERT BROADCAST</h3>
+            <p style="font-size: 12px; color: var(--text-secondary);" data-i18n="modal_sub">Review parameter details before dispatching official emergency SMS warnings.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 11px; color: var(--text-secondary); font-weight: 600;" data-i18n="modal_target">Target Ward / Taluka</label>
+                <select id="modWard" style="background: #ffffff; color: var(--text-primary); border: 1px solid var(--card-border); padding: 8px; border-radius: var(--radius-sm);">
+                    <option value="CHA_001">Chandrapur City (Extreme Risk)</option>
+                    <option value="CHA_005">Brahmapuri (Extreme Risk)</option>
+                </select>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 11px; color: var(--text-secondary); font-weight: 600;" data-i18n="modal_msg">Proposed SMS Content</label>
+                <textarea rows="3" readonly style="background: var(--card-sub); color: var(--text-secondary); border: 1px solid var(--card-border); padding: 8px; border-radius: var(--radius-sm); font-size: 12px;">ALERT: Extreme Heatwave Warning in Chandrapur. WBGT 42.5°C. Outdoor physical work suspension recommended (11am-4pm).</textarea>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 11px; color: var(--text-secondary); font-weight: 600;" data-i18n="modal_phone">Recipient Phone Number (Twilio)</label>
+                <input type="tel" id="modPhone" value="+919876543210" style="background: #ffffff; color: var(--text-primary); border: 1px solid var(--card-border); padding: 8px; border-radius: var(--radius-sm);">
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <button class="btn-btn" onclick="closeAlertModal()" data-i18n="btn_cancel">Cancel</button>
+                <button class="btn-alert-global" onclick="sendBroadcast()" data-i18n="btn_broadcast">Confirm & Broadcast SMS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script>
+        const API_URL = "http://127.0.0.1:8000";
+        let curLang = localStorage.getItem('heatshield_lang') || 'en';
+        let wardsData = [];
+        let selectedWard = null;
+        let overviewPreviewMap, fullMap, overviewGroup, fullGroup;
+        let forecastChart = null;
+
+        const MOCK_WARDS = [
+            { ward_id: "CHA_001", ward_name: "Chandrapur City", lat: 19.9615, lon: 79.2961, population: 320000, current_temp_c: 47.2, humidity_pct: 28, wbgt: 42.45, risk_score: 82.4, risk_band: "Extreme", driver: "Low green cover (6.5%)" },
+            { ward_id: "CHA_002", ward_name: "Ballarpur", lat: 19.8333, lon: 79.3500, population: 145000, current_temp_c: 46.5, humidity_pct: 30, wbgt: 42.45, risk_score: 79.8, risk_band: "Extreme", driver: "42% outdoor worker exposure" },
+            { ward_id: "CHA_003", ward_name: "Warora", lat: 20.2333, lon: 79.0000, population: 135000, current_temp_c: 45.8, humidity_pct: 32, wbgt: 42.41, risk_score: 74.2, risk_band: "Extreme", driver: "High solar radiation load" },
+            { ward_id: "CHA_004", ward_name: "Bhadravati", lat: 20.2167, lon: 79.0500, population: 110000, current_temp_c: 45.2, humidity_pct: 34, wbgt: 42.20, risk_score: 68.5, risk_band: "Danger", driver: "13% elderly population" },
+            { ward_id: "CHA_005", ward_name: "Brahmapuri", lat: 20.6000, lon: 79.8500, population: 95000, current_temp_c: 47.6, humidity_pct: 27, wbgt: 42.50, risk_score: 81.0, risk_band: "Extreme", driver: "Peak ambient temperature" },
+            { ward_id: "CHA_006", ward_name: "Nagbhid", lat: 20.5667, lon: 79.9667, population: 75000, current_temp_c: 44.8, humidity_pct: 36, wbgt: 42.10, risk_score: 63.8, risk_band: "Danger", driver: "Humidity stress" },
+            { ward_id: "CHA_007", ward_name: "Rajura", lat: 19.7833, lon: 79.3667, population: 88000, current_temp_c: 46.0, humidity_pct: 31, wbgt: 42.26, risk_score: 76.5, risk_band: "Extreme", driver: "Industrial labor concentration" },
+            { ward_id: "CHA_008", ward_name: "Mul", lat: 20.0667, lon: 79.6667, population: 65000, current_temp_c: 43.5, humidity_pct: 40, wbgt: 42.48, risk_score: 52.4, risk_band: "Danger", driver: "Moderate thermal load" }
+        ];
+
+        function switchLanguage(lang) {
+            curLang = lang;
+            localStorage.setItem('heatshield_lang', lang);
+            document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+            document.getElementById('btnMr').classList.toggle('active', lang === 'mr');
+            document.getElementById('settingsLang').value = lang;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+        }
+
+        function showTab(id, elem) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            if (elem) elem.classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            const target = document.getElementById(`tab-${id}`);
+            if (target) target.classList.add('active');
+
+            if (id === 'map' && fullMap) {
+                setTimeout(() => fullMap.invalidateSize(), 150);
+            }
+            if (id === 'overview' && overviewPreviewMap) {
+                setTimeout(() => overviewPreviewMap.invalidateSize(), 150);
+            }
+        }
+
+        async function initData() {
+            try {
+                const res = await fetch(`${API_URL}/wards`);
+                if (res.ok) {
+                    wardsData = await res.json();
+                    document.getElementById('sysDot').className = 'dot';
+                    document.getElementById('sysStatus').textContent = translations[curLang].status_operational;
+                } else { throw new Error('API offline'); }
+            } catch (e) {
+                wardsData = MOCK_WARDS;
+                document.getElementById('sysDot').className = 'dot offline';
+                document.getElementById('sysStatus').textContent = translations[curLang].status_demo;
+            }
+
+            renderOverviewTable();
+            initGisMaps();
+            populateDetailsDropdown();
+            initForecastChart();
+        }
+
+        function renderOverviewTable() {
+            const tbody = document.getElementById('overviewTbody');
+            tbody.innerHTML = '';
+
+            const top5 = [...wardsData].sort((a, b) => b.risk_score - a.risk_score).slice(0, 5);
+
+            top5.forEach((w, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><b>0${idx + 1}</b></td>
+                    <td><b>${w.ward_name}</b></td>
+                    <td><span class="tag ${w.risk_band}">${w.risk_band}</span></td>
+                    <td><b>${Math.round(w.risk_score)}</b> / 100</td>
+                    <td>${Math.round(w.current_temp_c)}°C</td>
+                    <td>${w.wbgt ? w.wbgt.toFixed(1) : 42.5}°C</td>
+                    <td style="color: var(--text-secondary); font-size: 11.5px;">${w.driver || 'Low green cover + worker exposure'}</td>
+                    <td><button class="btn-btn" onclick="openWardDetail('${w.ward_id}')" data-i18n="btn_inspect">Inspect</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function initGisMaps() {
+            const lightTileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+            const tileOptions = { attribution: '&copy; OpenStreetMap &copy; CARTO' };
+
+            if (!overviewPreviewMap) {
+                overviewPreviewMap = L.map('overviewPreviewMap').setView([20.15, 79.35], 9);
+                L.tileLayer(lightTileUrl, tileOptions).addTo(overviewPreviewMap);
+                overviewGroup = L.layerGroup().addTo(overviewPreviewMap);
+            }
+
+            if (!fullMap) {
+                fullMap = L.map('fullMap').setView([20.15, 79.35], 9);
+                L.tileLayer(lightTileUrl, tileOptions).addTo(fullMap);
+                fullGroup = L.layerGroup().addTo(fullMap);
+            }
+
+            overviewGroup.clearLayers();
+            fullGroup.clearLayers();
+
+            const colors = { Extreme: '#dc2626', Danger: '#ea580c', Caution: '#d97706', Safe: '#16a34a' };
+
+            wardsData.forEach(w => {
+                const col = colors[w.risk_band] || '#2563eb';
+                
+                const m1 = L.circleMarker([w.lat, w.lon], { radius: 7, fillColor: col, color: '#fff', weight: 1.5, fillOpacity: 0.95 });
+                m1.bindTooltip(`<b>${w.ward_name}</b><br>Score: ${Math.round(w.risk_score)} | Temp: ${Math.round(w.current_temp_c)}°C`);
+                overviewGroup.addLayer(m1);
+
+                const m2 = L.circleMarker([w.lat, w.lon], { radius: 9, fillColor: col, color: '#fff', weight: 2, fillOpacity: 0.95 });
+                m2.on('click', () => selectGisWard(w));
+                fullGroup.addLayer(m2);
+            });
+
+            if (wardsData.length) selectGisWard(wardsData[0]);
+
+            // Guarantee Leaflet canvas resizing
+            setTimeout(() => {
+                if (overviewPreviewMap) overviewPreviewMap.invalidateSize();
+                if (fullMap) fullMap.invalidateSize();
+            }, 300);
+        }
+
+        function selectGisWard(w) {
+            selectedWard = w;
+            document.getElementById('mapWardTitle').textContent = w.ward_name;
+            document.getElementById('mapScore').textContent = `${Math.round(w.risk_score)} / 100`;
+            document.getElementById('mapTemp').textContent = `${Math.round(w.current_temp_c)}°C`;
+            document.getElementById('mapWbgt').textContent = `${w.wbgt ? w.wbgt.toFixed(1) : 42.5}°C`;
+
+            const badge = document.getElementById('mapBadge');
+            badge.className = `tag ${w.risk_band}`;
+            badge.textContent = w.risk_band;
+
+            renderHumanDrivers(document.getElementById('mapDriversList'), w);
+        }
+
+        function renderHumanDrivers(container, w) {
+            const t = translations[curLang];
+            container.innerHTML = `
+                <div class="driver-card">
+                    <span class="icon">🌡️</span>
+                    <div>
+                        <p class="title">${t.driver_temp || 'Very high ambient temperature'}</p>
+                        <p class="desc">${Math.round(w.current_temp_c)}°C — ${t.driver_temp_desc || 'Major thermal load contributor'}</p>
+                    </div>
+                </div>
+                <div class="driver-card">
+                    <span class="icon">☀️</span>
+                    <div>
+                        <p class="title">${t.driver_solar || 'High solar radiation exposure'}</p>
+                        <p class="desc">${w.solar_radiation_wm2 || 940} W/m² — ${t.driver_solar_desc || 'Increases direct solar heat stress'}</p>
+                    </div>
+                </div>
+                <div class="driver-card">
+                    <span class="icon">👷</span>
+                    <div>
+                        <p class="title">${t.driver_workers || 'High outdoor worker density'}</p>
+                        <p class="desc">${w.outdoor_worker_pct || 36}% — ${t.driver_workers_desc || 'Elevated demographic vulnerability'}</p>
+                    </div>
+                </div>
+                <div class="driver-card">
+                    <span class="icon">🌳</span>
+                    <div>
+                        <p class="title">${t.driver_green || 'Low green canopy cover'}</p>
+                        <p class="desc">${w.green_cover_pct || 6.5}% — ${t.driver_green_desc || 'Lack of urban shade protection'}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleTechAccordion() {
+            const acc = document.getElementById('techAccordion');
+            const btn = document.getElementById('btnTechToggle');
+            const isActive = acc.classList.contains('active');
+            acc.classList.toggle('active', !isActive);
+            btn.textContent = !isActive ? translations[curLang].btn_hide_tech_details : translations[curLang].btn_tech_details;
+        }
+
+        function filterGisMap(risk) {
+            fullGroup.clearLayers();
+            const colors = { Extreme: '#dc2626', Danger: '#ea580c', Caution: '#d97706', Safe: '#16a34a' };
+
+            wardsData.filter(w => risk === 'All' || w.risk_band === risk).forEach(w => {
+                const m = L.circleMarker([w.lat, w.lon], { radius: 9, fillColor: colors[w.risk_band], color: '#fff', weight: 2, fillOpacity: 0.95 });
+                m.on('click', () => selectGisWard(w));
+                fullGroup.addLayer(m);
+            });
+        }
+
+        function goToSelectedWardDetails() {
+            if (selectedWard) openWardDetail(selectedWard.ward_id);
+        }
+
+        function openWardDetail(wardId) {
+            showTab('details');
+            document.getElementById('selWardDetail').value = wardId;
+            loadWardDetailView(wardId);
+        }
+
+        function populateDetailsDropdown() {
+            const sel = document.getElementById('selWardDetail');
+            sel.innerHTML = '';
+            wardsData.forEach(w => {
+                const opt = document.createElement('option');
+                opt.value = w.ward_id;
+                opt.textContent = `${w.ward_name} (${w.risk_band})`;
+                sel.appendChild(opt);
+            });
+            if (wardsData.length) loadWardDetailView(wardsData[0].ward_id);
+        }
+
+        function loadWardDetailView(wardId) {
+            const w = wardsData.find(x => x.ward_id === wardId) || wardsData[0];
+            document.getElementById('detTitle').textContent = w.ward_name.toUpperCase();
+            document.getElementById('detSub').textContent = `Population: ${w.population.toLocaleString()}`;
+            document.getElementById('detScore').textContent = `${Math.round(w.risk_score)} / 100`;
+
+            const badge = document.getElementById('detBadge');
+            badge.className = `tag ${w.risk_band}`;
+            badge.textContent = w.risk_band.toUpperCase();
+
+            document.getElementById('detTempVal').textContent = `${Math.round(w.current_temp_c)}°C`;
+            document.getElementById('detRhVal').textContent = `${w.humidity_pct}%`;
+            document.getElementById('detWindVal').textContent = `${w.wind_speed_kmh || 12} km/h`;
+            document.getElementById('detSolarVal').textContent = `${w.solar_radiation_wm2 || 940} W/m²`;
+
+            document.getElementById('detWbgtVal').textContent = `${w.wbgt ? w.wbgt.toFixed(1) : 42.5}°C`;
+            document.getElementById('detHiVal').textContent = `${Math.round(w.heat_index || 52)}°C`;
+            document.getElementById('detAppVal').textContent = `${w.apparent_temperature_c || 46.5}°C`;
+            document.getElementById('detHtsiVal').textContent = `${w.human_thermal_stress_index || 42.6}°C`;
+
+            document.getElementById('detElderlyVal').textContent = `${w.elderly_pct || 10.5}%`;
+            document.getElementById('detWorkersVal').textContent = `${w.outdoor_worker_pct || 36.0}%`;
+            document.getElementById('detGreenVal').textContent = `${w.green_cover_pct || 6.5}%`;
+
+            renderHumanDrivers(document.getElementById('detDriversBox'), w);
+        }
+
+        function initForecastChart() {
+            const ctx = document.getElementById('forecastChart').getContext('2d');
+            if (forecastChart) forecastChart.destroy();
+
+            forecastChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Today', 'Tomorrow', 'Day 3', 'Day 4', 'Day 5'],
+                    datasets: [{
+                        label: 'District Peak Risk Score',
+                        data: [82, 84, 85, 81, 74],
+                        borderColor: '#dc2626',
+                        backgroundColor: 'rgba(220, 38, 38, 0.08)',
+                        fill: true,
+                        tension: 0.25,
+                        pointBackgroundColor: '#dc2626'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { min: 0, max: 100, grid: { color: '#e2e8f0' }, ticks: { color: '#64748b' } },
+                        x: { grid: { color: '#e2e8f0' }, ticks: { color: '#64748b' } }
+                    }
+                }
+            });
+        }
+
+        function runSim() {
+            const temp = parseFloat(document.getElementById('inSimTemp').value);
+            const rh = parseFloat(document.getElementById('inSimRh').value);
+            const solar = parseFloat(document.getElementById('inSimSolar').value);
+            const workers = parseFloat(document.getElementById('inSimWorkers').value);
+            const green = parseFloat(document.getElementById('inSimGreen').value);
+
+            document.getElementById('lblSimTemp').textContent = `${temp.toFixed(1)}°C`;
+            document.getElementById('lblSimRh').textContent = `${rh}%`;
+            document.getElementById('lblSimSolar').textContent = `${solar} W/m²`;
+            document.getElementById('lblSimWorkers').textContent = `${workers}%`;
+            document.getElementById('lblSimGreen').textContent = `${green}%`;
+
+            const e = (rh / 100.0) * 6.105 * Math.exp((17.27 * temp) / (237.7 + temp));
+            const wbgt = 0.567 * temp + 0.393 * e + 3.94;
+            const solarWbgt = wbgt + (0.0037 * solar);
+
+            const rawHtsi = (0.5 * solarWbgt) + (0.3 * temp) + (0.2 * temp);
+            const normHtsi = Math.max(0, Math.min(100, ((rawHtsi - 25.0) / 25.0) * 100.0));
+            const demoComp = (0.4 * 12) + (0.4 * workers) + (0.2 * (100.0 - green));
+            const simScore = Math.round(Math.max(0, Math.min(100, (0.6 * normHtsi) + (0.4 * demoComp))));
+
+            document.getElementById('simOutVal').textContent = simScore;
+            const delta = simScore - 74;
+            document.getElementById('simDeltaText').textContent = `${delta >= 0 ? '+' : ''}${delta} points change`;
+        }
+
+        function openAlertModal() { document.getElementById('alertModal').classList.add('active'); }
+        function closeAlertModal() { document.getElementById('alertModal').classList.remove('active'); }
+
+        async function sendBroadcast() {
+            const ward = document.getElementById('modWard').value;
+            const phone = document.getElementById('modPhone').value;
+
+            try {
+                await fetch(`${API_URL}/alerts/trigger`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ward_id: ward, risk_band: 'Extreme', recipient_phone: phone })
+                });
+                alert('🚨 Emergency Alert Broadcasted via Twilio SMS');
+            } catch (e) {
+                alert(`🚨 Emergency Alert SMS Simulated to ${phone}`);
+            }
+            closeAlertModal();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            switchLanguage(curLang);
+            initData();
+        });
+    </script>
+</body>
+</html>

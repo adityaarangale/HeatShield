@@ -1,0 +1,170 @@
+[
+  {
+    "ward_id": "CHA_001",
+    "ward_name": "Chandrapur City",
+    "lat": 19.9615,
+    "lon": 79.2961,
+    "population": 320000,
+    "elderly_pct": 10.5,
+    "outdoor_worker_pct": 36.0,
+    "green_cover_pct": 6.5,
+    "current_temp_c": 47.2,
+    "humidity_pct": 28.0,
+    "wind_speed_kmh": 12.0,
+    "solar_radiation_wm2": 940.0,
+    "forecast_3day": [
+      { "day": "Day 1", "temp_c": 47.8, "humidity_pct": 26.0, "solar_radiation_wm2": 950.0 },
+      { "day": "Day 2", "temp_c": 48.0, "humidity_pct": 25.0, "solar_radiation_wm2": 950.0 },
+      { "day": "Day 3", "temp_c": 46.5, "humidity_pct": 30.0, "solar_radiation_wm2": 920.0 },
+      { "day": "Day 4", "temp_c": 45.8, "humidity_pct": 32.0, "solar_radiation_wm2": 890.0 },
+      { "day": "Day 5", "temp_c": 44.5, "humidity_pct": 35.0, "solar_radiation_wm2": 860.0 }
+    ]
+  },
+  {
+    "ward_id": "CHA_002",
+    "ward_name": "Ballarpur",
+    "lat": 19.8333,
+    "lon": 79.3500,
+    "population": 145000,
+    "elderly_pct": 11.0,
+    "outdoor_worker_pct": 42.0,
+    "green_cover_pct": 8.0,
+    "current_temp_c": 46.5,
+    "humidity_pct": 30.0,
+    "wind_speed_kmh": 10.5,
+    "solar_radiation_wm2": 920.0,
+    "forecast_3day": [
+      { "day": "Day 1", "temp_c": 47.0, "humidity_pct": 28.0, "solar_radiation_wm2": 935.0 },
+      { "day": "Day 2", "temp_c": 47.5, "humidity_pct": 27.0, "solar_radiation_wm2": 940.0 },
+      { "day": "Day 3", "temp_c": 45.8, "humidity_pct": 32.0, "solar_radiation_wm2": 900.0 },
+      { "day": "Day 4", "temp_c": 45.0, "humidity_pct": 34.0, "solar_radiation_wm2": 880.0 },
+      { "day": "Day 5", "temp_c": 43.8, "humidity_pct": 38.0, "solar_radiation_wm2": 840.0 }
+    ]
+  },
+  {
+    "ward_id": "CHA_003",
+    "ward_name": "Warora",
+    "lat": 20.2333,
+    "lon": 79.0000,
+    "population": 135000,
+    "elderly_pct": 12.5,
+    "outdoor_worker_pct": 38.0,
+    "green_cover_pct": 12.0,
+    "current_temp_c": 45.8,
+    "humidity_pct": 32.0,
+    "wind_speed_kmh": 14.0,
+    "solar_radiation_wm2": 890.0,
+    "forecast_3day": [
+      { "day": "Day 1", "temp_c": 46.2, "humidity_pct": 30.0, "solar_radiation_wm2": 905.0 },
+      { "day": "Day 2", "temp_c": 46.8, "humidity_pct": 29.0, "solar_radiation_wm2": 915.0 },
+      { "day": "Day 3", "temp_c": 45.0, "humidity_pct": 35.0, "solar_radiation_wm2": 875.0 },
+      { "day": "Day 4", "temp_c": 44.2, "humidity_pct": 37.0, "solar_radiation_wm2": 850.0 },
+      { "day": "Day 5", "temp_c": 43.0, "humidity_pct": 40.0, "solar_radiation_wm2": 820.0 }
+    ]
+  },
+  {
+    "ward_id": "CHA_004",
+    "ward_name": "Bhadravati",
+    "lat": 20.2167,
+    "lon": 79.0500,
+    "population": 110000,
+    "elderly_pct": 13.0,
+    "outdoor_worker_pct": 35.0,
+    "green_cover_pct": 14.5,
+    "current_temp_c": 45.2,
+    "humidity_pct": 34.0,
+    "wind_speed_kmh": 13.0,
+    "solar_radiation_wm2": 880.0,
+    "forecast_3day": [
+      { "day": "Day 1", "temp_c": 45.8, "humidity_pct": 32.0, "solar_radiation_wm2": 895.0 },
+      { "day": "Day 2", "temp_c": 46.2, "humidity_pct": 31.0, "solar_radiation_wm2": 905.0 },
+      { "day": "Day 3", "temp_c": 44.5, "humidity_pct": 36.0, "solar_radiation_wm2": 860.0 },
+      { "day": "Day 4", "temp_c": 43.8, "humidity_pct": 38.0, "solar_radiation_wm2": 840.0 },
+      { "day": "Day 5", "temp_c": 42.5, "humidity_pct": 42.0, "solar_radiation_wm2": 810.0 }
+    ]
+  },
+  {
+    "ward_id": "CHA_005",
+    "ward_name": "Brahmapuri",
+    "lat": 20.6000,
+    "lon": 79.8500,
+    "population": 95000,
+    "elderly_pct": 14.5,
+    "outdoor_worker_pct": 32.0,
+    "green_cover_pct": 18.0,
+    "current_temp_c": 47.6,
+    "humidity_pct": 27.0,
+    "wind_speed_kmh": 11.0,
+    "solar_radiation_wm2": 930.0,
+    "forecast_3day": [
+      { "day": "Day 1", "temp_c": 48.0, "humidity_pct": 25.0, "solar_radiation_wm2": 945.0 },
+      { "day": "Day 2", "temp_c": 48.3, "humidity_pct": 25.0, "solar_radiation_wm2": 950.0 },
+      { "day": "Day 3", "temp_c": 46.8, "humidity_pct": 29.0, "solar_radiation_wm2": 910.0 },
+      { "day": "Day 4", "temp_c": 45.9, "humidity_pct": 31.0, "solar_radiation_wm2": 885.0 },
+      { "day": "Day 5", "temp_c": 44.2, "humidity_pct": 36.0, "solar_radiation_wm2": 850.0 }
+    ]
+  },
+  {
+    "ward_id": "CHA_006",
+    "ward_name": "Nagbhid",
+    "lat": 20.5667,
+    "lon": 79.9667,
+    "population": 75000,
+    "elderly_pct": 15.2,
+    "outdoor_worker_pct": 30.0,
+    "green_cover_pct": 22.0,
+    "current_temp_c": 44.8,
+    "humidity_pct": 36.0,
+    "wind_speed_kmh": 12.5,
+    "solar_radiation_wm2": 860.0,
+    "forecast_3day": [
+      { "day": "Day 1", "temp_c": 45.4, "humidity_pct": 34.0, "solar_radiation_wm2": 875.0 },
+      { "day": "Day 2", "temp_c": 45.9, "humidity_pct": 33.0, "solar_radiation_wm2": 885.0 },
+      { "day": "Day 3", "temp_c": 44.0, "humidity_pct": 38.0, "solar_radiation_wm2": 840.0 },
+      { "day": "Day 4", "temp_c": 43.2, "humidity_pct": 40.0, "solar_radiation_wm2": 820.0 },
+      { "day": "Day 5", "temp_c": 42.0, "humidity_pct": 43.0, "solar_radiation_wm2": 790.0 }
+    ]
+  },
+  {
+    "ward_id": "CHA_007",
+    "ward_name": "Rajura",
+    "lat": 19.7833,
+    "lon": 79.3667,
+    "population": 88000,
+    "elderly_pct": 11.8,
+    "outdoor_worker_pct": 40.0,
+    "green_cover_pct": 10.0,
+    "current_temp_c": 46.0,
+    "humidity_pct": 31.0,
+    "wind_speed_kmh": 9.5,
+    "solar_radiation_wm2": 910.0,
+    "forecast_3day": [
+      { "day": "Day 1", "temp_c": 46.5, "humidity_pct": 29.0, "solar_radiation_wm2": 925.0 },
+      { "day": "Day 2", "temp_c": 47.1, "humidity_pct": 28.0, "solar_radiation_wm2": 930.0 },
+      { "day": "Day 3", "temp_c": 45.2, "humidity_pct": 33.0, "solar_radiation_wm2": 890.0 },
+      { "day": "Day 4", "temp_c": 44.5, "humidity_pct": 35.0, "solar_radiation_wm2": 870.0 },
+      { "day": "Day 5", "temp_c": 43.1, "humidity_pct": 39.0, "solar_radiation_wm2": 830.0 }
+    ]
+  },
+  {
+    "ward_id": "CHA_008",
+    "ward_name": "Mul",
+    "lat": 20.0667,
+    "lon": 79.6667,
+    "population": 65000,
+    "elderly_pct": 15.8,
+    "outdoor_worker_pct": 28.0,
+    "green_cover_pct": 28.5,
+    "current_temp_c": 43.5,
+    "humidity_pct": 40.0,
+    "wind_speed_kmh": 15.0,
+    "solar_radiation_wm2": 820.0,
+    "forecast_3day": [
+      { "day": "Day 1", "temp_c": 44.0, "humidity_pct": 38.0, "solar_radiation_wm2": 835.0 },
+      { "day": "Day 2", "temp_c": 44.8, "humidity_pct": 36.0, "solar_radiation_wm2": 850.0 },
+      { "day": "Day 3", "temp_c": 42.8, "humidity_pct": 42.0, "solar_radiation_wm2": 800.0 },
+      { "day": "Day 4", "temp_c": 42.0, "humidity_pct": 44.0, "solar_radiation_wm2": 780.0 },
+      { "day": "Day 5", "temp_c": 40.8, "humidity_pct": 48.0, "solar_radiation_wm2": 750.0 }
+    ]
+  }
+]
