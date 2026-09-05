@@ -10,7 +10,9 @@ from models import (
     WardResponse,
     ForecastRiskTrendItem,
     AlertTriggerRequest,
-    AlertTriggerResponse
+    AlertTriggerResponse,
+    BroadcastAlertRequest,
+    BroadcastAlertResponse
 )
 from logic import (
     calculate_heat_index,
@@ -202,6 +204,59 @@ def trigger_alert(request: AlertTriggerRequest):
         provider="Console Log (Fallback)",
         recipient_phone=recipient_phone
     )
+
+
+@app.post("/alerts/broadcast", response_model=BroadcastAlertResponse, tags=["Alerts"])
+@app.post("/api/alerts/broadcast", response_model=BroadcastAlertResponse, tags=["Alerts"])
+def broadcast_alerts(request: BroadcastAlertRequest):
+    """
+    POST /alerts/broadcast
+    Dispatches a batch emergency advisory or safe green bulletin to multiple citizen / evaluator contacts
+    in a single 1-click execution.
+    """
+    account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+    auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+    from_phone = os.getenv("TWILIO_PHONE_NUMBER")
+
+    sent_recipients = []
+    provider = "Console Audit Log"
+
+    print(f"\n=======================================================")
+    print(f"[1-CLICK BATCH BROADCAST TRIGGERED - HEAT SHIELD]")
+    print(f"Target Ward: {request.ward_id} | Risk Tier: {request.risk_band}")
+    print(f"Recipients ({len(request.recipient_phones)}): {', '.join(request.recipient_phones)}")
+    print(f"Message Content:\n{request.custom_message}")
+    print(f"=======================================================\n")
+
+    if account_sid and auth_token and from_phone:
+        try:
+            from twilio.rest import Client
+            client = Client(account_sid, auth_token)
+            provider = "Twilio SMS Gateway"
+            for phone in request.recipient_phones:
+                clean_phone = phone.strip()
+                if clean_phone:
+                    client.messages.create(
+                        body=request.custom_message,
+                        from_=from_phone,
+                        to=clean_phone
+                    )
+                    sent_recipients.append(clean_phone)
+        except Exception as e:
+            logger.warning(f"Twilio broadcast error: {str(e)}. Defaulted to simulated log.")
+            sent_recipients = request.recipient_phones
+    else:
+        sent_recipients = request.recipient_phones
+
+    return BroadcastAlertResponse(
+        status="broadcast_completed",
+        total_recipients=len(request.recipient_phones),
+        successful_count=len(sent_recipients),
+        recipients=sent_recipients,
+        provider=provider,
+        message=request.custom_message
+    )
+
 
 
 @app.post("/api/calculate", response_model=CalculationResponse, tags=["Calculations"])

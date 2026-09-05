@@ -103,5 +103,22 @@ class AlertTriggerResponse(BaseModel):
     recipient_phone: Optional[str] = None
 
 
+class BroadcastAlertRequest(BaseModel):
+    ward_id: str = Field(..., description="Target Ward ID or 'ALL'", examples=["CHA_001"])
+    risk_band: str = Field(..., description="Risk tier classification", examples=["Extreme"])
+    recipient_phones: List[str] = Field(..., description="List of recipient phone numbers", examples=[["+919876543210", "+919876543211"]])
+    custom_message: str = Field(..., description="Broadcast message content", examples=["EMERGENCY HEAT ADVISORY: Stay indoors between 11 AM - 4 PM."])
+
+
+class BroadcastAlertResponse(BaseModel):
+    status: str = Field("broadcast_completed", description="Overall broadcast status")
+    total_recipients: int
+    successful_count: int
+    recipients: List[str]
+    provider: str
+    message: str
+
+
 # Backward compatibility alias
 WardRiskResponse = WardResponse
+

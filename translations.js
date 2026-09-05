@@ -164,6 +164,8 @@ const translations = {
     // Action Center
     actions_title: "ACTION CENTER & MOBILE DISPATCH",
     actions_sub: "Standard Operating Procedures (SOP) & direct citizen mobile advisory broadcast",
+    actions_hub_title: "1-CLICK EMERGENCY BROADCAST & CITIZEN CONTACTS HUB",
+    actions_hub_sub: "Broadcast verified heatwave warnings or safe green zone notices to your team, project evaluators, and registered district area citizens in 1 click.",
     act_imm_hdr: "IMMEDIATE (0 – 2 HOURS)",
     act_6h_hdr: "NEXT 6 HOURS",
     act_24h_hdr: "NEXT 24 HOURS",
@@ -362,6 +364,8 @@ const translations = {
     // Action Center
     actions_title: "अ‍ॅक्शन सेंटर व थेट मोबाईल संदेश",
     actions_sub: "वेळेच्या तीव्रतेनुसार आयोजित पालिका कार्यपद्धती (SOP) आणि थेट नागरिक प्रसारण",
+    actions_hub_title: "१-क्लिक आपत्कालीन प्रसारण व नागरिक संपर्क केंद्र",
+    actions_hub_sub: "तुमचा संघ, परीक्षक आणि नोंदणीकृत जिल्हा नागरिकांना १ क्लिकमध्ये पडताळणीकृत उष्णतेचा इशारा किंवा सुरक्षित हरित संदेश पाठवा.",
     act_imm_hdr: "तात्काळ (० – २ तास)",
     act_6h_hdr: "पुढील ६ तास",
     act_24h_hdr: "पुढील २४ तास",
