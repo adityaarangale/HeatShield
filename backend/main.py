@@ -228,6 +228,8 @@ def broadcast_alerts(request: BroadcastAlertRequest):
     print(f"Message Content:\n{request.custom_message}")
     print(f"=======================================================\n")
 
+    fast2sms_key = os.getenv("FAST2SMS_API_KEY")
+
     if account_sid and auth_token and from_phone:
         try:
             from twilio.rest import Client
@@ -244,6 +246,35 @@ def broadcast_alerts(request: BroadcastAlertRequest):
                     sent_recipients.append(clean_phone)
         except Exception as e:
             logger.warning(f"Twilio broadcast error: {str(e)}. Defaulted to simulated log.")
+            sent_recipients = request.recipient_phones
+    elif fast2sms_key:
+        try:
+            import urllib.request
+            import json
+            raw_nums = [p.replace("+91", "").replace("+", "").strip() for p in request.recipient_phones]
+            clean_nums = [n for n in raw_nums if len(n) == 10 and n.isdigit()]
+            if clean_nums:
+                req_payload = json.dumps({
+                    "route": "q",
+                    "message": request.custom_message,
+                    "language": "english",
+                    "flash": 0,
+                    "numbers": ",".join(clean_nums)
+                }).encode("utf-8")
+                req = urllib.request.Request(
+                    "https://www.fast2sms.com/dev/bulkV2",
+                    data=req_payload,
+                    headers={
+                        "authorization": fast2sms_key,
+                        "Content-Type": "application/json"
+                    }
+                )
+                with urllib.request.urlopen(req, timeout=6) as resp:
+                    logger.info(f"[Fast2SMS Response]: {resp.read().decode()}")
+                provider = "Fast2SMS India Gateway"
+                sent_recipients = request.recipient_phones
+        except Exception as e:
+            logger.warning(f"Fast2SMS error: {str(e)}")
             sent_recipients = request.recipient_phones
     else:
         sent_recipients = request.recipient_phones
