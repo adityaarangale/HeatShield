@@ -110,6 +110,7 @@ const translations = {
     forecast_title: "5-DAY HEAT RISK OUTLOOK",
     forecast_sub: "Predictive multi-day trend modeling to enable early response planning",
     forecast_summary: "Extreme heat risk is projected to persist for the next 72 hours across central Chandrapur.",
+    forecast_interpretation: "Extreme heat risk is projected to persist for the next 72 hours across central Chandrapur.",
     lbl_today: "Today",
     lbl_tomorrow: "Tomorrow",
     lbl_day3: "Day 3",
