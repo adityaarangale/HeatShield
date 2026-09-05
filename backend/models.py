@@ -86,9 +86,10 @@ class CalculationResponse(BaseModel):
 
 
 class AlertTriggerRequest(BaseModel):
-    ward_id: str = Field(..., description="Target Ward ID (e.g. AMD_001)", examples=["AMD_001"])
+    ward_id: str = Field(..., description="Target Ward ID (e.g. CHA_001)", examples=["CHA_001"])
     risk_band: str = Field(..., description="Risk level band (e.g. Extreme, Danger)", examples=["Extreme"])
     recipient_phone: Optional[str] = Field(None, description="Optional recipient phone number for SMS delivery", examples=["+919876543210"])
+    custom_message: Optional[str] = Field(None, description="Customized official advisory message text")
 
 
 class AlertTriggerResponse(BaseModel):

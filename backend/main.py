@@ -57,6 +57,8 @@ app.add_middleware(
 
 
 @app.get("/", tags=["Health"])
+@app.get("/health", tags=["Health"])
+@app.get("/api/health", tags=["Health"])
 def health_check():
     return {
         "status": "healthy",
@@ -143,10 +145,13 @@ def trigger_alert(request: AlertTriggerRequest):
         )
 
     wbgt = calculate_wbgt(target_ward.current_temp_c, target_ward.humidity_pct)
-    sms_message = (
-        f"ALERT: {target_ward.ward_name} - {request.risk_band} heat risk. "
-        f"WBGT {wbgt}°C. Vulnerable groups advised to avoid outdoor activity 11am-4pm."
-    )
+    if request.custom_message and request.custom_message.strip():
+        sms_message = request.custom_message.strip()
+    else:
+        sms_message = (
+            f"ALERT: {target_ward.ward_name} - {request.risk_band} heat risk. "
+            f"WBGT {wbgt}°C. Vulnerable groups advised to avoid outdoor activity 11am-4pm."
+        )
 
     account_sid = os.getenv("TWILIO_ACCOUNT_SID")
     auth_token = os.getenv("TWILIO_AUTH_TOKEN")
@@ -177,11 +182,15 @@ def trigger_alert(request: AlertTriggerRequest):
             logger.warning(f"[Twilio Fallback Error] {str(err)}. Falling back to console log.")
 
     # Fallback log for demonstration / unconfigured Twilio credentials
-    print(f"\n=======================================================")
-    print(f"[ALERT TRIGGER DEMO LOG - MOCK SMS]")
-    print(f"To: {recipient_phone}")
-    print(f"Message: {sms_message}")
-    print(f"=======================================================\n")
+    try:
+        print(f"\n=======================================================")
+        print(f"[ALERT TRIGGER DEMO LOG - MOCK SMS]")
+        print(f"To: {recipient_phone}")
+        print(f"Message: {sms_message}")
+        print(f"=======================================================\n")
+    except UnicodeEncodeError:
+        safe_msg = sms_message.encode('ascii', errors='backslashreplace').decode('ascii')
+        print(f"[ALERT TRIGGER DEMO LOG - MOCK SMS] To: {recipient_phone} | Message: {safe_msg}")
 
     return AlertTriggerResponse(
         status="simulated",
