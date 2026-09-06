@@ -197,6 +197,36 @@ const translations = {
     btn_push_alert: "Trigger Live Screen Alert",
     test_backend: "Test Backend Connection",
 
+    // Action Center Broadcast & Directory Labels
+    lbl_select_ward: "1. Select Target Ward / City",
+    lbl_advisory_cat: "2. Advisory Category",
+    lbl_sms_content: "Official Verified SMS Content (Ready to Dispatch)",
+    lbl_pair_phone: "📲 PAIR PHYSICAL PHONE (LIVE ALERT DEMO)",
+    lbl_instant_buzz: "INSTANT BUZZ",
+    lbl_pair_desc: "To receive this alert right on your mobile lockscreen: open <b><a href=\"https://ntfy.sh/heatshield-chandrapur\" target=\"_blank\" style=\"color: #2563eb; text-decoration: underline;\">ntfy.sh/heatshield-chandrapur</a></b> on your phone & tap <b>\"Subscribe\"</b>. When you click Send, your phone will chime with this alert!",
+    btn_test_chime: "🔔 Test Handset Chime Now",
+    btn_telecom_key: "🔑 Telecom SMS Gateway Key",
+    lbl_registered_contacts: "Registered Citizen & Authority Contacts",
+    lbl_selected: "selected",
+    btn_add_number: "➕ Add Custom Number",
+    lbl_filter_city: "🏙️ View Contacts by City / Taluka Area:",
+    btn_select_all_city: "✓ Select All in City",
+    btn_select_team: "⭐ My Team & Sir",
+    btn_clear_sel: "Clear",
+
+    // SOP Action Items
+    sop_imm_1: "Activate emergency cooling centers in Chandrapur City & Ballarpur",
+    sop_imm_2: "Enforce mandatory outdoor work suspension (11:00 AM – 4:00 PM)",
+    sop_imm_3: "Place district emergency ambulances on standby at thermal clusters",
+    sop_6h_1: "Deploy hydration vans to major bus stands, market squares, and coal field hubs",
+    sop_6h_2: "Dispatch municipal volunteers for elderly welfare checks in Rajura & Warora",
+    sop_6h_3: "Verify backup power generators at cold-chain medicine storage facilities",
+
+    // Overview Priority Action Numbers
+    act_num_1: "1. Emergency Cooling Centers",
+    act_num_2: "2. Work Suspension Advisory",
+    act_num_3: "3. Hospital Preparedness Alert",
+
     // Settings
     settings_title: "SYSTEM SETTINGS",
     settings_lang: "Default Control Room Language",
