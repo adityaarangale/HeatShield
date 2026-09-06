@@ -895,10 +895,344 @@
             color: var(--brand-primary);
             box-shadow: 0 1px 3px rgba(234, 88, 12, 0.15);
         }
+
+        /* ======================================================== */
+        /* MOBILE RESPONSIVE DRAWER & ADAPTIVE VIEWPORT SYSTEM      */
+        /* ======================================================== */
+
+        /* Mobile Hamburger Button in Top Header */
+        .mobile-menu-btn {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: var(--card-sub);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.15s ease;
+        }
+
+        .mobile-menu-btn:hover,
+        .mobile-menu-btn:active {
+            background: var(--card-sub-hover);
+            border-color: #cbd5e1;
+        }
+
+        /* Mobile Sidebar Close Button */
+        .sidebar-close-btn {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            color: #94a3b8;
+            cursor: pointer;
+            margin-left: auto;
+            flex-shrink: 0;
+            transition: all 0.15s ease;
+        }
+
+        .sidebar-close-btn:hover,
+        .sidebar-close-btn:active {
+            background: rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+        }
+
+        /* Mobile Off-Canvas Backdrop Overlay */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(11, 19, 41, 0.65);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 1999;
+            opacity: 0;
+            transition: opacity 0.28s ease;
+            pointer-events: none;
+        }
+
+        .sidebar-backdrop.active {
+            display: block;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Responsive Table Container */
+        .table-responsive-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table-responsive-wrapper table.tbl {
+            min-width: 620px;
+        }
+
+        /* Responsive Grid Classes */
+        .ward-detail-header-card {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .detail-metrics-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .forecast-kpi-grid {
+            grid-template-columns: repeat(5, 1fr);
+        }
+
+        .action-grid-wrapper {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 20px;
+        }
+
+        .action-select-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Tablet & Mobile Media Queries (<= 900px) */
+        @media (max-width: 900px) {
+            body {
+                overflow-x: hidden;
+                overflow-y: auto;
+                height: 100vh;
+                height: 100dvh;
+            }
+
+            .mobile-menu-btn {
+                display: inline-flex;
+            }
+
+            .sidebar-close-btn {
+                display: inline-flex;
+            }
+
+            aside.sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 280px;
+                max-width: 82vw;
+                height: 100vh;
+                height: 100dvh;
+                z-index: 2000;
+                transform: translateX(-100%);
+                transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: none;
+            }
+
+            aside.sidebar.mobile-open {
+                transform: translateX(0);
+                box-shadow: 12px 0 35px rgba(0, 0, 0, 0.5);
+            }
+
+            .workspace {
+                width: 100%;
+                max-width: 100vw;
+                height: 100vh;
+                height: 100dvh;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            header.top-header {
+                padding: 0 12px;
+                height: 56px;
+                gap: 8px;
+            }
+
+            .header-meta {
+                gap: 8px;
+            }
+
+            .pill-location {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+
+            .pill-status {
+                display: none;
+            }
+
+            .header-actions {
+                gap: 8px;
+            }
+
+            .btn-alert-global {
+                padding: 7px 11px;
+                font-size: 11px;
+            }
+
+            .page-body {
+                padding: 14px 12px;
+                gap: 14px;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .cmd-banner {
+                padding: 14px 16px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .cmd-info h2 {
+                font-size: 19px;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .cmd-info p {
+                font-size: 11.5px;
+            }
+
+            .kpi-row {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px;
+            }
+
+            .kpi-card {
+                padding: 12px 14px;
+            }
+
+            .kpi-card .val {
+                font-size: 20px;
+            }
+
+            .dashboard-main-grid {
+                grid-template-columns: 1fr !important;
+                gap: 14px;
+            }
+
+            .card-box {
+                padding: 14px;
+            }
+
+            .card-head {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .card-head button,
+            .card-head select {
+                width: 100%;
+            }
+
+            .gis-grid {
+                grid-template-columns: 1fr !important;
+                gap: 12px;
+                height: auto !important;
+            }
+
+            #fullMap {
+                min-height: 350px !important;
+                height: 350px !important;
+            }
+
+            .map-legend-overlay {
+                max-width: calc(100% - 20px);
+                bottom: 8px;
+                left: 8px;
+                font-size: 10px;
+                padding: 6px 10px;
+            }
+
+            .ward-detail-header-card {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 8px;
+            }
+
+            .ward-detail-header-card > div:last-child {
+                text-align: left !important;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .detail-metrics-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px;
+            }
+
+            .forecast-kpi-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px;
+            }
+
+            .action-grid-wrapper {
+                grid-template-columns: 1fr !important;
+                gap: 16px;
+            }
+
+            .action-select-pair {
+                grid-template-columns: 1fr !important;
+                gap: 8px;
+            }
+
+            .grid-split {
+                grid-template-columns: 1fr !important;
+                gap: 14px;
+            }
+
+            .modal-box {
+                width: 95%;
+                max-height: 90vh;
+                overflow-y: auto;
+                padding: 18px 14px;
+            }
+        }
+
+        /* Extra Small Mobile Devices (<= 480px) */
+        @media (max-width: 480px) {
+            .cmd-info h2 {
+                font-size: 16px;
+            }
+            .btn-alert-global span {
+                display: none;
+            }
+            .btn-alert-global::after {
+                content: "ALERT";
+                font-weight: 700;
+                font-size: 11px;
+            }
+            .pill-location span {
+                max-width: 115px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: inline-block;
+            }
+        }
     </style>
 </head>
 
 <body>
+
+    <!-- MOBILE OFF-CANVAS BACKDROP -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
 
     <!-- LEFT NAVIGATION SIDEBAR -->
     <aside class="sidebar">
@@ -923,6 +1257,12 @@
                     <h1 data-i18n="brand_title">HEAT SHIELD</h1>
                     <p data-i18n="brand_tagline">Extreme Heat Wave Early Warning & Action System</p>
                 </div>
+                <button class="sidebar-close-btn" onclick="closeMobileSidebar()" aria-label="Close navigation">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
             </div>
 
             <nav class="nav-list">
@@ -1022,6 +1362,13 @@
         <!-- TOP HEADER -->
         <header class="top-header">
             <div class="header-meta">
+                <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileSidebar()" aria-label="Open Navigation Menu">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
                 <div class="pill-location">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
@@ -1098,23 +1445,25 @@
                                 <h3 data-i18n="sec_ranked_wards">RANKED PRIORITY WARDS</h3>
                                 <button class="btn-btn" onclick="showTab('map')" data-i18n="btn_view_map">Open Interactive GIS Map →</button>
                             </div>
-                            <table class="tbl">
-                                <thead>
-                                    <tr>
-                                        <th data-i18n="col_rank">#</th>
-                                        <th data-i18n="col_ward">Ward / Taluka</th>
-                                        <th data-i18n="col_risk">Risk Tier</th>
-                                        <th data-i18n="col_score">Score</th>
-                                        <th data-i18n="col_temp">Temp</th>
-                                        <th data-i18n="col_wbgt">WBGT</th>
-                                        <th data-i18n="col_driver">Primary Risk Driver</th>
-                                        <th data-i18n="col_action">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="overviewTbody">
-                                    <!-- Injected by JS -->
-                                </tbody>
-                            </table>
+                            <div class="table-responsive-wrapper">
+                                <table class="tbl">
+                                    <thead>
+                                        <tr>
+                                            <th data-i18n="col_rank">#</th>
+                                            <th data-i18n="col_ward">Ward / Taluka</th>
+                                            <th data-i18n="col_risk">Risk Tier</th>
+                                            <th data-i18n="col_score">Score</th>
+                                            <th data-i18n="col_temp">Temp</th>
+                                            <th data-i18n="col_wbgt">WBGT</th>
+                                            <th data-i18n="col_driver">Primary Risk Driver</th>
+                                            <th data-i18n="col_action">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="overviewTbody">
+                                        <!-- Injected by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <!-- GIS Preview Map -->
@@ -1302,7 +1651,7 @@
                 </div>
 
                 <!-- Header Info -->
-                <div class="card-box" style="flex-direction: row; justify-content: space-between; align-items: center;">
+                <div class="card-box ward-detail-header-card">
                     <div>
                         <h2 id="detTitle" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; color: var(--text-primary);">CHANDRAPUR CITY</h2>
                         <p id="detSub" style="color: var(--text-secondary); font-size: 12px;">Population: 320,000</p>
@@ -1314,7 +1663,7 @@
                 </div>
 
                 <!-- 3 Metric Columns -->
-                <div class="kpi-row" style="grid-template-columns: repeat(3, 1fr);">
+                <div class="kpi-row detail-metrics-grid">
                     <div class="card-box">
                         <h4 style="font-size: 12px; color: var(--text-secondary);" data-i18n="sec_current">CURRENT WEATHER</h4>
                         <p><span data-i18n="lbl_temp">Temperature</span>: <b id="detTempVal">47.2°C</b></p>
@@ -1391,7 +1740,7 @@
                     </p>
                 </div>
 
-                <div class="kpi-row" style="grid-template-columns: repeat(5, 1fr);" id="forecastKpiRow">
+                <div class="kpi-row forecast-kpi-grid" id="forecastKpiRow">
                     <!-- Dynamic Days -->
                 </div>
 
@@ -1565,10 +1914,10 @@
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px;">
+                    <div class="action-grid-wrapper">
                         <!-- Left Column: Advisory Selection & Message -->
                         <div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="action-select-pair">
                                 <div>
                                     <label style="font-size: 11.5px; font-weight: 700; color: var(--text-secondary);">1. Select Target Ward / City</label>
                                     <select id="actionWardSelect" onchange="syncActionWardMessage()" style="width: 100%; background: #ffffff; color: var(--text-primary); border: 1px solid var(--card-border); padding: 8px; border-radius: var(--radius-sm); margin-top: 4px; font-size: 12px; font-weight: 600;">
@@ -2292,16 +2641,47 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             const target = document.getElementById(`tab-${id}`);
             if (target) target.classList.add('active');
 
+            // Automatically close mobile sidebar drawer upon selecting a tab
+            if (window.innerWidth <= 900) {
+                closeMobileSidebar();
+            }
+
             if (id === 'map' && fullMap) {
-                setTimeout(() => fullMap.invalidateSize(), 200);
+                setTimeout(() => fullMap.invalidateSize(), 250);
             }
             if (id === 'overview' && overviewPreviewMap) {
-                setTimeout(() => overviewPreviewMap.invalidateSize(), 200);
+                setTimeout(() => overviewPreviewMap.invalidateSize(), 250);
             }
             if (id === 'forecast' && forecastChart) {
-                setTimeout(() => forecastChart.resize(), 100);
+                setTimeout(() => forecastChart.resize(), 150);
             }
         }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.querySelector('aside.sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (!sidebar) return;
+            const isOpen = sidebar.classList.contains('mobile-open');
+            if (isOpen) {
+                closeMobileSidebar();
+            } else {
+                sidebar.classList.add('mobile-open');
+                if (backdrop) backdrop.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeMobileSidebar() {
+            const sidebar = document.querySelector('aside.sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.remove('mobile-open');
+            if (backdrop) backdrop.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeMobileSidebar();
+        });
 
         async function initData() {
             let loadedWards = null;
