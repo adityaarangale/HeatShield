@@ -3,7 +3,7 @@ const translations = {
   en: {
     // Brand & Navigation
     brand_title: "HEAT SHIELD",
-    brand_tagline: "Extreme Heat Early Warning & Action System",
+    brand_tagline: "Extreme Heat Wave Early Warning & Action System",
     pilot_location: "Chandrapur District, MH",
     status_operational: "FastAPI Backend Connected",
     status_cloud: "System Operational (Cloud Engine)",
@@ -69,6 +69,16 @@ const translations = {
     layer_green: "Green Canopy (NDVI)",
     layer_cooling: "Cooling Shelters & Vans",
 
+    // Map Legend
+    map_legend_title: "GIS Map Infrastructure & Legend",
+    legend_shelter: "Cooling Shelters (Hospitals & Relief Centers)",
+    legend_van: "Mobile Hydration & ORS Relief Vans",
+    legend_extreme: "Extreme Heat Risk Zone",
+    legend_danger: "High Danger Zone",
+    legend_caution: "Caution Zone",
+    legend_safe: "Ecological Green Safe Zone",
+    legend_blue_dots_info: "🔵 Blue dots on map indicate Emergency Cooling Shelters & Mobile Hydration Relief Vans.",
+
     // Ward Details / Wards Page
     wards_title: "WARD RISK ANALYSIS",
     wards_sub: "In-depth thermal stress, demographic vulnerability, and response status",
@@ -89,6 +99,7 @@ const translations = {
     lbl_elderly: "Elderly Population",
     lbl_workers: "Outdoor Workers",
     lbl_green: "Green Cover",
+    lbl_population: "Population",
 
     driver_temp: "Very high ambient temperature",
     driver_temp_desc: "Major thermal load contributor",
@@ -117,19 +128,27 @@ const translations = {
     st_pending: "PENDING",
     st_not_started: "NOT STARTED",
 
-    btn_tech_details: "Show Technical Metrics & Formulas",
-    btn_hide_tech_details: "Hide Technical Metrics",
-
     // Forecast Page
     forecast_title: "5-DAY HEAT RISK OUTLOOK",
     forecast_sub: "Predictive multi-day trend modeling to enable early response planning",
-    forecast_summary: "Extreme heat risk is projected to persist for the next 72 hours across central Chandrapur.",
-    forecast_interpretation: "Extreme heat risk is projected to persist for the next 72 hours across central Chandrapur.",
+    forecast_summary: "Extreme heat risk is projected to persist for the next 48-72 hours across central Chandrapur & Ballarpur before easing.",
+    forecast_interpretation: "Extreme heat risk is projected to persist for the next 48-72 hours across central Chandrapur & Ballarpur before easing.",
+    forecast_live_badge: "Live Satellite & NWP Meteorological Forecast",
+    forecast_model_badge: "Municipal Predictive Simulation Model",
     lbl_today: "Today",
     lbl_tomorrow: "Tomorrow",
     lbl_day3: "Day 3",
     lbl_day4: "Day 4",
     lbl_day5: "Day 5",
+
+    // Weekday names
+    day_sun: "Sun",
+    day_mon: "Mon",
+    day_tue: "Tue",
+    day_wed: "Wed",
+    day_thu: "Thu",
+    day_fri: "Fri",
+    day_sat: "Sat",
 
     // What-If Simulator Page
     sim_title: "WHAT-IF SCENARIO SIMULATOR",
@@ -162,18 +181,18 @@ const translations = {
     btn_resolve: "Resolve",
 
     // Action Center
-    actions_title: "ACTION CENTER & MOBILE DISPATCH",
-    actions_sub: "Standard Operating Procedures (SOP) & direct citizen mobile advisory broadcast",
-    actions_hub_title: "1-CLICK EMERGENCY BROADCAST & CITIZEN CONTACTS HUB",
-    actions_hub_sub: "Broadcast verified heatwave warnings or safe green zone notices to your team, project evaluators, and registered district area citizens in 1 click.",
+    actions_title: "ACTION CENTER & EMERGENCY DISPATCH",
+    actions_sub: "Municipal Standard Operating Procedures (SOP) & direct telecom mobile broadcast console",
+    actions_hub_title: "OFFICIAL EMERGENCY BROADCAST & CITIZEN DIRECTORY",
+    actions_hub_sub: "Dispatch verified heatwave warnings or safe ecological bulletins to municipal response desks, hospital wards, and registered district citizens.",
     act_imm_hdr: "IMMEDIATE (0 – 2 HOURS)",
     act_6h_hdr: "NEXT 6 HOURS",
     act_24h_hdr: "NEXT 24 HOURS",
     act_pub_hdr: "PUBLIC ADVISORIES",
     btn_copy: "Copy Advisory Text",
     btn_send: "Broadcast Alert SMS",
-
-    btn_send_whatsapp: "Send to My WhatsApp",
+    btn_dispatch_sms: "DISPATCH EMERGENCY CELLULAR SMS",
+    lbl_carrier_gateway: "Telecom Carrier SMS Gateway Online",
     btn_send_sms: "Send via Mobile SMS",
     btn_push_alert: "Trigger Live Screen Alert",
     test_backend: "Test Backend Connection",
@@ -185,7 +204,7 @@ const translations = {
     settings_freshness: "Data Sync Status",
 
     // Modal Confirmation
-    modal_title: "🚨 DISPATCH OFFICIAL EMERGENCY MOBILE ADVISORY",
+    modal_title: "DISPATCH OFFICIAL EMERGENCY MOBILE ADVISORY",
     modal_sub: "Transmit verified heatwave warning or safe green zone bulletin directly to citizen mobile devices.",
     modal_target: "Target Ward / Taluka",
     modal_msg: "Proposed Official Message Content",
@@ -197,13 +216,23 @@ const translations = {
     risk_extreme: "Extreme",
     risk_danger: "Danger",
     risk_caution: "Caution",
-    risk_safe: "Safe"
+    risk_safe: "Safe",
+
+    // Ward Names
+    ward_CHA_001: "Chandrapur City",
+    ward_CHA_002: "Ballarpur",
+    ward_CHA_003: "Rajura",
+    ward_CHA_004: "Warora",
+    ward_CHA_005: "Bhadravati",
+    ward_CHA_006: "Brahmapuri",
+    ward_CHA_007: "Nagbhid Wetland",
+    ward_CHA_008: "Mul - Tadoba Forest Buffer"
   },
 
   mr: {
     // Brand & Navigation
     brand_title: "हीट शील्ड",
-    brand_tagline: "उष्णतेचा धोका पूर्वसूचना व कृती प्रणाली",
+    brand_tagline: "अत्यंत तीव्र उष्णतेची लाट पूर्वसूचना व कृती प्रणाली",
     pilot_location: "चंद्रपूर जिल्हा, महाराष्ट्र",
     status_operational: "FastAPI बॅकएंड जोडले आहे",
     status_cloud: "प्रणाली कार्यरत आहे (क्लाउड इंजिन)",
@@ -269,6 +298,16 @@ const translations = {
     layer_green: "हरित आच्छादन (NDVI)",
     layer_cooling: "कूलिंग सेंटर्स आणि व्हॅन्स",
 
+    // Map Legend
+    map_legend_title: "GIS सुविधा व जोखीम सूची (Legend)",
+    legend_shelter: "आपत्कालीन कूलिंग सेंटर्स (रुग्णालये व मदत केंद्रे)",
+    legend_van: "मोबाईल हायड्रेशन व ओआरएस व्हॅन्स",
+    legend_extreme: "अत्यंत धोका उष्णता क्षेत्र",
+    legend_danger: "धोकादायक उष्णता क्षेत्र",
+    legend_caution: "सावधानता क्षेत्र",
+    legend_safe: "पर्यावरणीय हरित सुरक्षित क्षेत्र",
+    legend_blue_dots_info: "🔵 निळे ठिपके (Blue Dots) आपत्कालीन कूलिंग केंद्रे आणि फिरत्या पाणी/ओआरएस व्हॅन्स दर्शवितात.",
+
     // Ward Details / Wards Page
     wards_title: "प्रभाग जोखीम विश्लेषण",
     wards_sub: "सविस्तर उष्णता ताण, लोकसंख्या संवेदनशीलता आणि सज्जता स्थिती",
@@ -289,6 +328,7 @@ const translations = {
     lbl_elderly: "वृद्ध लोकसंख्या",
     lbl_workers: "बाहेरील कामगार",
     lbl_green: "हरित आच्छादन",
+    lbl_population: "लोकसंख्या",
 
     driver_temp: "खूप जास्त वातावरण तापमान",
     driver_temp_desc: "उष्णतेच्या भाराचा सर्वात मोठा घटक",
@@ -303,8 +343,8 @@ const translations = {
     driver_canopy_desc: "उच्च वृक्ष आच्छादनामुळे सूक्ष्म हवामान शीतकरण मिळते",
     driver_cool_island: "पर्यावरणीय उष्णता-शोषक क्षेत्र",
     driver_cool_island_desc: "शहराच्या तुलनेत पृष्ठभागाचे तापमान १५.७°C पर्यंत कमी",
-    driver_safe_day: "उष्णतेचा धोका नाही",
-    driver_safe_day_desc: "दिवसाच्या नियमित बाहेरील कामांसाठी सुरक्षित",
+    driver_safe_day: "उष्णतेचा धोका नाही (अनुकूल परिस्थिती)",
+    driver_safe_day_desc: "दिवसाच्या नियमित बाहेरील कामांसाठी सुरक्षित वातावरण",
 
     prep_cooling: "कूलिंग सेंटर्स",
     prep_water: "पाणी वाटप केंद्रे",
@@ -317,19 +357,27 @@ const translations = {
     st_pending: "प्रलंबित (PENDING)",
     st_not_started: "सुरू नाही (NOT STARTED)",
 
-    btn_tech_details: "तांत्रिक सूत्रे आणि गणना दाखवा",
-    btn_hide_tech_details: "तांत्रिक तपशील लपवा",
-
     // Forecast Page
     forecast_title: "५-दिवसीय उष्णता जोखीम अंदाज",
     forecast_sub: "पूर्वतयारी व नियोजन करण्यासाठी बहु-दिवसीय अंदाज मॉडेलिंग",
-    forecast_summary: "मध्य चंद्रपूर आणि औद्योगिक पट्ट्यात पुढील ७२ तास उष्णतेची तीव्र लाट कायम राहण्याचा अंदाज आहे.",
-    forecast_interpretation: "मध्य चंद्रपूर आणि औद्योगिक पट्ट्यात पुढील ७२ तास उष्णतेची तीव्र लाट कायम राहण्याचा अंदाज आहे.",
+    forecast_summary: "मध्य चंद्रपूर आणि बल्लारपूरमध्ये पुढील ४८-७२ तास उष्णतेची तीव्र लाट राहण्याचा अंदाज असून त्यानंतर हवामान सुधारेल.",
+    forecast_interpretation: "मध्य चंद्रपूर आणि बल्लारपूरमध्ये पुढील ४८-७२ तास उष्णतेची तीव्र लाट राहण्याचा अंदाज असून त्यानंतर हवामान सुधारेल.",
+    forecast_live_badge: "थेट उपग्रह व हवामान अंदाज मॉडेल",
+    forecast_model_badge: "महानगरपालिका अंदाज मॉडेल",
     lbl_today: "आज",
     lbl_tomorrow: "उद्या",
     lbl_day3: "दिवस ३",
     lbl_day4: "दिवस ४",
     lbl_day5: "दिवस ५",
+
+    // Weekday names
+    day_sun: "रवि",
+    day_mon: "सोम",
+    day_tue: "मंगळ",
+    day_wed: "बुध",
+    day_thu: "गुरू",
+    day_fri: "शुक्र",
+    day_sat: "शनि",
 
     // What-If Simulator Page
     sim_title: "परिस्थिती सिम्युलेटर (What-If Simulator)",
@@ -362,18 +410,18 @@ const translations = {
     btn_resolve: "निराकरण करा (Resolve)",
 
     // Action Center
-    actions_title: "अ‍ॅक्शन सेंटर व थेट मोबाईल संदेश",
-    actions_sub: "वेळेच्या तीव्रतेनुसार आयोजित पालिका कार्यपद्धती (SOP) आणि थेट नागरिक प्रसारण",
-    actions_hub_title: "१-क्लिक आपत्कालीन प्रसारण व नागरिक संपर्क केंद्र",
-    actions_hub_sub: "तुमचा संघ, परीक्षक आणि नोंदणीकृत जिल्हा नागरिकांना १ क्लिकमध्ये पडताळणीकृत उष्णतेचा इशारा किंवा सुरक्षित हरित संदेश पाठवा.",
+    actions_title: "अ‍ॅक्शन सेंटर व आपत्कालीन संदेश प्रसारण",
+    actions_sub: "वेळेच्या तीव्रतेनुसार आयोजित पालिका कार्यपद्धती (SOP) आणि थेट दूरसंचार नागरिक प्रसारण",
+    actions_hub_title: "अधिकृत आपत्कालीन प्रसारण व संपर्क केंद्र",
+    actions_hub_sub: "नोंदणीकृत नागरिक, आपत्ती व्यवस्थापन पथक आणि पालिका अधिकाऱ्यांना १-क्लिकमध्ये थेट मोबाईलवर अधिकृत SMS इशारा पाठवा.",
     act_imm_hdr: "तात्काळ (० – २ तास)",
     act_6h_hdr: "पुढील ६ तास",
     act_24h_hdr: "पुढील २४ तास",
     act_pub_hdr: "सार्वजनिक सल्ला व सूचना",
     btn_copy: "सल्ला मजकूर कॉपी करा",
     btn_send: "SMS आपत्कालीन इशारा पाठवा",
-
-    btn_send_whatsapp: "माझ्या व्हॉट्सअ‍ॅपवर पाठवा",
+    btn_dispatch_sms: "आपत्कालीन सेल्युलर SMS पाठवा",
+    lbl_carrier_gateway: "दूरसंचार SMS गेटवे सक्रिय",
     btn_send_sms: "थेट SMS पाठवा",
     btn_push_alert: "स्क्रीनवर लाईव्ह अलर्ट दाखवा",
     test_backend: "बॅकएंड कनेक्शन तपासा",
@@ -397,6 +445,20 @@ const translations = {
     risk_extreme: "अत्यंत धोका",
     risk_danger: "धोकादायक",
     risk_caution: "सावधान",
-    risk_safe: "सुरक्षित"
+    risk_safe: "सुरक्षित",
+
+    // Ward Names
+    ward_CHA_001: "चंद्रपूर शहर",
+    ward_CHA_002: "बल्लारपूर",
+    ward_CHA_003: "राजूरा",
+    ward_CHA_004: "वरोरा",
+    ward_CHA_005: "भद्रावती",
+    ward_CHA_006: "ब्रह्मपुरी",
+    ward_CHA_007: "नागभीड पाणथळ क्षेत्र",
+    ward_CHA_008: "मुल - ताडोबा वन बफर"
   }
 };
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = translations;
+}

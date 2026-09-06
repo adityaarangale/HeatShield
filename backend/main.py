@@ -159,6 +159,7 @@ def trigger_alert(request: AlertTriggerRequest):
     auth_token = os.getenv("TWILIO_AUTH_TOKEN")
     from_phone = os.getenv("TWILIO_PHONE_NUMBER")
     recipient_phone = request.recipient_phone or os.getenv("TO_PHONE_NUMBER", "+919876543210")
+    fast2sms_key = request.api_key or os.getenv("FAST2SMS_API_KEY")
 
     if account_sid and auth_token and from_phone:
         try:
@@ -177,11 +178,48 @@ def trigger_alert(request: AlertTriggerRequest):
                 risk_band=request.risk_band,
                 wbgt=wbgt,
                 message=sms_message,
-                provider="Twilio SMS",
+                provider="Twilio SMS Gateway",
                 recipient_phone=recipient_phone
             )
         except Exception as err:
             logger.warning(f"[Twilio Fallback Error] {str(err)}. Falling back to console log.")
+
+    if fast2sms_key:
+        try:
+            import urllib.request
+            import json
+            clean_num = recipient_phone.replace("+91", "").replace("+", "").strip()
+            if len(clean_num) == 10 and clean_num.isdigit():
+                req_payload = json.dumps({
+                    "route": "q",
+                    "message": sms_message,
+                    "language": "english",
+                    "flash": 0,
+                    "numbers": clean_num
+                }).encode("utf-8")
+                req = urllib.request.Request(
+                    "https://www.fast2sms.com/dev/bulkV2",
+                    data=req_payload,
+                    headers={
+                        "authorization": fast2sms_key,
+                        "Content-Type": "application/json"
+                    }
+                )
+                with urllib.request.urlopen(req, timeout=8) as resp:
+                    resp_body = resp.read().decode()
+                    logger.info(f"[Fast2SMS Single]: {resp_body}")
+                return AlertTriggerResponse(
+                    status="sent",
+                    ward_id=target_ward.ward_id,
+                    ward_name=target_ward.ward_name,
+                    risk_band=request.risk_band,
+                    wbgt=wbgt,
+                    message=sms_message,
+                    provider="Fast2SMS India Cellular Gateway",
+                    recipient_phone=recipient_phone
+                )
+        except Exception as err:
+            logger.warning(f"[Fast2SMS Error] {str(err)}. Falling back to simulation.")
 
     # Fallback log for demonstration / unconfigured Twilio credentials
     try:
@@ -228,7 +266,7 @@ def broadcast_alerts(request: BroadcastAlertRequest):
     print(f"Message Content:\n{request.custom_message}")
     print(f"=======================================================\n")
 
-    fast2sms_key = os.getenv("FAST2SMS_API_KEY")
+    fast2sms_key = request.api_key or os.getenv("FAST2SMS_API_KEY")
 
     if account_sid and auth_token and from_phone:
         try:
@@ -269,9 +307,10 @@ def broadcast_alerts(request: BroadcastAlertRequest):
                         "Content-Type": "application/json"
                     }
                 )
-                with urllib.request.urlopen(req, timeout=6) as resp:
-                    logger.info(f"[Fast2SMS Response]: {resp.read().decode()}")
-                provider = "Fast2SMS India Gateway"
+                with urllib.request.urlopen(req, timeout=8) as resp:
+                    resp_body = resp.read().decode()
+                    logger.info(f"[Fast2SMS Broadcast Response]: {resp_body}")
+                provider = "Fast2SMS India Cellular Gateway"
                 sent_recipients = request.recipient_phones
         except Exception as e:
             logger.warning(f"Fast2SMS error: {str(e)}")

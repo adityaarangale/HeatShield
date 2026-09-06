@@ -90,6 +90,7 @@ class AlertTriggerRequest(BaseModel):
     risk_band: str = Field(..., description="Risk level band (e.g. Extreme, Danger)", examples=["Extreme"])
     recipient_phone: Optional[str] = Field(None, description="Optional recipient phone number for SMS delivery", examples=["+919876543210"])
     custom_message: Optional[str] = Field(None, description="Customized official advisory message text")
+    api_key: Optional[str] = Field(None, description="Optional Fast2SMS or Twilio API key from frontend")
 
 
 class AlertTriggerResponse(BaseModel):
@@ -99,7 +100,7 @@ class AlertTriggerResponse(BaseModel):
     risk_band: str
     wbgt: float
     message: str
-    provider: str = Field(..., description="Delivery mechanism (Twilio SMS or Console Log Fallback)")
+    provider: str = Field(..., description="Delivery mechanism (Twilio SMS, Fast2SMS, or Console Log Fallback)")
     recipient_phone: Optional[str] = None
 
 
@@ -108,6 +109,7 @@ class BroadcastAlertRequest(BaseModel):
     risk_band: str = Field(..., description="Risk tier classification", examples=["Extreme"])
     recipient_phones: List[str] = Field(..., description="List of recipient phone numbers", examples=[["+919876543210", "+919876543211"]])
     custom_message: str = Field(..., description="Broadcast message content", examples=["EMERGENCY HEAT ADVISORY: Stay indoors between 11 AM - 4 PM."])
+    api_key: Optional[str] = Field(None, description="Optional Fast2SMS or Twilio API key from frontend")
 
 
 class BroadcastAlertResponse(BaseModel):
