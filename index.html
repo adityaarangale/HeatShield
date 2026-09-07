@@ -3941,10 +3941,30 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                 console.log("FastAPI backend offline:", err);
             }
 
-            // 3. Log each recipient into the Audit Log table
-            selectedContacts.forEach(c => {
-                logDispatchAudit("Direct SMS Gateway", c.phone, `${c.name}: ${message}`);
-            });
+            // 3. Log single city-level broadcast entry into the Alert Center table (No individual phone numbers)
+            const tAlert = (window.translations && translations[curLang]) ? translations[curLang] : {};
+            let displayCityName = selectedCityFilter;
+            let displayScore = curLang === 'mr' ? 'प्रसारण' : 'Broadcast';
+            let displayBand = 'Extreme';
+
+            if (selectedCityFilter === 'ALL') {
+                displayCityName = curLang === 'mr' ? 'सर्व प्रभाग (जिल्हाव्यापी)' : 'All Wards (District-wide)';
+            } else {
+                const matchedWard = wardsData.find(w => 
+                    w.ward_name.toLowerCase().includes(selectedCityFilter.toLowerCase()) || 
+                    selectedCityFilter.toLowerCase().includes(w.ward_name.toLowerCase()) ||
+                    (w.ward_id && w.ward_id.toLowerCase().includes(selectedCityFilter.toLowerCase()))
+                );
+                if (matchedWard) {
+                    displayCityName = (curLang === 'mr' && tAlert['ward_' + matchedWard.ward_id]) ? tAlert['ward_' + matchedWard.ward_id] : matchedWard.ward_name;
+                    displayScore = `${matchedWard.risk_score.toFixed(1)} / 100`;
+                    displayBand = matchedWard.risk_band;
+                } else if (CITY_TRANSLATIONS[selectedCityFilter]) {
+                    displayCityName = CITY_TRANSLATIONS[selectedCityFilter][curLang] || selectedCityFilter;
+                }
+            }
+
+            logDispatchAudit(displayCityName, selectedContacts.length, message, displayScore, displayBand);
 
             // 4. Update Lockscreen mockups
             const mockText = document.getElementById('mockMobileMessageText');
@@ -4021,7 +4041,13 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                 }).catch(e => console.log("Modal single dispatch:", e));
             } catch (e) {}
 
-            logDispatchAudit("Direct SMS Gateway", cleanPhone, message);
+            const tModal = (window.translations && translations[curLang]) ? translations[curLang] : {};
+            const wModal = wardsData.find(x => x.ward_id === wardId);
+            const modalCityName = wModal ? ((curLang === 'mr' && tModal['ward_' + wModal.ward_id]) ? tModal['ward_' + wModal.ward_id] : wModal.ward_name) : wardId;
+            const modalScore = wModal ? `${wModal.risk_score.toFixed(1)} / 100` : (curLang === 'mr' ? 'थेट' : 'Direct');
+            const modalBand = wModal ? wModal.risk_band : 'Extreme';
+
+            logDispatchAudit(modalCityName, 1, message, modalScore, modalBand);
             closeAlertModal();
 
             // Open clean in-app SMS Receipt
@@ -4111,17 +4137,19 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             const t = (window.translations && translations[curLang]) ? translations[curLang] : {};
             tbody.innerHTML = '';
 
-            // 1. Render dynamic live dispatches first
+            // 1. Render dynamic live dispatches first (Grouped by City / Ward Name, no individual phone numbers)
             dynamicDispatches.forEach(d => {
                 const tr = document.createElement('tr');
                 tr.style.backgroundColor = '#fff7ed';
+                const sentBadge = curLang === 'mr' ? 'प्रसारित' : 'Sent';
+                const deliveredBadge = curLang === 'mr' ? '✓ वितरित' : 'Delivered ✓';
                 tr.innerHTML = `
-                    <td><span class="tag Extreme">${curLang === 'mr' ? 'प्रसारित' : 'Sent'}</span></td>
-                    <td><b>${d.phone}</b> (${d.channel})</td>
-                    <td><b>${curLang === 'mr' ? 'थेट' : 'Direct'}</b></td>
+                    <td><span class="tag ${d.band || 'Extreme'}">${sentBadge}</span></td>
+                    <td><b>${d.ward_name}</b></td>
+                    <td><b>${d.score}</b></td>
                     <td>${d.time}</td>
                     <td style="font-size: 11px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${d.message}</td>
-                    <td><span class="tag Safe">${curLang === 'mr' ? '✓ वितरित' : 'Delivered ✓'}</span></td>
+                    <td><span class="tag Safe">${deliveredBadge}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -4185,16 +4213,18 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             }
         }
 
-        function logDispatchAudit(channel, phone, message) {
+        function logDispatchAudit(targetCityName, recipientCount, message, riskScore, riskBand) {
             const countEl = document.getElementById('dispatchedTodayCount');
             if (countEl) {
-                countEl.textContent = parseInt(countEl.textContent || '16') + 1;
+                countEl.textContent = parseInt(countEl.textContent || '16') + (recipientCount || 1);
             }
 
             dynamicDispatches.unshift({
-                channel: channel,
-                phone: phone,
+                ward_name: targetCityName,
+                recipient_count: recipientCount || 1,
                 message: message,
+                score: riskScore || (curLang === 'mr' ? 'प्रसारण' : 'Broadcast'),
+                band: riskBand || 'Extreme',
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             });
 
