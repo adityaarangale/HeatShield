@@ -1823,11 +1823,11 @@
                 <div class="kpi-row" style="grid-template-columns: repeat(3, 1fr);">
                     <div class="kpi-card">
                         <label data-i18n="kpi_active_alerts">Active Warnings</label>
-                        <div class="val" style="color: var(--risk-extreme);" id="activeAlertCount">3</div>
+                        <div class="val" style="color: var(--risk-extreme);" id="activeAlertCount">2</div>
                     </div>
                     <div class="kpi-card">
                         <label data-i18n="kpi_green_zones">Green Zone Safe Areas</label>
-                        <div class="val" style="color: var(--risk-safe);">2</div>
+                        <div class="val" style="color: var(--risk-safe);" id="alertGreenZonesCount">2</div>
                     </div>
                     <div class="kpi-card">
                         <label data-i18n="kpi_dispatched_today">Dispatched Today</label>
@@ -4177,6 +4177,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                 `;
                 tbody.appendChild(tr);
             });
+            updateAlertCenterKpis();
         }
 
         function ackAlertItem(id, btn) {
@@ -4195,6 +4196,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             if (tr) tr.style.opacity = '0.4';
             btn.textContent = curLang === 'mr' ? 'निवारण झाले ✓' : 'Resolved ✓';
             btn.disabled = true;
+            updateAlertCenterKpis();
         }
 
         function ackAlert(btn) {
@@ -4211,12 +4213,40 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                 btn.textContent = curLang === 'mr' ? 'निवारण झाले ✓' : 'Resolved ✓';
                 btn.disabled = true;
             }
+            const firstUnresolved = SYSTEM_ALERTS.find(a => !a.resolved && a.band !== 'Safe');
+            if (firstUnresolved) firstUnresolved.resolved = true;
+            updateAlertCenterKpis();
+        }
+
+        function updateAlertCenterKpis() {
+            // 1. Active Warnings: count unresolved active warnings (Extreme / Danger)
+            const unresolvedCount = SYSTEM_ALERTS.filter(a => !a.resolved && a.band !== 'Safe').length;
+            const alertCountEl = document.getElementById('activeAlertCount');
+            if (alertCountEl) {
+                alertCountEl.textContent = unresolvedCount;
+                alertCountEl.style.color = unresolvedCount > 0 ? 'var(--risk-extreme)' : 'var(--risk-safe)';
+            }
+
+            // 2. Ecological Green Zones: count wards maintaining Safe status
+            const greenCount = wardsData.length ? wardsData.filter(w => w.risk_band === 'Safe').length : 2;
+            const greenEl = document.getElementById('alertGreenZonesCount');
+            if (greenEl) greenEl.textContent = greenCount;
+
+            // 3. Dispatched Today: persistent count from localStorage
+            const dispCount = localStorage.getItem('heatshield_dispatched_count');
+            const dispEl = document.getElementById('dispatchedTodayCount');
+            if (dispEl && dispCount) {
+                dispEl.textContent = dispCount;
+            }
         }
 
         function logDispatchAudit(targetCityName, recipientCount, message, riskScore, riskBand) {
             const countEl = document.getElementById('dispatchedTodayCount');
             if (countEl) {
-                countEl.textContent = parseInt(countEl.textContent || '16') + (recipientCount || 1);
+                const currentTotal = parseInt(countEl.textContent || '16');
+                const newTotal = currentTotal + (recipientCount || 1);
+                countEl.textContent = newTotal;
+                localStorage.setItem('heatshield_dispatched_count', newTotal);
             }
 
             dynamicDispatches.unshift({
@@ -4229,6 +4259,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             });
 
             renderAlertsTable();
+            updateAlertCenterKpis();
         }
 
         // ==========================================
