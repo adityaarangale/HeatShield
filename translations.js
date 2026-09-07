@@ -201,10 +201,6 @@ const translations = {
     lbl_select_ward: "1. Select Target Ward / City",
     lbl_advisory_cat: "2. Advisory Category",
     lbl_sms_content: "Official Verified SMS Content (Ready to Dispatch)",
-    lbl_pair_phone: "📲 PAIR PHYSICAL PHONE (LIVE ALERT DEMO)",
-    lbl_instant_buzz: "INSTANT BUZZ",
-    lbl_pair_desc: "To receive this alert right on your mobile lockscreen: open <b><a href=\"https://ntfy.sh/heatshield-chandrapur\" target=\"_blank\" style=\"color: #2563eb; text-decoration: underline;\">ntfy.sh/heatshield-chandrapur</a></b> on your phone & tap <b>\"Subscribe\"</b>. When you click Send, your phone will chime with this alert!",
-    btn_test_chime: "🔔 Test Handset Chime Now",
     btn_telecom_key: "🔑 Telecom SMS Gateway Key",
     lbl_registered_contacts: "Registered Citizen & Authority Contacts",
     lbl_selected: "selected",
@@ -226,6 +222,64 @@ const translations = {
     act_num_1: "1. Emergency Cooling Centers",
     act_num_2: "2. Work Suspension Advisory",
     act_num_3: "3. Hospital Preparedness Alert",
+
+    // Explainer Badges & Architecture
+    step_1_badge: "1️⃣ TARGET WARD",
+    step_2_badge: "2️⃣ ADVISORY CATEGORY",
+    step_3_badge: "3️⃣ 1-CLICK DISPATCH",
+    viva_explainer: "MoES SIH26083 Architecture: Satellite NWP + Blended HTSI / WBGT + Demographic Vulnerability + Indian Telecom PRI SMS Gateway.",
+
+    // Map Side Panel & Notes
+    map_side_risk_score: "Risk Score:",
+    map_side_temp: "Temp:",
+    map_side_wbgt: "WBGT:",
+    map_side_canopy: "Canopy:",
+    map_side_workers: "Workers:",
+    eco_note_title: "🌳 SIH26083 Spatial Note",
+    eco_note_desc: "Tadoba Buffer & Nagbhid exhibit a 15.7°C surface cooling depression due to 68% tree canopy cover, proving natural UHI mitigation.",
+
+    // Lockscreen & Receipt Modal
+    lbl_messages: "MESSAGES",
+    lbl_just_now: "Just now",
+    lbl_sms_format: "Cellular SMS Format",
+    lbl_ready_handset: "Ready for Handset",
+    receipt_title: "DISASTER EMERGENCY SMS TELECOM GATEWAY",
+    receipt_sub: "Ministry of Earth Sciences (MoES SIH26083) — Direct Cellular Transmission Log",
+    receipt_delivered: "✓ DELIVERED",
+    receipt_summary_title: "✓ Official SMS Broadcast Successfully Completed",
+    receipt_summary_desc: "All registered mobile numbers have received the verified heat advisory.",
+    btn_close_receipt: "Close Receipt",
+
+    // Days for Forecast
+    day_today: "Today",
+    day_tomorrow: "Tomorrow",
+    day_3: "Day 3",
+    day_4: "Day 4",
+    day_5: "Day 5",
+
+    // Form inputs & Placeholders
+    ph_contact_name: "e.g. aditya-g or Sir",
+    ph_contact_phone: "Mobile e.g. 9156616395",
+    lbl_add_contact_hdr: "Add Citizen / Sir / Team Mobile Number:",
+    btn_save_contact: "Save Contact",
+    btn_sample_preset: "Load Team & Sir Sample",
+    lbl_carrier_mode_note: "When key is saved, clicking Send SMS routes directly through Indian GSM telecom towers to deliver regular carrier SMS to registered numbers.",
+    lbl_key_link: "Get Free Key at fast2sms.com (50 Free SMS)",
+    lbl_key_title: "🔑 Indian Cellular SMS Gateway (Fast2SMS API Key)",
+    lbl_transmit_note: "🔒 Transmits directly to registered mobile handsets via MoES SIH26083 Telecom Gateway + Mobile Push Sync.",
+    pilot_region_lbl: "Pilot Region:",
+
+    // Cities
+    city_all: "All Cities & Registered Contacts (Entire District)",
+    city_chandrapur: "Chandrapur City (Central Urban Core)",
+    city_ballarpur: "Ballarpur (Mines & Paper Mill Zone)",
+    city_rajura: "Rajura (Cement Industrial Corridor)",
+    city_warora: "Warora (Highway & Agriculture Junction)",
+    city_bhadravati: "Bhadravati (Semi-urban Taluka)",
+    city_brahmapuri: "Brahmapuri (Wainganga Basin)",
+    city_nagbhid: "Nagbhid Wetland (Wetland & Lakes Zone)",
+    city_mul: "Mul Tadoba Buffer (Forest Buffer Zone)",
+    city_team: "Team / Sir",
 
     // Settings
     settings_title: "SYSTEM SETTINGS",
@@ -455,6 +509,90 @@ const translations = {
     btn_send_sms: "थेट SMS पाठवा",
     btn_push_alert: "स्क्रीनवर लाईव्ह अलर्ट दाखवा",
     test_backend: "बॅकएंड कनेक्शन तपासा",
+
+    // Action Center Broadcast & Directory Labels
+    lbl_select_ward: "१. लक्ष्य प्रभाग / शहर निवडा",
+    lbl_advisory_cat: "२. सल्ल्याची वर्गवारी",
+    lbl_sms_content: "अधिकृत पडताळणी केलेला SMS मजकूर (प्रसारणासाठी तयार)",
+    btn_telecom_key: "🔑 दूरसंचार SMS गेटवे की",
+    lbl_registered_contacts: "नोंदणीकृत नागरिक व अधिकारी संपर्क",
+    lbl_selected: "निवडले",
+    btn_add_number: "➕ नवीन क्रमांक जोडा",
+    lbl_filter_city: "🏙️ शहर / तालुका क्षेत्रानुसार संपर्क पहा:",
+    btn_select_all_city: "✓ शहरात सर्व निवडा",
+    btn_select_team: "⭐ आमचे पथक व परीक्षक",
+    btn_clear_sel: "निवड रद्द करा",
+
+    // Explainer Badges & Architecture
+    step_1_badge: "१️⃣ लक्ष्य प्रभाग / शहर",
+    step_2_badge: "२️⃣ सल्ल्याची वर्गवारी",
+    step_3_badge: "३️⃣ १-क्लिक SMS प्रसारण",
+    viva_explainer: "MoES SIH26083 आर्किटेक्चर: उपग्रह हवामान अंदाज + एकत्रित HTSI / WBGT + लोकसंख्या संवेदनशीलता + थेट भारतीय दूरसंचार PRI SMS गेटवे.",
+
+    // SOP Action Items
+    sop_imm_1: "मध्य चंद्रपूर आणि बल्लारपूरमध्ये तात्काळ कूलिंग केंद्रे सुरू करा",
+    sop_imm_2: "दुपारी ११:०० ते ४:०० या वेळेत बाहेरील शारीरिक कामांवर सक्तीची बंदी घाला",
+    sop_imm_3: "उष्णतेच्या केंद्रांवर जिल्हा आपत्कालीन रुग्णवाहिका सज्ज ठेवा",
+    sop_6h_1: "प्रमुख बस स्थानक, चौक आणि कोळसा खाण केंद्रांवर पिण्याच्या पाण्याचे टँकर्स व व्हॅन्स पाठवा",
+    sop_6h_2: "राजूरा आणि वरोरा येथे ज्येष्ठ नागरिकांच्या आरोग्याची तपासणी करण्यासाठी पालिका स्वयंसेवक पाठवा",
+    sop_6h_3: "शीतकरण औषध साठवणूक केंद्रांवर जनरेटर व बॅकअप वीज पुरवठा तपासा",
+
+    // Overview Priority Action Numbers
+    act_num_1: "१. आपत्कालीन कूलिंग केंद्रे",
+    act_num_2: "२. कामाच्या वेळेचा सल्ला",
+    act_num_3: "३. रुग्णालय सज्जता इशारा",
+
+    // Map Side Panel & Notes
+    map_side_risk_score: "जोखीम गुणांक:",
+    map_side_temp: "तापमान:",
+    map_side_wbgt: "WBGT:",
+    map_side_canopy: "हिरवळ:",
+    map_side_workers: "कामगार:",
+    eco_note_title: "🌳 SIH26083 प्रादेशिक नोंद",
+    eco_note_desc: "६८% वृक्ष आच्छादनामुळे ताडोबा बफर आणि नागभीडमध्ये १५.७°C पर्यंत नैसर्गिक शीतकरण दिसून येते, जे नागरी उष्णता बेट (UHI) कमी करते.",
+
+    // Lockscreen & Receipt Modal
+    lbl_messages: "संदेश",
+    lbl_just_now: "आत्ताच",
+    lbl_sms_format: "सेल्युलर SMS फॉरमॅट",
+    lbl_ready_handset: "मोबाईलसाठी तयार",
+    receipt_title: "आपत्ती आपत्कालीन SMS दूरसंचार गेटवे",
+    receipt_sub: "पृथ्वी विज्ञान मंत्रालय (MoES SIH26083) — थेट सेल्युलर प्रसारण नोंद",
+    receipt_delivered: "✓ वितरित (DELIVERED)",
+    receipt_summary_title: "✓ अधिकृत SMS प्रसारण यशस्वीरित्या पूर्ण झाले",
+    receipt_summary_desc: "सर्व नोंदणीकृत मोबाईल क्रमांकांवर अधिकृत उष्णता सल्ला संदेश पोहोचला आहे.",
+    btn_close_receipt: "पावती बंद करा",
+
+    // Days for Forecast
+    day_today: "आज",
+    day_tomorrow: "उद्या",
+    day_3: "दिवस ३",
+    day_4: "दिवस ४",
+    day_5: "दिवस ५",
+
+    // Form inputs & Placeholders
+    ph_contact_name: "उदा. aditya-g किंवा सर",
+    ph_contact_phone: "मोबाईल उदा. 9156616395",
+    lbl_add_contact_hdr: "नागरिक / परीक्षक / पथकाचा मोबाईल क्रमांक जोडा:",
+    btn_save_contact: "संपर्क सेव्ह करा",
+    btn_sample_preset: "पथक व सर नमुना भरा",
+    lbl_carrier_mode_note: "की सेव्ह केल्यावर, Send SMS क्लिक केल्यास थेट भारतीय GSM टॉवर्सद्वारे नोंदणीकृत क्रमांकांवर नियमित SMS पाठवला जातो.",
+    lbl_key_link: "fast2sms.com वर मोफत की मिळवा (५० मोफत SMS)",
+    lbl_key_title: "🔑 भारतीय सेल्युलर SMS गेटवे (Fast2SMS API Key)",
+    lbl_transmit_note: "🔒 MoES SIH26083 दूरसंचार गेटवेद्वारे नोंदणीकृत मोबाईलवर थेट पाठवले जाते.",
+    pilot_region_lbl: "प्रायोगिक क्षेत्र:",
+
+    // Cities
+    city_all: "सर्व शहरे व संपर्क (संपूर्ण जिल्हा)",
+    city_chandrapur: "चंद्रपूर शहर (मध्यवर्ती नागरी भाग)",
+    city_ballarpur: "बल्लारपूर (खाण व पेपर मिल क्षेत्र)",
+    city_rajura: "राजूरा (सिमेंट उद्योग कॉरिडोअर)",
+    city_warora: "वरोरा (महामार्ग व कृषी जंक्शन)",
+    city_bhadravati: "भद्रावती (निम-शहरी तालुका)",
+    city_brahmapuri: "ब्रह्मपुरी (वैनगंगा खोरे)",
+    city_nagbhid: "नागभीड पाणथळ क्षेत्र (पाणथळ व तलाव)",
+    city_mul: "मुल - ताडोबा बफर (वन बफर क्षेत्र)",
+    city_team: "आमचे पथक / सर",
 
     // Settings
     settings_title: "सिस्टम सेटिंग्ज",

@@ -1352,7 +1352,7 @@
         </div>
 
         <div class="sidebar-foot">
-            <p><strong>Pilot Region:</strong> <span data-i18n="pilot_location">Chandrapur District, MH</span></p>
+            <p><strong data-i18n="pilot_region_lbl">Pilot Region:</strong> <span data-i18n="pilot_location">Chandrapur District, MH</span></p>
             <p style="margin-top: 2px;">Municipal Command Platform</p>
         </div>
     </aside>
@@ -1487,15 +1487,15 @@
                             </div>
                             <ul class="action-list">
                                 <li>
-                                    <span class="act-num">1. Emergency Cooling Centers</span>
+                                    <span class="act-num" data-i18n="act_num_1">1. Emergency Cooling Centers</span>
                                     <span style="color: var(--text-secondary);" data-i18n="act_1">Activate emergency cooling centers across central Chandrapur & Ballarpur</span>
                                 </li>
                                 <li>
-                                    <span class="act-num">2. Work Suspension Advisory</span>
+                                    <span class="act-num" data-i18n="act_num_2">2. Work Suspension Advisory</span>
                                     <span style="color: var(--text-secondary);" data-i18n="act_2">Enforce outdoor work suspension (11:00 AM – 4:00 PM)</span>
                                 </li>
                                 <li>
-                                    <span class="act-num">3. Hospital Preparedness Alert</span>
+                                    <span class="act-num" data-i18n="act_num_3">3. Hospital Preparedness Alert</span>
                                     <span style="color: var(--text-secondary);" data-i18n="act_3">Alert district emergency health facilities for heat stroke admissions</span>
                                 </li>
                             </ul>
@@ -1576,8 +1576,8 @@
 
                         <!-- Ecological Callout Badge -->
                         <div style="margin-top: 10px; padding: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-sm);">
-                            <p style="font-size: 11px; font-weight: 700; color: #166534;">🌳 SIH26083 Spatial Note</p>
-                            <p style="font-size: 11px; color: #15803d; margin-top: 4px; line-height: 1.35;">
+                            <p style="font-size: 11px; font-weight: 700; color: #166534;" data-i18n="eco_note_title">🌳 SIH26083 Spatial Note</p>
+                            <p style="font-size: 11px; color: #15803d; margin-top: 4px; line-height: 1.35;" data-i18n="eco_note_desc">
                                 Tadoba Buffer & Nagbhid exhibit a <b>15.7°C surface cooling depression</b> due to 68% tree canopy cover, proving natural UHI mitigation.
                             </p>
                         </div>
@@ -1617,11 +1617,11 @@
                     <div class="card-box" id="mapSidePanel">
                         <span class="tag Extreme" id="mapBadge">Extreme</span>
                         <h3 id="mapWardTitle" style="font-size: 16px; color: var(--text-primary); margin-top: 4px;">Chandrapur City</h3>
-                        <p style="font-size: 12px; color: var(--text-secondary);">Risk Score: <b id="mapScore" style="color: var(--text-primary);">74.3 / 100</b></p>
+                        <p style="font-size: 12px; color: var(--text-secondary);"><span data-i18n="map_side_risk_score">Risk Score:</span> <b id="mapScore" style="color: var(--text-primary);">74.3 / 100</b></p>
 
                         <div style="margin-top: 10px; font-size: 12px;">
-                            <p>Temp: <b id="mapTemp">47.2°C</b> | WBGT: <b id="mapWbgt">42.5°C</b></p>
-                            <p style="margin-top: 2px;">Canopy: <b id="mapGreen">6.5%</b> | Workers: <b id="mapWorkers">36%</b></p>
+                            <p><span data-i18n="map_side_temp">Temp:</span> <b id="mapTemp">47.2°C</b> | <span data-i18n="map_side_wbgt">WBGT:</span> <b id="mapWbgt">42.5°C</b></p>
+                            <p style="margin-top: 2px;"><span data-i18n="map_side_canopy">Canopy:</span> <b id="mapGreen">6.5%</b> | <span data-i18n="map_side_workers">Workers:</span> <b id="mapWorkers">36%</b></p>
                         </div>
 
                         <div style="margin-top: 14px; border-top: 1px solid var(--card-border); padding-top: 10px;">
@@ -1920,7 +1920,8 @@
                         <div>
                             <div class="action-select-pair">
                                 <div>
-                                    <label style="font-size: 11.5px; font-weight: 700; color: var(--text-secondary);">1. Select Target Ward / City</label>
+                                    <span style="background: rgba(234,88,12,0.1); color: var(--brand-primary); font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 99px; display: inline-block; margin-bottom: 3px;" data-i18n="step_1_badge">1️⃣ TARGET WARD</span>
+                                    <label style="font-size: 11.5px; font-weight: 700; color: var(--text-secondary); display: block;" data-i18n="lbl_select_ward">1. Select Target Ward / City</label>
                                     <select id="actionWardSelect" onchange="syncActionWardMessage()" style="width: 100%; background: #ffffff; color: var(--text-primary); border: 1px solid var(--card-border); padding: 8px; border-radius: var(--radius-sm); margin-top: 4px; font-size: 12px; font-weight: 600;">
                                         <option value="ALL">🌐 Broadcast to All Wards</option>
                                         <option value="Chandrapur" selected>Chandrapur City (Extreme - 74.3)</option>
@@ -1934,7 +1935,8 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label style="font-size: 11.5px; font-weight: 700; color: var(--text-secondary);">2. Advisory Category</label>
+                                    <span style="background: rgba(234,88,12,0.1); color: var(--brand-primary); font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 99px; display: inline-block; margin-bottom: 3px;" data-i18n="step_2_badge">2️⃣ ADVISORY CATEGORY</span>
+                                    <label style="font-size: 11.5px; font-weight: 700; color: var(--text-secondary); display: block;" data-i18n="lbl_advisory_cat">2. Advisory Category</label>
                                     <select id="actionAdvisoryType" onchange="updateActionMsgTemplate()" style="width: 100%; background: #ffffff; color: var(--text-primary); border: 1px solid var(--card-border); padding: 8px; border-radius: var(--radius-sm); margin-top: 4px; font-size: 12px; font-weight: 600;">
                                         <option value="extreme">🔴 Extreme Heat Emergency (Work Ban 11am-4pm)</option>
                                         <option value="danger">🟠 High Thermal Stress & Mandatory Hydration</option>
@@ -1943,7 +1945,7 @@
                                 </div>
                             </div>
 
-                            <label style="font-size: 11.5px; font-weight: 700; color: var(--text-secondary); margin-top: 12px; display: block;">
+                            <label style="font-size: 11.5px; font-weight: 700; color: var(--text-secondary); margin-top: 12px; display: block;" data-i18n="lbl_sms_content">
                                 Official Verified SMS Content (Ready to Dispatch)
                             </label>
                             <textarea id="actionMsgPreview" oninput="syncMockHandsetPreview()" rows="5" style="width: 100%; background: var(--card-sub); color: var(--text-primary); border: 1px solid var(--card-border); padding: 9px; border-radius: var(--radius-sm); margin-top: 4px; font-size: 11.5px; font-family: inherit; line-height: 1.45; resize: vertical;">🚨 OFFICIAL HEAT EMERGENCY ADVISORY — Chandrapur Municipal Corp & MoES
@@ -1952,48 +1954,33 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
 
                             <!-- Single Executive Cellular Dispatch Button (No WhatsApp) -->
                             <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+                                    <span style="background: rgba(220,38,38,0.1); color: var(--risk-extreme); font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 99px;" data-i18n="step_3_badge">3️⃣ 1-CLICK DISPATCH</span>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 11px; color: #166534; font-weight: 700;">BSNL PRI & Fast2SMS Gateway ✓</span>
+                                        <button class="btn-btn" style="padding: 3px 8px; font-size: 10.5px; background: white; color: #475569; border: 1px solid #cbd5e1;" onclick="toggleSmsKeyConfig()" data-i18n="btn_telecom_key">🔑 Telecom SMS Gateway Key</button>
+                                    </div>
+                                </div>
                                 <button class="btn-btn" style="background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%); color: white; border: none; font-weight: 800; font-size: 13px; padding: 13px 16px; border-radius: var(--radius-sm); box-shadow: 0 4px 14px rgba(220, 38, 38, 0.28); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;" onclick="broadcastOneClickAlert()">
                                     <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4.93 19.07a10 10 0 0 1 0-14.14M2 12h2M20 12h2M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07M8.46 8.46a5 5 0 0 0 0 7.07"></path><circle cx="12" cy="12" r="2"></circle></svg>
                                     <span id="btnBroadcastLabel" data-i18n="btn_dispatch_sms">DISPATCH EMERGENCY CELLULAR SMS (2)</span>
                                 </button>
-                                <p style="font-size: 11px; color: var(--text-secondary); text-align: center; margin-top: 1px;">
-                                    🔒 Transmits directly to registered mobile handsets via MoES SIH26083 Telecom Gateway + Mobile Push Sync.
+                                <p style="font-size: 11px; color: var(--text-secondary); text-align: center; margin-top: 1px;" data-i18n="lbl_transmit_note">
+                                    🔒 Transmits directly to registered mobile handsets via MoES SIH26083 Telecom Gateway.
                                 </p>
-                            </div>Push Sync.
-                                </p>
-                            </div>
-
-                            <!-- Live Handset Mobile Sync Box (For Live Phone Demonstrations to Sir) -->
-                            <div style="margin-top: 12px; background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1.5px solid #93c5fd; border-radius: var(--radius-sm); padding: 12px; display: flex; gap: 12px; align-items: center;">
-                                <a href="https://ntfy.sh/heatshield-chandrapur" target="_blank" title="Scan with phone camera or tap to open alert channel">
-                                    <img src="https://api.qrserver.com/v1/create-qr-code/?data=https%3A%2F%2Fntfy.sh%2Fheatshield-chandrapur&size=100x100" alt="Pair Phone QR" style="width: 78px; height: 78px; border-radius: 8px; border: 1px solid #bfdbfe; background: white; padding: 3px; display: block;">
-                                </a>
-                                <div style="flex: 1;">
-                                    <div style="display: flex; align-items: center; gap: 6px;">
-                                        <span style="font-size: 12px; font-weight: 800; color: #1e40af;">📲 PAIR PHYSICAL PHONE (LIVE ALERT DEMO)</span>
-                                        <span style="background: #22c55e; color: white; font-size: 9px; font-weight: 800; padding: 1px 6px; border-radius: 99px;">INSTANT BUZZ</span>
-                                    </div>
-                                    <p style="font-size: 11px; color: #334155; margin-top: 3px; line-height: 1.35;">
-                                        To receive this alert right on your mobile lockscreen: open <b><a href="https://ntfy.sh/heatshield-chandrapur" target="_blank" style="color: #2563eb; text-decoration: underline;">ntfy.sh/heatshield-chandrapur</a></b> on your phone & tap <b>"Subscribe"</b>. When you click Send, your phone will chime with this alert!
-                                    </p>
-                                    <div style="display: flex; gap: 8px; margin-top: 6px;">
-                                        <button class="btn-btn" style="padding: 4px 10px; font-size: 11px; background: #2563eb; color: white; border: none; font-weight: 700;" onclick="testHandsetNotification()">🔔 Test Handset Chime Now</button>
-                                        <button class="btn-btn" style="padding: 4px 10px; font-size: 11px; background: white; color: #475569; border: 1px solid #cbd5e1;" onclick="toggleSmsKeyConfig()">🔑 Telecom SMS Gateway Key</button>
-                                    </div>
-                                </div>
                             </div>
 
                             <!-- Expandable Fast2SMS / Twilio Carrier Key Config -->
                             <div id="smsGatewayKeyBox" style="display: none; margin-top: 8px; background: #f8fafc; border: 1px solid var(--card-border); border-radius: var(--radius-sm); padding: 10px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-size: 11px; font-weight: 700; color: var(--text-primary);">🔑 Indian Cellular SMS Gateway (Fast2SMS API Key)</span>
-                                    <a href="https://www.fast2sms.com" target="_blank" style="font-size: 10px; color: #ea580c; text-decoration: underline;">Get Free Key at fast2sms.com (50 Free SMS)</a>
+                                    <span style="font-size: 11px; font-weight: 700; color: var(--text-primary);" data-i18n="lbl_key_title">🔑 Indian Cellular SMS Gateway (Fast2SMS API Key)</span>
+                                    <a href="https://www.fast2sms.com" target="_blank" style="font-size: 10px; color: #ea580c; text-decoration: underline;" data-i18n="lbl_key_link">Get Free Key at fast2sms.com (50 Free SMS)</a>
                                 </div>
                                 <div style="display: flex; gap: 6px; margin-top: 6px;">
                                     <input type="password" id="fast2smsApiKeyInput" placeholder="Paste Fast2SMS authorization key..." style="flex: 1; padding: 6px 8px; font-size: 11px; border: 1px solid var(--card-border); border-radius: 4px; font-family: monospace;">
-                                    <button class="btn-btn" style="padding: 6px 12px; font-size: 11px; background: var(--brand-primary); color: white; border: none; font-weight: 700;" onclick="saveFast2SmsKey()">Save Key</button>
+                                    <button class="btn-btn" style="padding: 6px 12px; font-size: 11px; background: var(--brand-primary); color: white; border: none; font-weight: 700;" onclick="saveFast2SmsKey()" data-i18n="btn_save_contact">Save Key</button>
                                 </div>
-                                <p style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;">
+                                <p style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;" data-i18n="lbl_carrier_mode_note">
                                     When key is saved, clicking Send SMS routes directly through Indian GSM telecom towers to deliver regular carrier SMS to registered numbers.
                                 </p>
                             </div>
@@ -2002,9 +1989,9 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                             <div style="background: #1e293b; border-radius: 10px; padding: 11px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.12); margin-top: 10px; border: 1px solid #334155;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 7px;">
                                     <div style="display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: #94a3b8;">
-                                        <span>💬</span> <b>MESSAGES</b> • <span>VM-HTSHLD (MoES Official)</span>
+                                        <span>💬</span> <b data-i18n="lbl_messages">MESSAGES</b> • <span>VM-HTSHLD (MoES Official)</span>
                                     </div>
-                                    <span style="font-size: 10px; color: #94a3b8;">Just now</span>
+                                    <span style="font-size: 10px; color: #94a3b8;" data-i18n="lbl_just_now">Just now</span>
                                 </div>
                                 <div style="font-size: 11.5px; color: #f1f5f9; line-height: 1.4; font-family: system-ui, sans-serif;" id="mockMobileMessageText">
                                     🚨 OFFICIAL HEAT EMERGENCY ADVISORY — Chandrapur Municipal Corp & MoES
@@ -2013,7 +2000,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                                 </div>
                                 <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #4ade80;">
                                     <span id="mockDeliveryTargetLabel">✓ Ready for Handset: aditya-g (9156616395)</span>
-                                    <span style="background: rgba(74, 222, 128, 0.15); padding: 2px 7px; border-radius: 4px; font-weight: 700;">Cellular SMS Format</span>
+                                    <span style="background: rgba(74, 222, 128, 0.15); padding: 2px 7px; border-radius: 4px; font-weight: 700;" data-i18n="lbl_sms_format">Cellular SMS Format</span>
                                 </div>
                             </div>
                         </div>
@@ -2022,16 +2009,16 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                         <div style="background: #ffffff; border: 1px solid var(--card-border); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <h4 style="font-size: 12.5px; font-weight: 700; color: var(--text-primary);">
-                                    👥 Registered Citizen & Authority Contacts (<span id="selectedContactsCount">0</span> selected)
+                                    👥 <span data-i18n="lbl_registered_contacts">Registered Citizen & Authority Contacts</span> (<span id="selectedContactsCount">0</span> <span data-i18n="lbl_selected">selected</span>)
                                 </h4>
-                                <button class="btn-btn" style="padding: 3px 8px; font-size: 11px; background: #f1f5f9;" onclick="toggleAddContactForm()">
+                                <button class="btn-btn" style="padding: 3px 8px; font-size: 11px; background: #f1f5f9;" onclick="toggleAddContactForm()" data-i18n="btn_add_number">
                                     ➕ Add Custom Number
                                 </button>
                             </div>
 
                             <!-- City / Taluka Area Directory Filter -->
                             <div style="background: #fff7ed; border: 1px solid #fed7aa; padding: 8px 10px; border-radius: var(--radius-sm); display: flex; flex-direction: column; gap: 3px;">
-                                <label style="font-size: 10.5px; font-weight: 800; color: #9a3412; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <label style="font-size: 10.5px; font-weight: 800; color: #9a3412; text-transform: uppercase; letter-spacing: 0.5px;" data-i18n="lbl_filter_city">
                                     🏙️ View Contacts by City / Taluka Area:
                                 </label>
                                 <select id="contactCityFilter" onchange="onCityFilterChanged(this.value)" style="width: 100%; padding: 6px 8px; border: 1.5px solid #ea580c; border-radius: 4px; font-size: 12px; font-weight: 700; background: #ffffff; color: #0f172a; cursor: pointer;">
@@ -2049,17 +2036,17 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
 
                             <!-- Filter & Quick-Select Pills -->
                             <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                                <button class="btn-btn" style="padding: 3px 8px; font-size: 10.5px; font-weight: 600;" onclick="filterContactsSelection('all')">✓ Select All in City</button>
-                                <button class="btn-btn" style="padding: 3px 8px; font-size: 10.5px; font-weight: 600; background: #fff7ed; color: #ea580c; border-color: #fed7aa;" onclick="filterContactsSelection('team')">⭐ My Team & Sir</button>
-                                <button class="btn-btn" style="padding: 3px 8px; font-size: 10.5px;" onclick="filterContactsSelection('none')">Clear</button>
+                                <button class="btn-btn" style="padding: 3px 8px; font-size: 10.5px; font-weight: 600;" onclick="filterContactsSelection('all')" data-i18n="btn_select_all_city">✓ Select All in City</button>
+                                <button class="btn-btn" style="padding: 3px 8px; font-size: 10.5px; font-weight: 600; background: #fff7ed; color: #ea580c; border-color: #fed7aa;" onclick="filterContactsSelection('team')" data-i18n="btn_select_team">⭐ My Team & Sir</button>
+                                <button class="btn-btn" style="padding: 3px 8px; font-size: 10.5px;" onclick="filterContactsSelection('none')" data-i18n="btn_clear_sel">Clear</button>
                             </div>
 
                             <!-- Expandable Add Custom Contact Form -->
                             <div id="addContactBox" style="display: none; background: #f8fafc; border: 1px dashed var(--card-border); padding: 10px; border-radius: var(--radius-sm); flex-direction: column; gap: 6px;">
-                                <div style="font-weight: 700; font-size: 11px; color: var(--text-primary);">Add Citizen / Sir / Team Mobile Number:</div>
+                                <div style="font-weight: 700; font-size: 11px; color: var(--text-primary);" data-i18n="lbl_add_contact_hdr">Add Citizen / Sir / Team Mobile Number:</div>
                                 <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 6px;">
-                                    <input type="text" id="newContactName" placeholder="e.g. aditya-g or Sir" style="padding: 5px 8px; font-size: 11px; border: 1px solid var(--card-border); border-radius: 4px;">
-                                    <input type="tel" id="newContactPhone" placeholder="Mobile e.g. 9156616395" style="padding: 5px 8px; font-size: 11px; border: 1px solid var(--card-border); border-radius: 4px; font-family: monospace;">
+                                    <input type="text" id="newContactName" placeholder="e.g. aditya-g or Sir" data-i18n-placeholder="ph_contact_name" style="padding: 5px 8px; font-size: 11px; border: 1px solid var(--card-border); border-radius: 4px;">
+                                    <input type="tel" id="newContactPhone" placeholder="Mobile e.g. 9156616395" data-i18n-placeholder="ph_contact_phone" style="padding: 5px 8px; font-size: 11px; border: 1px solid var(--card-border); border-radius: 4px; font-family: monospace;">
                                     <select id="newContactCity" style="padding: 5px 8px; font-size: 11px; border: 1px solid var(--card-border); border-radius: 4px;">
                                         <option value="Chandrapur">Chandrapur</option>
                                         <option value="Ballarpur">Ballarpur</option>
@@ -2073,9 +2060,9 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                                     </select>
                                 </div>
                                 <div style="display: flex; gap: 6px; margin-top: 4px;">
-                                    <button class="btn-btn" style="background: var(--brand-primary); color: white; border: none; font-size: 11px; padding: 4px 10px; font-weight: 700;" onclick="saveCustomContact()">Save Contact</button>
-                                    <button class="btn-btn" style="font-size: 11px; padding: 4px 10px;" onclick="toggleAddContactForm()">Cancel</button>
-                                    <button class="btn-btn" style="font-size: 11px; padding: 4px 8px; margin-left: auto; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;" onclick="loadTeamSirPreset()">Load Team & Sir Sample</button>
+                                    <button class="btn-btn" style="background: var(--brand-primary); color: white; border: none; font-size: 11px; padding: 4px 10px; font-weight: 700;" onclick="saveCustomContact()" data-i18n="btn_save_contact">Save Contact</button>
+                                    <button class="btn-btn" style="font-size: 11px; padding: 4px 10px;" onclick="toggleAddContactForm()" data-i18n="btn_cancel">Cancel</button>
+                                    <button class="btn-btn" style="font-size: 11px; padding: 4px 8px; margin-left: auto; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;" onclick="loadTeamSirPreset()" data-i18n="btn_sample_preset">Load Team & Sir Sample</button>
                                 </div>
                             </div>
 
@@ -2217,11 +2204,11 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
         <div class="modal-box" style="max-width: 580px; border-top: 4px solid var(--brand-primary);">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h3 style="color: #166534; font-size: 15px; display: flex; align-items: center; gap: 8px;">
-                    <span>📡</span> <span>DISASTER EMERGENCY SMS TELECOM GATEWAY</span>
+                    <span>📡</span> <span data-i18n="receipt_title">DISASTER EMERGENCY SMS TELECOM GATEWAY</span>
                 </h3>
-                <span class="tag Safe" style="font-weight: 700; font-size: 11px;">✓ DELIVERED</span>
+                <span class="tag Safe" style="font-weight: 700; font-size: 11px;" data-i18n="receipt_delivered">✓ DELIVERED</span>
             </div>
-            <p style="font-size: 11.5px; color: var(--text-secondary); margin-top: -6px;">
+            <p style="font-size: 11.5px; color: var(--text-secondary); margin-top: -6px;" data-i18n="receipt_sub">
                 Ministry of Earth Sciences (MoES SIH26083) — Direct Cellular Transmission Log
             </p>
 
@@ -2233,37 +2220,26 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             <div style="background: #1e293b; border-radius: 8px; padding: 12px; color: white; margin-top: 6px; border: 1px solid #334155;">
                 <div style="display: flex; justify-content: space-between; font-size: 10.5px; color: #94a3b8; margin-bottom: 5px;">
                     <div style="display: flex; align-items: center; gap: 5px;">
-                        <span>💬</span> <b>MESSAGES</b> • <span>VM-HTSHLD (MoES Disaster Alert)</span>
+                        <span>💬</span> <b data-i18n="lbl_messages">MESSAGES</b> • <span>VM-HTSHLD (MoES Disaster Alert)</span>
                     </div>
-                    <span>Just now</span>
+                    <span data-i18n="lbl_just_now">Just now</span>
                 </div>
                 <div id="modalSmsHandsetText" style="font-size: 11.5px; color: #f8fafc; line-height: 1.4; font-family: system-ui, sans-serif;">
                     🚨 OFFICIAL HEAT EMERGENCY ADVISORY...
                 </div>
                 <div style="margin-top: 6px; display: flex; justify-content: space-between; font-size: 10px; color: #4ade80;">
                     <span>✓ Delivered to Handset SIM (Airtel / Jio 4G)</span>
-                    <span style="background: rgba(74, 222, 128, 0.15); padding: 1px 6px; border-radius: 4px;">Cellular SMS</span>
+                    <span style="background: rgba(74, 222, 128, 0.15); padding: 1px 6px; border-radius: 4px;" data-i18n="lbl_sms_format">Cellular SMS</span>
                 </div>
             </div>
 
-            <!-- Physical Phone Sync Reminder -->
-            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px 12px; font-size: 11.5px; color: #1e40af; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px;">
-                <div>
-                    <b>📲 Did your mobile phone chime?</b><br>
-                    To receive alerts on your handset lockscreen: open <b><a href="https://ntfy.sh/heatshield-chandrapur" target="_blank" style="color: #2563eb; text-decoration: underline;">ntfy.sh/heatshield-chandrapur</a></b> on your phone & tap Subscribe!
-                </div>
-                <a href="https://ntfy.sh/heatshield-chandrapur" target="_blank" style="background: #2563eb; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-weight: 700; font-size: 11px; white-space: nowrap;">
-                    Open on Phone
-                </a>
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px; font-size: 12px; color: #166534; margin-top: 8px;">
+                <div style="font-weight: 700;" data-i18n="receipt_summary_title">✓ Official SMS Broadcast Successfully Completed</div>
+                <div id="smsReceiptSummaryText" style="margin-top: 2px;" data-i18n="receipt_summary_desc">All registered mobile numbers have received the verified heat advisory.</div>
             </div>
 
-            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px; font-size: 12px; color: #166534; margin-top: 6px;">
-                <div style="font-weight: 700;">✓ Official SMS Broadcast Successfully Completed</div>
-                <div id="smsReceiptSummaryText" style="margin-top: 2px;">All registered mobile numbers have received the verified heat advisory.</div>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
-                <button class="btn-btn" style="background: var(--brand-primary); color: white; border: none; font-weight: 700; padding: 8px 20px;" onclick="closeSmsReceiptModal()">
+            <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+                <button class="btn-btn" style="background: var(--brand-primary); color: white; border: none; font-weight: 700; padding: 8px 20px;" onclick="closeSmsReceiptModal()" data-i18n="btn_close_receipt">
                     Close Receipt
                 </button>
             </div>
@@ -2715,16 +2691,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             }
 
             // Populate Modal Wards
-            const modWard = document.getElementById('modWard');
-            if (modWard) {
-                modWard.innerHTML = '';
-                wardsData.forEach(w => {
-                    const opt = document.createElement('option');
-                    opt.value = w.ward_id;
-                    opt.textContent = `${w.ward_name} (${w.risk_band} — ${w.risk_score}/100)`;
-                    modWard.appendChild(opt);
-                });
-            }
+            populateModalWards();
 
             // Refresh KPIs & UI Elements
             updateDistrictKpis();
@@ -2733,6 +2700,8 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             populateDetailsDropdown();
             initForecastChart();
             runSim();
+            updateActionDropdowns();
+            renderAlertsTable();
             updateActionMsgTemplate();
             renderContactsList();
             switchLanguage(curLang);
@@ -3149,6 +3118,23 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             }
         }
 
+        function populateModalWards() {
+            const modWard = document.getElementById('modWard');
+            if (!modWard || !wardsData.length) return;
+            const currentVal = modWard.value;
+            const t = (window.translations && translations[curLang]) ? translations[curLang] : {};
+            modWard.innerHTML = '';
+            wardsData.forEach(w => {
+                const opt = document.createElement('option');
+                opt.value = w.ward_id;
+                const wardName = (curLang === 'mr' && t['ward_' + w.ward_id]) ? t['ward_' + w.ward_id] : w.ward_name;
+                const riskBandText = (curLang === 'mr' && t['risk_' + w.risk_band.toLowerCase()]) ? t['risk_' + w.risk_band.toLowerCase()] : w.risk_band;
+                opt.textContent = `${wardName} (${riskBandText} — ${w.risk_score.toFixed(1)}/100)`;
+                modWard.appendChild(opt);
+            });
+            if (currentVal) modWard.value = currentVal;
+        }
+
         function loadWardDetailView(wardId) {
             const w = wardsData.find(x => x.ward_id === wardId) || wardsData[0];
             if (!w) return;
@@ -3193,7 +3179,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             const dayItems = [];
             // Day 0: Today
             dayItems.push({
-                label: curLang === 'mr' ? (t.day_today || 'आज (Today)') : 'Today',
+                label: curLang === 'mr' ? (t.day_today || 'आज') : 'Today',
                 temp: w.current_temp_c,
                 rh: w.humidity_pct,
                 score: w.risk_score,
@@ -3201,12 +3187,14 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             });
 
             // Days 1 to 4: from forecast_risk_trend
+            const defaultDayNamesMr = ['उद्या', 'दिवस ३', 'दिवस ४', 'दिवस ५'];
             for (let i = 1; i < 5; i++) {
                 const tr = trend[i] || trend[i - 1] || {};
                 const dayKey = i === 1 ? 'day_tomorrow' : `day_${i + 1}`;
                 const defaultLabel = i === 1 ? 'Tomorrow' : `Day ${i + 1}`;
+                const mrLabel = t[dayKey] || defaultDayNamesMr[i - 1];
                 dayItems.push({
-                    label: curLang === 'mr' ? (t[dayKey] || defaultLabel) : defaultLabel,
+                    label: curLang === 'mr' ? mrLabel : defaultLabel,
                     temp: tr.temp_c || Math.max(28, w.current_temp_c - (i * 2.5)),
                     rh: tr.humidity_pct || Math.min(65, w.humidity_pct + (i * 4)),
                     score: tr.risk_score !== undefined ? tr.risk_score : Math.max(20, Math.round((w.risk_score - (i * 6.5)) * 10) / 10),
@@ -3261,13 +3249,15 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
         function initForecastChart() {
             const ctx = document.getElementById('forecastChart').getContext('2d');
             if (forecastChart) forecastChart.destroy();
+            const labels = curLang === 'mr' ? ['आज', 'उद्या', 'दिवस ३', 'दिवस ४', 'दिवस ५'] : ['Today', 'Tomorrow', 'Day 3', 'Day 4', 'Day 5'];
+            const chartLabel = curLang === 'mr' ? 'जिल्हा कमाल धोका कल' : 'District Peak Risk Score Trend';
 
             forecastChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Today', 'Tomorrow', 'Day 3', 'Day 4', 'Day 5'],
+                    labels: labels,
                     datasets: [{
-                        label: 'District Peak Risk Score Trend',
+                        label: chartLabel,
                         data: [75, 77, 78, 73, 69],
                         borderColor: '#dc2626',
                         backgroundColor: 'rgba(220, 38, 38, 0.08)',
@@ -3376,6 +3366,9 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             if (typeof renderOverviewTable === 'function' && wardsData.length) renderOverviewTable();
             if (typeof renderMapLayers === 'function') renderMapLayers();
             if (typeof populateDetailsDropdown === 'function' && wardsData.length) populateDetailsDropdown();
+            if (typeof populateModalWards === 'function' && wardsData.length) populateModalWards();
+            if (typeof updateActionDropdowns === 'function') updateActionDropdowns();
+            if (typeof renderAlertsTable === 'function') renderAlertsTable();
             if (typeof renderContactsList === 'function') renderContactsList();
             if (typeof updateActionMsgTemplate === 'function') updateActionMsgTemplate();
             if (selectedWard) {
@@ -3388,6 +3381,44 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
         // ==========================================
         // CITY CONTACTS REGISTRY & DIRECT TELECOM SMS
         // ==========================================
+
+        const CITY_TRANSLATIONS = {
+            'Chandrapur': { en: 'Chandrapur', mr: 'चंद्रपूर' },
+            'Ballarpur': { en: 'Ballarpur', mr: 'बल्लारपूर' },
+            'Rajura': { en: 'Rajura', mr: 'राजूरा' },
+            'Warora': { en: 'Warora', mr: 'वरोरा' },
+            'Bhadravati': { en: 'Bhadravati', mr: 'भद्रावती' },
+            'Brahmapuri': { en: 'Brahmapuri', mr: 'ब्रह्मपुरी' },
+            'Nagbhid': { en: 'Nagbhid', mr: 'नागभीड' },
+            'Mul': { en: 'Mul', mr: 'मुल' },
+            'Team': { en: 'Team / Sir', mr: 'आमचे पथक / सर' },
+            'ALL': { en: 'All Wards', mr: 'सर्व प्रभाग' }
+        };
+
+        const CONTACT_ROLES = {
+            'Registered Citizen / Local Resident': { en: 'Registered Citizen / Local Resident', mr: 'नोंदणीकृत नागरिक / स्थानिक रहिवासी' },
+            'Disaster Management Lead': { en: 'Disaster Management Lead', mr: 'आपत्ती व्यवस्थापन प्रमुख' },
+            'MoES Evaluation Panel': { en: 'MoES Evaluation Panel', mr: 'MoES मूल्यांकन समिती / परीक्षक' },
+            'Municipal Disaster Desk': { en: 'Municipal Disaster Desk', mr: 'महानगरपालिका आपत्ती कक्ष' },
+            'District Emergency Operations': { en: 'District Emergency Operations', mr: 'जिल्हाधिकारी व DDMA आपत्कालीन कक्ष' },
+            'Critical Care Hospital': { en: 'Critical Care Hospital', mr: 'GMCH उष्माघात अतिदक्षता विभाग' },
+            'Urban Community Shelter': { en: 'Urban Community Shelter', mr: 'गांधी चौक नागरी निवारण व जल केंद्र' },
+            'Mine Safety Cell': { en: 'Mine Safety Cell', mr: 'बल्लारपूर खाण व औद्योगिक सुरक्षा पथक' },
+            'Civic Health In-Charge': { en: 'Civic Health In-Charge', mr: 'नगरपरिषद मुख्य आरोग्य अधिकारी' },
+            'Industrial Labor Welfare': { en: 'Industrial Labor Welfare', mr: 'BILT पेपर मिल कामगार कल्याण अधिकारी' },
+            'Industrial Safety Desk': { en: 'Industrial Safety Desk', mr: 'राजूरा सिमेंट कॉरिडोअर सुरक्षा कक्ष' },
+            'Rural Emergency Health': { en: 'Rural Emergency Health', mr: 'राजूरा ग्रामीण समुदाय आरोग्य केंद्र' },
+            'Agricultural Worker Safety': { en: 'Agricultural Worker Safety', mr: 'वरोरा कृषी उत्पन्न बाजार समिती' },
+            'Sub-District Medical Unit': { en: 'Sub-District Medical Unit', mr: 'वरोरा उपजिल्हा रुग्णालय उष्मा कक्ष' },
+            'Municipal Emergency Cell': { en: 'Municipal Emergency Cell', mr: 'भद्रावती पालिका आपत्कालीन प्रतिसाद' },
+            'Public Health Care Desk': { en: 'Public Health Care Desk', mr: 'भद्रावती ग्रामीण रुग्णालय कक्ष' },
+            'Disaster Cell & Revenue': { en: 'Disaster Cell & Revenue', mr: 'ब्रह्मपुरी उपविभागीय अधिकारी (SDO)' },
+            'River Basin Medical Cell': { en: 'River Basin Medical Cell', mr: 'ब्रह्मपुरी उपजिल्हा रुग्णालय' },
+            'Wetland Microclimate Desk': { en: 'Wetland Microclimate Desk', mr: 'नागभीड पाणथळ व पाटबंधारे नियंत्रण' },
+            'Local Health Unit': { en: 'Local Health Unit', mr: 'नागभीड प्राथमिक आरोग्य केंद्र (PHC)' },
+            'Forest Buffer Station': { en: 'Forest Buffer Station', mr: 'मुल वनपरिक्षेत्र व ताडोबा बफर कक्ष' },
+            'Ecological Zone Clinic': { en: 'Ecological Zone Clinic', mr: 'मुल ग्रामीण रुग्णालय आपत्कालीन विभाग' }
+        };
 
         const BASE_CITY_CONTACTS = [
             // Chandrapur City
@@ -3471,6 +3502,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             const container = document.getElementById('contactsListContainer');
             if (!container) return;
             container.innerHTML = '';
+            const t = (window.translations && translations[curLang]) ? translations[curLang] : {};
 
             const filtered = appContacts.filter(c => {
                 if (selectedCityFilter === 'ALL') return true;
@@ -3480,7 +3512,13 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             });
 
             if (filtered.length === 0) {
-                container.innerHTML = `<div style="padding: 12px; text-align: center; color: #94a3b8; font-size: 11.5px;">No contacts registered for ${selectedCityFilter} yet. Click "+ Add Custom Number" above to register someone!</div>`;
+                const cityName = (CITY_TRANSLATIONS[selectedCityFilter] && CITY_TRANSLATIONS[selectedCityFilter][curLang]) 
+                    ? CITY_TRANSLATIONS[selectedCityFilter][curLang] 
+                    : selectedCityFilter;
+                const emptyMsg = curLang === 'mr'
+                    ? `${cityName} साठी अद्याप कोणतेही संपर्क नोंदणीकृत नाहीत. नवीन क्रमांक जोडण्यासाठी वरील बटणावर क्लिक करा.`
+                    : `No contacts registered for ${selectedCityFilter} yet. Click "+ Add Custom Number" above to register someone!`;
+                container.innerHTML = `<div style="padding: 12px; text-align: center; color: #94a3b8; font-size: 11.5px;">${emptyMsg}</div>`;
                 const countEl = document.getElementById('selectedContactsCount');
                 if (countEl) countEl.textContent = '0';
                 return;
@@ -3491,17 +3529,26 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                 if (c.checked) selCount++;
                 const item = document.createElement('div');
                 item.style.cssText = `display: flex; align-items: center; justify-content: space-between; padding: 6px 9px; border-radius: 4px; background: ${c.checked ? '#fff7ed' : '#ffffff'}; border: 1px solid ${c.checked ? '#fed7aa' : '#f1f5f9'}; font-size: 11.5px; transition: all 0.15s ease;`;
+
+                const roleText = (CONTACT_ROLES[c.role] && CONTACT_ROLES[c.role][curLang])
+                    ? CONTACT_ROLES[c.role][curLang]
+                    : (curLang === 'mr' ? (c.isTeam ? 'आमचे पथक / परीक्षक' : 'नागरिक संपर्क') : (c.role || 'Citizen Contact'));
+
+                const cityBadge = (CITY_TRANSLATIONS[c.city] && CITY_TRANSLATIONS[c.city][curLang])
+                    ? CITY_TRANSLATIONS[c.city][curLang]
+                    : c.city;
+
                 item.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
                         <input type="checkbox" id="chk_${c.id}" ${c.checked ? 'checked' : ''} onchange="toggleContactCheck('${c.id}', this.checked)" style="accent-color: var(--brand-primary); cursor: pointer; width: 14px; height: 14px;">
                         <label for="chk_${c.id}" style="cursor: pointer; display: flex; flex-direction: column;">
                             <span style="font-weight: 700; color: var(--text-primary); font-size: 12px;">${c.name}</span>
                             <span style="font-family: monospace; color: #ea580c; font-size: 11px; font-weight: 600;">📱 ${c.phone}</span>
-                            <span style="font-size: 10px; color: var(--text-secondary);">${c.role || 'Citizen Contact'}</span>
+                            <span style="font-size: 10px; color: var(--text-secondary);">${roleText}</span>
                         </label>
                     </div>
                     <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
-                        <span class="tag ${c.isTeam ? 'Extreme' : 'Caution'}" style="font-size: 9.5px; padding: 1px 7px;">${c.city.toUpperCase()}</span>
+                        <span class="tag ${c.isTeam ? 'Extreme' : 'Caution'}" style="font-size: 9.5px; padding: 1px 7px;">${cityBadge.toUpperCase()}</span>
                         ${c.id.startsWith('custom_') ? `<button onclick="deleteContact('${c.id}')" title="Delete" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 13px; padding: 2px 5px;">✕</button>` : ''}
                     </div>
                 `;
@@ -3512,7 +3559,11 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             if (countEl) countEl.textContent = selCount;
 
             const btnLabel = document.getElementById('btnBroadcastLabel');
-            if (btnLabel) btnLabel.textContent = `SEND EMERGENCY SMS (${selCount})`;
+            if (btnLabel) {
+                btnLabel.textContent = curLang === 'mr' 
+                    ? `आपत्कालीन सेल्युलर SMS पाठवा (${selCount})`
+                    : `DISPATCH EMERGENCY CELLULAR SMS (${selCount})`;
+            }
 
             syncMockHandsetPreview();
         }
@@ -3552,7 +3603,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             const city = citySelect.value;
 
             if (!name || !phone) {
-                alert("Please enter both contact name and a valid phone number.");
+                alert(curLang === 'mr' ? "कृपया नाव आणि वैध मोबाईल क्रमांक प्रविष्ट करा." : "Please enter both contact name and a valid phone number.");
                 return;
             }
 
@@ -3580,7 +3631,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             nameInput.value = '';
             phoneInput.value = '';
             toggleAddContactForm();
-            alert(`✓ Contact "${name}" (${phone}) successfully registered for ${city}!`);
+            alert(curLang === 'mr' ? `✓ संपर्क "${name}" (${phone}) सेव्ह झाला!` : `✓ Contact "${name}" (${phone}) successfully registered for ${city}!`);
         }
 
         function deleteContact(id) {
@@ -3596,9 +3647,11 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
         }
 
         function loadTeamSirPreset() {
-            const sirNum = prompt("Enter Sir / Evaluator Mobile Number:", "+919876543210");
+            const sirPrompt = curLang === 'mr' ? "सर / परीक्षकांचा मोबाईल क्रमांक टाका:" : "Enter Sir / Evaluator Mobile Number:";
+            const sirNum = prompt(sirPrompt, "+919876543210");
             if (!sirNum) return;
-            const myNum = prompt("Enter Your Mobile Number (Team Lead):", "+917066996315");
+            const leadPrompt = curLang === 'mr' ? "आपला मोबाईल क्रमांक टाका (पथक प्रमुख):" : "Enter Your Mobile Number (Team Lead):";
+            const myNum = prompt(leadPrompt, "+917066996315");
             if (!myNum) return;
 
             const sirContact = appContacts.find(c => c.id === 'usr_sir');
@@ -3607,7 +3660,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             if (myContact) myContact.phone = myNum;
 
             renderContactsList();
-            alert(`✓ Team & Sir numbers updated!\nSir: ${sirNum}\nTeam Lead: ${myNum}`);
+            alert(curLang === 'mr' ? `✓ पथक व परीक्षकांचे क्रमांक अपडेट केले!\nपरीक्षक: ${sirNum}\nपथक प्रमुख: ${myNum}` : `✓ Team & Sir numbers updated!\nSir: ${sirNum}\nTeam Lead: ${myNum}`);
         }
 
         const ADVISORY_TEMPLATES = {
@@ -3616,13 +3669,99 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             safe: "🟢 GREEN ZONE SAFE BULLETIN — MoES SIH26083 Ecological Monitoring\nTarget: Mul & Nagbhid Forest Corridors (Safe Status - 24/100).\nDense tree canopy (68%) maintains local temperatures below 34°C. Zero thermal hazard today. Normal outdoor routines permitted with baseline hydration."
         };
 
+        const ADVISORY_TEMPLATES_MR = {
+            extreme: "🚨 अधिकृत उष्णता आपत्कालीन सल्ला — चंद्रपूर महानगरपालिका व MoES\nलक्ष्य: चंद्रपूर मध्यवर्ती शहर आणि बल्लारपूर खाण क्षेत्र (अत्यंत उष्णता धोका - ७५/१००).\nसकाळी ११:०० ते दुपारी ४:०० या वेळेत बाहेरील कामांवर सक्तीची बंदी. जिल्हा रुग्णालय व गांधी चौकात कूलिंग केंद्रे सुरू. ओआरएस (ORS) व पाण्याचे सेवन करा. हेल्पलाईन: १०७७ / १०८.",
+            danger: "⚠️ उच्च उष्णता ताण सल्ला — चंद्रपूर जिल्हा आपत्ती व्यवस्थापन प्राधिकरण\nलक्ष्य: राजूरा व वरोरा औद्योगिक कॉरिडोअर (धोकादायक स्तर - ६८/१००).\nथेट उन्हात जाणे टाळा. शारीरिक कामगारांसाठी दर तासाला १५ मिनिटे सावलीत विश्रांती अनिवार्य. मुख्य बस स्थानकांवर मोफत पिण्याच्या पाण्याच्या व्हॅन्स उपलब्ध.",
+            safe: "🟢 हरित क्षेत्र सुरक्षित बुलेटिन — MoES SIH26083 पर्यावरण संनियंत्रण कक्ष\nलक्ष्य: मुल - ताडोबा वन बफर व नागभीड पाणथळ क्षेत्र (सुरक्षित स्तर - २४/१००).\nदाट वृक्ष आच्छादनामुळे (६८%) स्थानिक तापमान ३४°C च्या खाली स्थिर. आज उष्णतेचा कोणताही धोका नाही. योग्य जलसंजिवनीसह दैनंदिन व्यवहार सुरू ठेवू शकता."
+        };
+
         function updateActionMsgTemplate() {
             const type = document.getElementById('actionAdvisoryType').value;
             const preview = document.getElementById('actionMsgPreview');
-            if (preview && ADVISORY_TEMPLATES[type]) {
-                preview.value = ADVISORY_TEMPLATES[type];
+            const tmpl = (curLang === 'mr' ? ADVISORY_TEMPLATES_MR : ADVISORY_TEMPLATES)[type];
+            if (preview && tmpl) {
+                preview.value = tmpl;
             }
             syncMockHandsetPreview();
+        }
+
+        function updateActionDropdowns() {
+            // 1. Target Ward Select
+            const wardSel = document.getElementById('actionWardSelect');
+            if (wardSel) {
+                const currentVal = wardSel.value;
+                const wardOptions = [
+                    { val: 'ALL', en: '🌐 Broadcast to All Wards', mr: '🌐 सर्व प्रभागांमध्ये प्रसारण करा' },
+                    { val: 'Chandrapur', en: 'Chandrapur City (Extreme - 74.3)', mr: 'चंद्रपूर शहर (अत्यंत धोका - ७४.३)' },
+                    { val: 'Ballarpur', en: 'Ballarpur (Extreme - 75.9)', mr: 'बल्लारपूर (अत्यंत धोका - ७५.९)' },
+                    { val: 'Rajura', en: 'Rajura (Extreme - 71.2)', mr: 'राजूरा (अत्यंत धोका - ७१.२)' },
+                    { val: 'Warora', en: 'Warora (Danger - 69.2)', mr: 'वरोरा (धोकादायक - ६९.२)' },
+                    { val: 'Bhadravati', en: 'Bhadravati (Caution - 45.6)', mr: 'भद्रावती (सावधान - ४५.६)' },
+                    { val: 'Brahmapuri', en: 'Brahmapuri (Caution - 45.4)', mr: 'ब्रह्मपुरी (सावधान - ४५.४)' },
+                    { val: 'Nagbhid', en: 'Nagbhid Wetland (Safe - 29.2)', mr: 'नागभीड पाणथळ क्षेत्र (सुरक्षित - २९.२)' },
+                    { val: 'Mul', en: 'Mul Tadoba Buffer (Safe - 24.2)', mr: 'मुल - ताडोबा वन बफर (सुरक्षित - २४.२)' }
+                ];
+                wardSel.innerHTML = wardOptions.map(o => 
+                    `<option value="${o.val}" ${o.val === currentVal ? 'selected' : ''}>${curLang === 'mr' ? o.mr : o.en}</option>`
+                ).join('');
+            }
+
+            // 2. Advisory Type Select
+            const advSel = document.getElementById('actionAdvisoryType');
+            if (advSel) {
+                const currentType = advSel.value;
+                const advOptions = [
+                    { val: 'extreme', en: '🔴 Extreme Heat Emergency (Work Ban 11am-4pm)', mr: '🔴 अत्यंत उष्णता आणीबाणी (काम बंदी ११ ते ४)' },
+                    { val: 'danger', en: '🟠 High Thermal Stress & Mandatory Hydration', mr: '🟠 उच्च उष्णता ताण आणि सक्तीचे पाणी वाटप' },
+                    { val: 'safe', en: '🟢 Green Zone Safe Day Notice (No Heat Damage)', mr: '🟢 हरित क्षेत्र सुरक्षित दिवस (उष्णतेचा धोका नाही)' }
+                ];
+                advSel.innerHTML = advOptions.map(o =>
+                    `<option value="${o.val}" ${o.val === currentType ? 'selected' : ''}>${curLang === 'mr' ? o.mr : o.en}</option>`
+                ).join('');
+            }
+
+            // 3. City Filter Select
+            const cityFilter = document.getElementById('contactCityFilter');
+            if (cityFilter) {
+                const currentCity = cityFilter.value;
+                const cityOptions = [
+                    { val: 'ALL', en: '🌐 All Cities & Registered Contacts (Entire District)', mr: '🌐 सर्व शहरे व संपर्क (संपूर्ण जिल्हा)' },
+                    { val: 'Chandrapur', en: '🏛️ Chandrapur City (Central Urban Core)', mr: '🏛️ चंद्रपूर शहर (मध्यवर्ती नागरी भाग)' },
+                    { val: 'Ballarpur', en: '⛏️ Ballarpur (Mines & Paper Mill Zone)', mr: '⛏️ बल्लारपूर (खाण व पेपर मिल क्षेत्र)' },
+                    { val: 'Rajura', en: '🏭 Rajura (Cement Industrial Corridor)', mr: '🏭 राजूरा (सिमेंट उद्योग कॉरिडोअर)' },
+                    { val: 'Warora', en: '🌾 Warora (Highway & Agriculture Junction)', mr: '🌾 वरोरा (महामार्ग व कृषी जंक्शन)' },
+                    { val: 'Bhadravati', en: '🏘️ Bhadravati (Semi-urban Taluka)', mr: '🏘️ भद्रावती (निम-शहरी तालुका)' },
+                    { val: 'Brahmapuri', en: '🌊 Brahmapuri (Wainganga Basin)', mr: '🌊 ब्रह्मपुरी (वैनगंगा खोरे)' },
+                    { val: 'Nagbhid', en: '💧 Nagbhid (Wetland & Lakes Zone)', mr: '💧 नागभीड (पाणथळ व तलाव क्षेत्र)' },
+                    { val: 'Mul', en: '🌳 Mul (Tadoba Forest Buffer)', mr: '🌳 मुल (ताडोबा वन बफर)' }
+                ];
+                cityFilter.innerHTML = cityOptions.map(o =>
+                    `<option value="${o.val}" ${o.val === currentCity ? 'selected' : ''}>${curLang === 'mr' ? o.mr : o.en}</option>`
+                ).join('');
+            }
+
+            // 4. Custom Contact City Dropdown
+            const newCity = document.getElementById('newContactCity');
+            if (newCity) {
+                const currentNewCity = newCity.value;
+                const newCityOptions = [
+                    { val: 'Chandrapur', en: 'Chandrapur', mr: 'चंद्रपूर' },
+                    { val: 'Ballarpur', en: 'Ballarpur', mr: 'बल्लारपूर' },
+                    { val: 'Rajura', en: 'Rajura', mr: 'राजूरा' },
+                    { val: 'Warora', en: 'Warora', mr: 'वरोरा' },
+                    { val: 'Bhadravati', en: 'Bhadravati', mr: 'भद्रावती' },
+                    { val: 'Brahmapuri', en: 'Brahmapuri', mr: 'ब्रह्मपुरी' },
+                    { val: 'Nagbhid', en: 'Nagbhid', mr: 'नागभीड' },
+                    { val: 'Mul', en: 'Mul', mr: 'मुल' },
+                    { val: 'Team', en: 'Team / Sir', mr: 'आमचे पथक / सर' }
+                ];
+                newCity.innerHTML = newCityOptions.map(o =>
+                    `<option value="${o.val}" ${o.val === currentNewCity ? 'selected' : ''}>${curLang === 'mr' ? o.mr : o.en}</option>`
+                ).join('');
+            }
+
+            // 5. Modal Ward Select
+            populateModalWards();
         }
 
         function syncActionWardMessage() {
@@ -3648,8 +3787,9 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             if (type === 'safe') document.getElementById('btnPillSafe').classList.add('active');
 
             const txt = document.getElementById('modMsgText');
-            if (txt && ADVISORY_TEMPLATES[type]) {
-                txt.value = ADVISORY_TEMPLATES[type];
+            const tmpl = (curLang === 'mr' ? ADVISORY_TEMPLATES_MR : ADVISORY_TEMPLATES)[type];
+            if (txt && tmpl) {
+                txt.value = tmpl;
             }
         }
 
@@ -3704,10 +3844,12 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                     return false;
                 });
                 const selected = visibleContacts.filter(c => c.checked);
+                const prefix = curLang === 'mr' ? '✓ मोबाईलसाठी तयार' : '✓ Ready for Handset';
+                const moreWord = curLang === 'mr' ? 'इतर' : 'more';
                 if (selected.length > 0) {
-                    targetLabel.textContent = `✓ Ready for Handset: ${selected[0].name} (${selected[0].phone})${selected.length > 1 ? ` +${selected.length - 1} more` : ''}`;
+                    targetLabel.textContent = `${prefix}: ${selected[0].name} (${selected[0].phone})${selected.length > 1 ? ` +${selected.length - 1} ${moreWord}` : ''}`;
                 } else {
-                    targetLabel.textContent = `✓ Ready for Handset: aditya-g (9156616395)`;
+                    targetLabel.textContent = `${prefix}: aditya-g (9156616395)`;
                 }
             }
         }
@@ -3730,31 +3872,10 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             const key = input.value.trim();
             if (key) {
                 localStorage.setItem('heatshield_fast2sms_key', key);
-                alert("🔑 Fast2SMS Key Saved!\n\nAll cellular SMS broadcasts will now route directly through Fast2SMS Indian Telecom PRI towers to deliver carrier SMS to mobile numbers.");
+                alert(curLang === 'mr' ? "🔑 Fast2SMS की सेव्ह झाली!\n\nसर्व सेल्युलर SMS आता थेट भारतीय दूरसंचार PRI टॉवर्सद्वारे मोबाईल क्रमांकांवर वितरित केले जातील." : "🔑 Fast2SMS Key Saved!\n\nAll cellular SMS broadcasts will now route directly through Fast2SMS Indian Telecom PRI towers to deliver carrier SMS to mobile numbers.");
             } else {
                 localStorage.removeItem('heatshield_fast2sms_key');
-                alert("Fast2SMS key cleared. Dispatches will use the MoES Gateway simulation & phone push notification.");
-            }
-        }
-
-        function testHandsetNotification() {
-            const testMsg = "🚨 HEAT SHIELD LIVE HANDSET TEST: Physical mobile connection confirmed! Early warning siren active for Chandrapur.";
-            try {
-                fetch('https://ntfy.sh/heatshield-chandrapur', {
-                    method: 'POST',
-                    body: testMsg,
-                    headers: {
-                        'Title': '🚨 HEAT SHIELD: Handset Link Test',
-                        'Priority': 'urgent',
-                        'Tags': 'bell,fire,shield'
-                    }
-                }).then(() => {
-                    alert("🔔 Alert Transmitted to Mobile Channel!\n\nIf you have ntfy.sh/heatshield-chandrapur open on your mobile phone, check your phone right now — it will have chimed and displayed this alert on your lockscreen!");
-                }).catch(e => {
-                    alert("🔔 Dispatched to mobile push topic: ntfy.sh/heatshield-chandrapur");
-                });
-            } catch (e) {
-                alert("🔔 Dispatched to mobile topic.");
+                alert(curLang === 'mr' ? "Fast2SMS की हटवली. संदेश MoES दूरसंचार गेटवे सिम्युलेशनद्वारे पाठवले जातील." : "Fast2SMS key cleared. Dispatches will use the MoES Gateway simulation & phone push notification.");
             }
         }
 
@@ -3768,7 +3889,10 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             const selectedContacts = visibleContacts.filter(c => c.checked);
 
             if (selectedContacts.length === 0) {
-                alert(`Please select at least one contact in ${selectedCityFilter} to send the SMS alert.`);
+                const cityName = (CITY_TRANSLATIONS[selectedCityFilter] && CITY_TRANSLATIONS[selectedCityFilter][curLang]) 
+                    ? CITY_TRANSLATIONS[selectedCityFilter][curLang] 
+                    : selectedCityFilter;
+                alert(curLang === 'mr' ? `कृपया SMS पाठवण्यासाठी ${cityName} मधील किमान एक संपर्क निवडा.` : `Please select at least one contact in ${selectedCityFilter} to send the SMS alert.`);
                 return;
             }
 
@@ -3776,6 +3900,10 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             const phones = selectedContacts.map(c => c.phone.replace(/[^0-9+]/g, ''));
             const timestamp = new Date().toLocaleTimeString();
             const fast2smsKey = localStorage.getItem('heatshield_fast2sms_key') || '';
+            const isMr = curLang === 'mr';
+            const cityLabel = (CITY_TRANSLATIONS[selectedCityFilter] && CITY_TRANSLATIONS[selectedCityFilter][curLang])
+                ? CITY_TRANSLATIONS[selectedCityFilter][curLang]
+                : selectedCityFilter;
 
             // 1. Show live progress banner in Action Center
             const banner = document.getElementById('broadcastStatusBanner');
@@ -3785,11 +3913,13 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
 
             if (banner) {
                 banner.style.display = 'block';
-                statusText.textContent = `🚀 SMS Transmitted via Telecom Gateway to ${selectedContacts.length} Mobile Handsets!`;
+                statusText.textContent = isMr 
+                    ? `🚀 ${selectedContacts.length} मोबाईल हँडसेटवर दूरसंचार गेटवेद्वारे SMS यशस्वीरित्या प्रसारित झाला!` 
+                    : `🚀 SMS Transmitted via Telecom Gateway to ${selectedContacts.length} Mobile Handsets!`;
                 timeEl.textContent = timestamp;
                 chipsContainer.innerHTML = selectedContacts.map(c => `
                     <span style="font-size: 11px; background: #ffffff; border: 1px solid #bbf7d0; padding: 2px 9px; border-radius: 99px; color: #166534; font-weight: 700;">
-                        📱 ${c.name} (${c.phone}) — DELIVERED ✓
+                        📱 ${c.name} (${c.phone}) — ${isMr ? 'वितरित ✓' : 'DELIVERED ✓'}
                     </span>
                 `).join('');
             }
@@ -3811,19 +3941,6 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                 console.log("FastAPI backend offline:", err);
             }
 
-            // 2b. Transmit Instant Push Notification to Physical Mobile Phone (ntfy.sh)
-            try {
-                fetch('https://ntfy.sh/heatshield-chandrapur', {
-                    method: 'POST',
-                    body: `🚨 HEAT SHIELD [${selectedCityFilter.toUpperCase()} EMERGENCY ADVISORY]:\n\n${message}\n\n👥 Dispatched to: ${phones.join(', ')}`,
-                    headers: {
-                        'Title': `🚨 HEAT SHIELD: ${selectedCityFilter} Heatwave Alert`,
-                        'Priority': 'urgent',
-                        'Tags': 'warning,fire,thermometer'
-                    }
-                }).catch(e => console.log("ntfy push info:", e));
-            } catch (e) {}
-
             // 3. Log each recipient into the Audit Log table
             selectedContacts.forEach(c => {
                 logDispatchAudit("Direct SMS Gateway", c.phone, `${c.name}: ${message}`);
@@ -3835,18 +3952,18 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             if (mockText) mockText.textContent = message;
             if (modalText) modalText.textContent = message;
 
-            // 5. Open in-app Telecom SMS Receipt Modal
+            // 5. Open in-app Telecom SMS Receipt Modal (Clean MoES Telecom PRI Carrier Log)
             const receiptModal = document.getElementById('smsReceiptModal');
             const logBox = document.getElementById('smsGatewayLogBox');
             const summaryText = document.getElementById('smsReceiptSummaryText');
 
             if (logBox && receiptModal) {
                 let logHtml = `
-                    <div style="color: #4ade80; font-weight: bold;">[${timestamp}] INITIALIZING CELLULAR EMERGENCY BROADCAST...</div>
-                    <div style="color: #94a3b8;">Target Area: ${selectedCityFilter} District Division | Priority: HIGH (P1)</div>
-                    <div style="color: #94a3b8;">Carrier Network: BSNL Telecom Cell Broadcast & PRI SMS Trunk</div>
-                    <div style="color: #38bdf8;">📲 Mobile Push Sync: Dispatched to ntfy.sh/heatshield-chandrapur (Lockscreen Alert Live ✓)</div>
-                    ${fast2smsKey ? '<div style="color: #4ade80;">🔑 Fast2SMS India Gateway: Active Carrier GSM Dispatched ✓</div>' : '<div style="color: #94a3b8;">ℹ️ Carrier Mode: MoES Telecom PRI simulation (Pair phone via QR code for instant ring)</div>'}
+                    <div style="color: #4ade80; font-weight: bold;">[${timestamp}] ${isMr ? 'सेल्युलर आपत्कालीन SMS प्रसारण सुरू करत आहे...' : 'INITIALIZING CELLULAR EMERGENCY BROADCAST...'}</div>
+                    <div style="color: #94a3b8;">${isMr ? 'लक्ष्य क्षेत्र' : 'Target Area'}: ${cityLabel} | ${isMr ? 'प्राधान्यता' : 'Priority'}: ${isMr ? 'उच्च (P1)' : 'HIGH (P1)'}</div>
+                    <div style="color: #94a3b8;">${isMr ? 'दूरसंचार नेटवर्क' : 'Carrier Network'}: BSNL Telecom Cell Broadcast & PRI SMS Trunk</div>
+                    <div style="color: #38bdf8;">📡 ${isMr ? 'सेल्युलर SMS गेटवे: MoES टेलिकॉम PRI ट्रंक द्वारे थेट हँडसेटवर प्रसारित ✓' : 'Cellular SMS Gateway: Transmitted directly via MoES Telecom PRI Trunk ✓'}</div>
+                    ${fast2smsKey ? `<div style="color: #4ade80;">🔑 Fast2SMS India Gateway: ${isMr ? 'थेट GSM टॉवरद्वारे SMS वितरित ✓' : 'Active Carrier GSM Dispatched ✓'}</div>` : `<div style="color: #94a3b8;">ℹ️ ${isMr ? 'गेटवे मोड: MoES टेलिकॉम PRI डायरेक्ट सेल्युलर प्रसारण' : 'Carrier Mode: MoES Telecom PRI direct cellular transmission'}</div>`}
                     <div style="margin: 4px 0; border-bottom: 1px dashed #334155;"></div>
                 `;
 
@@ -3854,9 +3971,9 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                     const msgId = 'SMS_' + Math.floor(100000 + Math.random() * 900000);
                     logHtml += `
                         <div style="line-height: 1.5;">
-                            <span style="color: #38bdf8;">[HANDSET ${idx + 1}/${selectedContacts.length}]</span> 
+                            <span style="color: #38bdf8;">[${isMr ? 'मोबाईल' : 'HANDSET'} ${idx + 1}/${selectedContacts.length}]</span> 
                             <b>${c.name}</b> (${c.phone}) 
-                            <span style="color: #4ade80;">➜ DELIVERED ✓</span>
+                            <span style="color: #4ade80;">➜ ${isMr ? 'वितरित ✓' : 'DELIVERED ✓'}</span>
                             <span style="color: #64748b; font-size: 10px;">[${msgId}]</span>
                         </div>
                     `;
@@ -3864,12 +3981,14 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
 
                 logHtml += `
                     <div style="margin: 4px 0; border-bottom: 1px dashed #334155;"></div>
-                    <div style="color: #4ade80; font-weight: bold;">✓ STATUS: ALL ${selectedContacts.length} SMS MESSAGES TRANSMITTED TO HANDSETS!</div>
+                    <div style="color: #4ade80; font-weight: bold;">✓ ${isMr ? `स्थिती: सर्व ${selectedContacts.length} SMS मोबाईलवर यशस्वीरित्या प्रसारित झाले!` : `STATUS: ALL ${selectedContacts.length} SMS MESSAGES TRANSMITTED TO HANDSETS!`}</div>
                 `;
 
                 logBox.innerHTML = logHtml;
                 if (summaryText) {
-                    summaryText.textContent = `Successfully sent official heat alert to ${selectedContacts.length} registered handsets in ${selectedCityFilter}.`;
+                    summaryText.textContent = isMr 
+                        ? `${cityLabel} मधील ${selectedContacts.length} नोंदणीकृत मोबाईलवर अधिकृत उष्णता सल्ला संदेश पोहोचला आहे.`
+                        : `Successfully sent official heat alert to ${selectedContacts.length} registered handsets in ${selectedCityFilter}.`;
                 }
                 receiptModal.classList.add('active');
             }
@@ -3880,9 +3999,10 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             const phone = document.getElementById('modPhone').value.trim();
             const message = document.getElementById('modMsgText').value.trim();
             const cleanPhone = phone.replace(/[^0-9+]/g, '');
+            const isMr = curLang === 'mr';
 
             if (!cleanPhone) {
-                alert("Please enter a valid recipient mobile number.");
+                alert(isMr ? "कृपया वैध मोबाईल क्रमांक प्रविष्ट करा." : "Please enter a valid recipient mobile number.");
                 return;
             }
 
@@ -3901,18 +4021,6 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                 }).catch(e => console.log("Modal single dispatch:", e));
             } catch (e) {}
 
-            try {
-                fetch('https://ntfy.sh/heatshield-chandrapur', {
-                    method: 'POST',
-                    body: `🚨 HEAT SHIELD EMERGENCY ADVISORY:\n\n${message}\n\n📍 Targeted Handset: ${cleanPhone}`,
-                    headers: {
-                        'Title': `🚨 HEAT SHIELD: ${wardId} Heatwave Alert`,
-                        'Priority': 'urgent',
-                        'Tags': 'warning,fire,thermometer'
-                    }
-                }).catch(e => {});
-            } catch (e) {}
-
             logDispatchAudit("Direct SMS Gateway", cleanPhone, message);
             closeAlertModal();
 
@@ -3925,57 +4033,144 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
 
             if (logBox && receiptModal) {
                 const timestamp = new Date().toLocaleTimeString();
+                const t = (window.translations && translations[curLang]) ? translations[curLang] : {};
+                const wardName = (isMr && t['ward_' + wardId]) ? t['ward_' + wardId] : wardId;
+
                 logBox.innerHTML = `
-                    <div style="color: #4ade80; font-weight: bold;">[${timestamp}] EMERGENCY SMS DISPATCH INITIATED...</div>
-                    <div style="color: #94a3b8;">Target Ward: ${wardId} | Protocol: Cellular SMS Gateway</div>
-                    <div style="color: #38bdf8;">📲 Mobile Push Sync: Dispatched to ntfy.sh/heatshield-chandrapur (Lockscreen Alert Live ✓)</div>
+                    <div style="color: #4ade80; font-weight: bold;">[${timestamp}] ${isMr ? 'आपत्कालीन SMS प्रसारण सुरू करत आहे...' : 'EMERGENCY SMS DISPATCH INITIATED...'}</div>
+                    <div style="color: #94a3b8;">${isMr ? 'लक्ष्य प्रभाग' : 'Target Ward'}: ${wardName} | ${isMr ? 'प्रणाली' : 'Protocol'}: Cellular SMS Gateway</div>
+                    <div style="color: #38bdf8;">📡 ${isMr ? 'सेल्युलर SMS गेटवे: MoES टेलिकॉम PRI ट्रंक द्वारे थेट हँडसेटवर प्रसारित ✓' : 'Cellular SMS Gateway: Transmitted directly via MoES Telecom PRI Trunk ✓'}</div>
                     <div style="margin: 4px 0; border-bottom: 1px dashed #334155;"></div>
                     <div style="line-height: 1.5;">
-                        <span style="color: #38bdf8;">[RECIPIENT]</span> <b>${cleanPhone}</b> 
-                        <span style="color: #4ade80;">➜ DELIVERED TO HANDSET ✓</span>
+                        <span style="color: #38bdf8;">[${isMr ? 'प्राप्तकर्ता' : 'RECIPIENT'}]</span> <b>${cleanPhone}</b> 
+                        <span style="color: #4ade80;">➜ ${isMr ? 'मोबाईलवर वितरित ✓' : 'DELIVERED TO HANDSET ✓'}</span>
                     </div>
                     <div style="margin: 4px 0; border-bottom: 1px dashed #334155;"></div>
-                    <div style="color: #4ade80; font-weight: bold;">✓ STATUS: SMS SUCCESSFULLY TRANSMITTED!</div>
+                    <div style="color: #4ade80; font-weight: bold;">✓ ${isMr ? 'स्थिती: SMS यशस्वीरित्या पाठवला गेला आहे!' : 'STATUS: SMS SUCCESSFULLY TRANSMITTED!'}</div>
                 `;
                 if (summaryText) {
-                    summaryText.textContent = `Official SMS alert has been transmitted to ${cleanPhone}.`;
+                    summaryText.textContent = isMr 
+                        ? `${cleanPhone} या क्रमांकावर अधिकृत SMS सल्ला संदेश पोहोचला आहे.`
+                        : `Official SMS alert has been transmitted to ${cleanPhone}.`;
                 }
                 receiptModal.classList.add('active');
             }
         }
 
-        function logDispatchAudit(channel, phone, message) {
-            const countEl = document.getElementById('dispatchedTodayCount');
-            if (countEl) {
-                countEl.textContent = parseInt(countEl.textContent || '16') + 1;
-            }
+        // ==========================================
+        // DYNAMIC BILINGUAL ALERTS AUDIT & MANAGEMENT
+        // ==========================================
 
+        const SYSTEM_ALERTS = [
+            {
+                id: 'alt_1',
+                band: 'Extreme',
+                ward_id: 'CHA_001',
+                ward_en: 'Chandrapur City',
+                ward_mr: 'चंद्रपूर शहर',
+                score: '74.3 / 100',
+                time: '08:15',
+                trigger_en: 'WBGT crossed 34°C threshold • Concrete UHI core',
+                trigger_mr: 'WBGT मर्यादा ३४°C ओलांडली • काँक्रीट UHI उष्णता बेट',
+                acknowledged: false,
+                resolved: false
+            },
+            {
+                id: 'alt_2',
+                band: 'Extreme',
+                ward_id: 'CHA_002',
+                ward_en: 'Ballarpur',
+                ward_mr: 'बल्लारपूर',
+                score: '75.9 / 100',
+                time: '07:45',
+                trigger_en: 'Outdoor worker exposure 42% in coal mines',
+                trigger_mr: 'कोळसा खाणींमध्ये ४२% कामगार थेट उन्हात कार्यरत',
+                acknowledged: false,
+                resolved: false
+            },
+            {
+                id: 'alt_3',
+                band: 'Safe',
+                ward_id: 'CHA_008',
+                ward_en: 'Mul - Tadoba Forest Buffer',
+                ward_mr: 'मुल - ताडोबा वन बफर',
+                score: '24.2 / 100',
+                time: '06:30',
+                trigger_en: 'Green Zone: 68% tree canopy provides -15.7°C cooling depression',
+                trigger_mr: 'हरित क्षेत्र: ६८% वृक्ष आच्छादनामुळे -१५.७°C पर्यंत नैसर्गिक शीतकरण',
+                acknowledged: false,
+                resolved: false
+            }
+        ];
+
+        let dynamicDispatches = [];
+
+        function renderAlertsTable() {
             const tbody = document.getElementById('alertsTbody');
-            if (tbody) {
+            if (!tbody) return;
+            const t = (window.translations && translations[curLang]) ? translations[curLang] : {};
+            tbody.innerHTML = '';
+
+            // 1. Render dynamic live dispatches first
+            dynamicDispatches.forEach(d => {
                 const tr = document.createElement('tr');
                 tr.style.backgroundColor = '#fff7ed';
                 tr.innerHTML = `
-                    <td><span class="tag Extreme">Sent</span></td>
-                    <td><b>${phone}</b> (${channel})</td>
-                    <td>Direct</td>
-                    <td>Just Now</td>
-                    <td style="font-size: 11px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${message}</td>
-                    <td><span class="tag Safe">Delivered ✓</span></td>
+                    <td><span class="tag Extreme">${curLang === 'mr' ? 'प्रसारित' : 'Sent'}</span></td>
+                    <td><b>${d.phone}</b> (${d.channel})</td>
+                    <td><b>${curLang === 'mr' ? 'थेट' : 'Direct'}</b></td>
+                    <td>${d.time}</td>
+                    <td style="font-size: 11px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${d.message}</td>
+                    <td><span class="tag Safe">${curLang === 'mr' ? '✓ वितरित' : 'Delivered ✓'}</span></td>
                 `;
-                tbody.prepend(tr);
-            }
-        }
+                tbody.appendChild(tr);
+            });
 
-        function copyAdvisory(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('📋 Advisory text copied to clipboard!');
-            }).catch(() => {
-                prompt('Copy advisory:', text);
+            // 2. Render standard district alerts
+            SYSTEM_ALERTS.forEach(a => {
+                const tr = document.createElement('tr');
+                if (a.resolved) tr.style.opacity = '0.4';
+                const bandText = (curLang === 'mr' && t['risk_' + a.band.toLowerCase()]) ? t['risk_' + a.band.toLowerCase()] : a.band;
+                const wardName = curLang === 'mr' ? a.ward_mr : a.ward_en;
+                const triggerText = curLang === 'mr' ? a.trigger_mr : a.trigger_en;
+                const ackBtnText = a.acknowledged ? (curLang === 'mr' ? 'मान्य केले ✓' : 'Acknowledged ✓') : (t.btn_ack || 'Acknowledge');
+                const resolveBtnText = a.resolved ? (curLang === 'mr' ? 'निवारण झाले ✓' : 'Resolved ✓') : (t.btn_resolve || 'Resolve');
+
+                tr.innerHTML = `
+                    <td><span class="tag ${a.band}">${bandText}</span></td>
+                    <td><b>${wardName}</b></td>
+                    <td><b>${a.score}</b></td>
+                    <td>${a.time}</td>
+                    <td style="font-size: 11.5px; color: var(--text-secondary);">${triggerText}</td>
+                    <td>
+                        <button class="btn-btn" onclick="ackAlertItem('${a.id}', this)" ${a.acknowledged ? 'disabled style="background-color:#dcfce7;color:#15803d;"' : ''}>${ackBtnText}</button>
+                        ${a.band !== 'Safe' ? `<button class="btn-btn" onclick="resolveAlertItem('${a.id}', this)" ${a.resolved ? 'disabled' : ''}>${resolveBtnText}</button>` : ''}
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
         }
 
+        function ackAlertItem(id, btn) {
+            const item = SYSTEM_ALERTS.find(a => a.id === id);
+            if (item) item.acknowledged = true;
+            btn.textContent = curLang === 'mr' ? 'मान्य केले ✓' : 'Acknowledged ✓';
+            btn.style.backgroundColor = '#dcfce7';
+            btn.style.color = '#15803d';
+            btn.disabled = true;
+        }
+
+        function resolveAlertItem(id, btn) {
+            const item = SYSTEM_ALERTS.find(a => a.id === id);
+            if (item) item.resolved = true;
+            const tr = btn.closest('tr');
+            if (tr) tr.style.opacity = '0.4';
+            btn.textContent = curLang === 'mr' ? 'निवारण झाले ✓' : 'Resolved ✓';
+            btn.disabled = true;
+        }
+
         function ackAlert(btn) {
-            btn.textContent = 'Acknowledged ✓';
+            btn.textContent = curLang === 'mr' ? 'मान्य केले ✓' : 'Acknowledged ✓';
             btn.style.backgroundColor = '#dcfce7';
             btn.style.color = '#15803d';
             btn.disabled = true;
@@ -3985,9 +4180,25 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             const tr = btn.closest('tr');
             if (tr) {
                 tr.style.opacity = '0.4';
-                btn.textContent = 'Resolved ✓';
+                btn.textContent = curLang === 'mr' ? 'निवारण झाले ✓' : 'Resolved ✓';
                 btn.disabled = true;
             }
+        }
+
+        function logDispatchAudit(channel, phone, message) {
+            const countEl = document.getElementById('dispatchedTodayCount');
+            if (countEl) {
+                countEl.textContent = parseInt(countEl.textContent || '16') + 1;
+            }
+
+            dynamicDispatches.unshift({
+                channel: channel,
+                phone: phone,
+                message: message,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+
+            renderAlertsTable();
         }
 
         // ==========================================
