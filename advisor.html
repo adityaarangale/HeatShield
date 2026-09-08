@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>HEAT SHIELD — Personal Heat Risk Advisor</title>
   <meta name="description" content="Citizen-facing personal thermal stress and heat safety advisor. Tailored heatwave guidance for Chandrapur District, Maharashtra. Disaster Management Authority.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22><path d=%22M12 2L3 6.2V12C3 17.5 6.8 21.7 12 23C17.2 21.7 21 17.5 21 12V6.2L12 2Z%22 fill=%22%23ea580c%22/><circle cx=%2212%22 cy=%2212%22 r=%223.5%22 fill=%22%23ffffff%22/></svg>">
@@ -66,7 +66,7 @@
         <span class="pulse-dot" id="statusPulseDot"></span>
         <span id="backendStatusText" data-i18n="status_live">FastAPI Backend Connected</span>
       </div>
-      <div style="font-size: 11px; font-weight: 700; color: var(--brand-orange);" data-i18n="authority_badge">
+      <div class="authority-badge-text" data-i18n="authority_badge">
         Disaster Management • Chandrapur
       </div>
     </div>
@@ -465,17 +465,25 @@
             using guidance from the CDC Extreme Heat Advisory, NOAA Heat Index,
             and OSHA Occupational Standards.
           </p>
-          <table class="factor-table">
-            <thead>
-              <tr>
-                <th data-i18n="col_factor">Factor</th>
-                <th data-i18n="col_val">Selection</th>
-                <th data-i18n="col_impact">Impact</th>
-                <th data-i18n="col_rationale">Rationale & Citation</th>
-              </tr>
-            </thead>
-            <tbody id="factorsTableBody"></tbody>
-          </table>
+          <div class="factor-table-container">
+            <div class="scroll-hint">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8L22 12L18 16"/><path d="M6 8L2 12L6 16"/></svg>
+              <span data-i18n="table_scroll_hint">Scroll horizontally to view full table</span>
+            </div>
+            <div class="factor-table-scroll">
+              <table class="factor-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="col_factor">Factor</th>
+                    <th data-i18n="col_val">Selection</th>
+                    <th data-i18n="col_impact">Impact</th>
+                    <th data-i18n="col_rationale">Rationale & Citation</th>
+                  </tr>
+                </thead>
+                <tbody id="factorsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
           <div id="totalMultiplierSummary" style="margin-top: 10px; font-weight: 700; font-size: 11.5px; color: var(--brand-orange);"></div>
         </div>
       </div>

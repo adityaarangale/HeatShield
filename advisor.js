@@ -386,7 +386,8 @@ const ADVISOR_I18N = {
     band_danger: "Danger Alert",
     band_extreme: "Extreme Emergency",
     unit_km: "km",
-    day_prefix: "Day"
+    day_prefix: "Day",
+    table_scroll_hint: "Scroll horizontally to view full table"
   },
   mr: {
     brand_title: "हीट शील्ड",
@@ -465,7 +466,8 @@ const ADVISOR_I18N = {
     band_danger: "धोकादायक स्थिती",
     band_extreme: "अत्यंत तीव्र धोका",
     unit_km: "किमी",
-    day_prefix: "दिवस"
+    day_prefix: "दिवस",
+    table_scroll_hint: "पूर्ण तक्ता पाहण्यासाठी डावीकडे/उजवीकडे सरकवा"
   },
   hi: {
     brand_title: "हीट शील्ड",
@@ -544,7 +546,8 @@ const ADVISOR_I18N = {
     band_danger: "खतरा स्तर",
     band_extreme: "अत्यधिक आपातकाल",
     unit_km: "किमी",
-    day_prefix: "दिन"
+    day_prefix: "दिन",
+    table_scroll_hint: "पूरी तालिका देखने के लिए क्षैतिज स्क्रॉल करें"
   }
 };
 
@@ -1678,8 +1681,10 @@ function renderForecast(forecastList) {
       card.innerHTML = `
         <div class="fc-day-title">${localizedDay}</div>
         <div class="fc-temp">${Math.round(item.temp_c)}°</div>
-        <span class="fc-badge ${item.personal_band}">${localizedBand} (${item.personal_score})</span>
-        <div style="font-size:10.5px;color:#64748b;margin-top:4px;">WBGT ${item.wbgt_c}°C</div>
+        <div class="fc-meta">
+          <span class="fc-badge ${item.personal_band}">${localizedBand} (${item.personal_score})</span>
+          <div class="fc-wbgt-tag">WBGT ${item.wbgt_c}°C</div>
+        </div>
       `;
       strip.appendChild(card);
     });
