@@ -14,6 +14,7 @@ from models import (
     BroadcastAlertRequest,
     BroadcastAlertResponse
 )
+from personal_risk import router as personal_risk_router
 from logic import (
     calculate_heat_index,
     calculate_wbgt,
@@ -56,6 +57,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(personal_risk_router)
 
 
 @app.get("/", tags=["Health"])

@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeatShield - Urban Heat Risk Intelligence Dashboard</title>
+    <meta name="description" content="Ward-Level Heatwave Early Warning & Action System for Smart Cities">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        :root {
+            /* Light Theme */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #94a3b8;
+            --border-color: #e2e8f0;
+            
+            --sidebar-bg: #0f172a;
+            --sidebar-text: #94a3b8;
+            --sidebar-hover: #1e293b;
+            --sidebar-active: rgba(234, 88, 12, 0.15);
+            --sidebar-active-text: #fb923c;
+            
+            --risk-extreme: #dc2626;
+            --risk-extreme-bg: #fef2f2;
+            --risk-extreme-border: #fecaca;
+            
+            --risk-high: #ea580c;
+            --risk-high-bg: #fff7ed;
+            --risk-high-border: #ffedd5;
+            
+            --risk-moderate: #d97706;
+            --risk-moderate-bg: #fffbeb;
+            --risk-moderate-border: #fef3c7;
+            
+            --risk-low: #16a34a;
+            --risk-low-bg: #f0fdf4;
+            --risk-low-border: #bbf7d0;
+            
+            --brand-primary: #ea580c;
+            --brand-primary-hover: #c2410c;
+            
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
+        
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #64748b;
+            --border-color: #334155;
+            
+            --risk-extreme-bg: rgba(220, 38, 38, 0.2);
+            --risk-extreme-border: rgba(220, 38, 38, 0.4);
+            
+            --risk-high-bg: rgba(234, 88, 12, 0.2);
+            --risk-high-border: rgba(234, 88, 12, 0.4);
+            
+            --risk-moderate-bg: rgba(217, 119, 6, 0.2);
+            --risk-moderate-border: rgba(217, 119, 6, 0.4);
+            
+            --risk-low-bg: rgba(22, 163, 74, 0.2);
+            --risk-low-border: rgba(22, 163, 74, 0.4);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            font-size: 14px;
+            line-height: 1.5;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            z-index: 30;
+        }
+        
+        .brand {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #ea580c, #f97316);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 4px 14px rgba(234, 88, 12, 0.4);
+        }
+        
+        .brand-text h1 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 17px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
+        
+        .brand-text p {
+            font-size: 11px;
+            color: var(--sidebar-text);
+            margin-top: 2px;
+        }
+        
+        .nav {
+            padding: 16px 12px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            color: var(--sidebar-text);
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            margin-bottom: 4px;
+        }
+        
+        .nav-item:hover {
+            background-color: var(--sidebar-hover);
+            color: #ffffff;
+        }
+        
+        .nav-item.active {
+            background-color: var(--sidebar-active);
+            color: var(--sidebar-active-text);
+            font-weight: 600;
+            border-left: 3px solid var(--brand-primary);
+        }
+        
+        .nav-item .icon { width: 20px; text-align: center; font-size: 16px; }
+        
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 11px;
+            color: var(--sidebar-text);
+        }
+        
+        /* Main Content */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* Header */
+        .header {
+            height: 64px;
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .location-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--bg-tertiary);
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+        }
+        
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--risk-low);
+            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .theme-toggle, .lang-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 6px;
+            cursor: pointer;
+            display: flex;
+            gap: 4px;
+        }
+        
+        .theme-btn, .lang-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        
+        .theme-btn.active, .lang-btn.active {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .alert-btn {
+            background-color: var(--risk-extreme);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 3px 10px rgba(220, 38, 38, 0.25);
+            transition: all 0.15s ease;
+        }
+        
+        .alert-btn:hover {
+            background-color: #b91c1c;
+            transform: translateY(-1px);
+        }
+        
+        /* Content Area */
+        .content {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        /* Cards */
+        .card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .card-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        /* KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 1200px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 600px) {
+            .kpi-grid { grid-template-columns: 1fr; }
+        }
+        
+        .kpi-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 18px 20px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .kpi-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .kpi-value {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        
+        .kpi-value.danger { color: var(--risk-extreme); }
+        .kpi-value.warning { color: var(--risk-high); }
+        .kpi-value.success { color: var(--risk-low); }
+        
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        th {
+            text-align: left;
+            padding: 12px;
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        tr:hover td {
+            background-color: var(--bg-tertiary);
+        }
+        
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .badge.extreme { background-color: var(--risk-extreme-bg); color: var(--risk-extreme); border: 1px solid var(--risk-extreme-border); }
+        .badge.high { background-color: var(--risk-high-bg); color: var(--risk-high); border: 1px solid var(--risk-high-border); }
+        .badge.moderate { background-color: var(--risk-moderate-bg); color: var(--risk-moderate); border: 1px solid var(--risk-moderate-border); }
+        .badge.low { background-color: var(--risk-low-bg); color: var(--risk-low); border: 1px solid var(--risk-low-border); }
+        
+        /* Buttons */
+        .btn {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        
+        .btn:hover {
+            background-color: var(--border-color);
+        }
+        
+        .btn-primary {
+            background-color: var(--brand-primary);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--brand-primary-hover);
+        }
+        
+        /* Ward Grid */
+        .ward-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        
+        .ward-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border-left: 4px solid var(--risk-low);
+        }
+        
+        .ward-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .ward-card.risk-extreme { border-left-color: var(--risk-extreme); }
+        .ward-card.risk-high { border-left-color: var(--risk-high); }
+        .ward-card.risk-moderate { border-left-color: var(--risk-moderate); }
+        .ward-card.risk-low { border-left-color: var(--risk-low); }
+        
+        .ward-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .ward-name {
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .ward-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .ward-metric {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        
+        .ward-metric-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 500px;
+            padding: 24px;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .modal-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .modal-content {
+            margin-bottom: 20px;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 12px;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 12px;
+        }
+        
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        
+        .spinner {
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--brand-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-lg);
+            z-index: 1001;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .toast.active {
+            display: flex;
+        }
+        
+        .toast.success { border-left: 4px solid var(--risk-low); }
+        .toast.error { border-left: 4px solid var(--risk-extreme); }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                height: 100%;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.open {
+                left: 0;
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .menu-toggle {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <div class="brand-logo">🛡️</div>
+            <div class="brand-text">
+                <h1>HeatShield</h1>
+                <p>Urban Heat Risk Intelligence</p>
+            </div>
+        </div>
+        
+        <nav class="nav">
+            <div class="nav-item active" data-page="dashboard">
+                <span class="icon">📊</span>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item" data-page="wards">
+                <span class="icon">🔍</span>
+                <span>Ward Intelligence</span>
+            </div>
+            <div class="nav-item" data-page="forecast">
+                <span class="icon">📈</span>
+                <span>Forecast</span>
+            </div>
+            <div class="nav-item" data-page="actions">
+                <span class="icon">📋</span>
+                <span>Action Center</span>
+            </div>
+            <div class="nav-item" data-page="alerts">
+                <span class="icon">🚨</span>
+                <span>Alert Management</span>
+            </div>
+            <div class="nav-item" data-page="advisory">
+                <span class="icon">📖</span>
+                <span>Citizen Advisory</span>
+            </div>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <p><strong>Pilot:</strong> Chandrapur District, MH</p>
+            <p style="margin-top: 4px;">SIH26083 - MoES</p>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <div class="main">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle btn" id="menuToggle">☰</button>
+                <div class="location-badge">
+                    <span>📍</span>
+                    <span>Chandrapur District, MH</span>
+                </div>
+                <div class="status-badge">
+                    <div class="status-dot"></div>
+                    <span>System Operational</span>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="theme-toggle">
+                    <button class="theme-btn active" data-theme="light">☀️</button>
+                    <button class="theme-btn" data-theme="dark">🌙</button>
+                </div>
+                <div class="lang-toggle">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="hi">हिंदी</button>
+                    <button class="lang-btn" data-lang="mr">मराठी</button>
+                </div>
+                <button class="alert-btn" id="quickAlertBtn">
+                    <span>⚡</span>
+                    <span>Quick Alert</span>
+                </button>
+            </div>
+        </header>
+        
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Dashboard Page -->
+            <div class="page active" id="page-dashboard">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Urban Heat Risk Intelligence Dashboard</h2>
+                        <span class="badge extreme" id="overallRiskBadge">EXTREME</span>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                        Monitoring heat stress, identifying vulnerable wards, and helping authorities take preventive action before extreme heat events occur.
+                    </p>
+                </div>
+                
+                <!-- KPI Cards -->
+                <div class="kpi-grid" id="dashboardKpi">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Wards</div>
+                        <div class="kpi-value" id="totalWards">-</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">High-Risk Wards</div>
+                        <div class="kpi-value danger" id="highRiskWards">-</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Population at Risk</div>
+                        <div class="kpi-value warning" id="populationAtRisk">-</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Average Risk Score</div>
+                        <div class="kpi-value danger" id="avgRiskScore">-</div>
+                    </div>
+                </div>
+                
+                <!-- Highest Priority Wards -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Highest Priority Wards (HVPI Ranking)</h3>
+                    </div>
+                    <div class="table-container">
+                        <table id="priorityWardsTable">
+                            <thead>
+                                <tr>
+                                    <th>Priority</th>
+                                    <th>Ward</th>
+                                    <th>Zone</th>
+                                    <th>HVPI Score</th>
+                                    <th>Risk Level</th>
+                                    <th>Population</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="7" class="loading">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Ward Risk Visualization -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Ward Risk Visualization</h3>
+                    </div>
+                    <div class="ward-grid" id="wardGrid">
+                        <div class="loading">Loading wards...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ward Intelligence Page -->
+            <div class="page" id="page-wards">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Ward Intelligence</h2>
+                    </div>
+                    
+                    <div class="filters">
+                        <input type="text" class="filter-input" id="wardSearch" placeholder="Search ward name...">
+                        <select class="filter-select" id="riskFilter">
+                            <option value="">All Risk Levels</option>
+                            <option value="Extreme">Extreme</option>
+                            <option value="High">High</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="Low">Low</option>
+                        </select>
+                        <select class="filter-select" id="zoneFilter">
+                            <option value="">All Zones</option>
+                            <option value="Central Zone">Central Zone</option>
+                            <option value="Industrial Zone">Industrial Zone</option>
+                            <option value="Eastern Zone">Eastern Zone</option>
+                            <option value="Northern Zone">Northern Zone</option>
+                            <option value="Southern Zone">Southern Zone</option>
+                            <option value="Western Zone">Western Zone</option>
+                        </select>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table id="wardsTable">
+                            <thead>
+                                <tr>
+                                    <th>Priority</th>
+                                    <th>Ward</th>
+                                    <th>Zone</th>
+                                    <th>Population</th>
+                                    <th>HVPI Score</th>
+                                    <th>Risk Level</th>
+                                    <th>Heat Index</th>
+                                    <th>WBGT</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="9" class="loading">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Forecast Page -->
+            <div class="page" id="page-forecast">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Heat Risk Forecast</h2>
+                        <select class="filter-select" id="forecastWardSelect">
+                            <option value="">Select Ward...</option>
+                        </select>
+                    </div>
+                    
+                    <div id="forecastContent">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Select a ward to view forecast</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Center Page -->
+            <div class="page" id="page-actions">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Municipal Action Center</h2>
+                        <select class="filter-select" id="actionWardSelect">
+                            <option value="">Select Ward...</option>
+                        </select>
+                    </div>
+                    
+                    <div id="actionsContent">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Select a ward to view recommended actions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Alerts Page -->
+            <div class="page" id="page-alerts">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Alert Management</h2>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="font-size: 14px; margin-bottom: 12px;">Send New Alert</h3>
+                        <div class="filters">
+                            <select class="filter-select" id="alertWardSelect">
+                                <option value="">Select Ward...</option>
+                            </select>
+                            <select class="filter-select" id="alertRiskSelect">
+                                <option value="Extreme">Extreme</option>
+                                <option value="High">High</option>
+                                <option value="Moderate">Moderate</option>
+                            </select>
+                            <button class="btn btn-primary" id="previewAlertBtn">Preview Alert</button>
+                        </div>
+                    </div>
+                    
+                    <h3 style="font-size: 14px; margin-bottom: 12px;">Alert History</h3>
+                    <div class="table-container">
+                        <table id="alertsHistoryTable">
+                            <thead>
+                                <tr>
+                                    <th>Alert ID</th>
+                                    <th>Timestamp</th>
+                                    <th>Ward</th>
+                                    <th>Risk Level</th>
+                                    <th>Recipient</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="6" class="loading">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Citizen Advisory Page -->
+            <div class="page" id="page-advisory">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Citizen Heat Safety Advisory</h2>
+                    </div>
+                    
+                    <div id="advisoryContent">
+                        <div class="advisory-section" style="margin-bottom: 24px;">
+                            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 12px; color: var(--risk-extreme);">🚰 Stay Hydrated</h3>
+                            <p style="color: var(--text-secondary);">Drink water regularly, even if you don't feel thirsty. Avoid caffeinated and alcoholic beverages as they can dehydrate you.</p>
+                        </div>
+                        
+                        <div class="advisory-section" style="margin-bottom: 24px;">
+                            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 12px; color: var(--risk-high);">☀️ Avoid Peak Heat</h3>
+                            <p style="color: var(--text-secondary);">Stay indoors during the hottest hours (11 AM to 4 PM). If you must go outside, seek shade and wear light, loose-fitting clothing.</p>
+                        </div>
+                        
+                        <div class="advisory-section" style="margin-bottom: 24px;">
+                            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 12px; color: var(--risk-moderate);">👵 Check Vulnerable People</h3>
+                            <p style="color: var(--text-secondary);">Regularly check on elderly family members, children, and those with chronic illnesses. Ensure they have access to cool spaces and water.</p>
+                        </div>
+                        
+                        <div class="advisory-section" style="margin-bottom: 24px;">
+                            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 12px; color: var(--risk-low);">❄️ Use Cooling Spaces</h3>
+                            <p style="color: var(--text-secondary);">Visit air-conditioned public spaces like malls, libraries, or cooling centers during extreme heat. Use fans and take cool showers.</p>
+                        </div>
+                        
+                        <div class="advisory-section">
+                            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">👷 Outdoor Worker Safety</h3>
+                            <p style="color: var(--text-secondary);">Take frequent breaks in shaded areas. Wear protective clothing and stay hydrated. Know the signs of heat exhaustion and heat stroke.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Alert Preview Modal -->
+    <div class="modal-overlay" id="alertModal">
+        <div class="modal">
+            <h3 class="modal-title">Alert Preview</h3>
+            <div class="modal-content" id="alertModalContent">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="cancelAlertBtn">Cancel</button>
+                <button class="btn btn-primary" id="sendAlertBtn">Send Alert</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ward Detail Modal -->
+    <div class="modal-overlay" id="wardModal">
+        <div class="modal" style="max-width: 600px;">
+            <h3 class="modal-title" id="wardModalTitle">Ward Details</h3>
+            <div class="modal-content" id="wardModalContent">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeWardModal()">Close</button>
+                <button class="btn btn-primary" id="wardAlertBtn">Send Alert</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span id="toastIcon"></span>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_BASE = 'http://localhost:8000/api/v1';
+        
+        // State
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        let currentLang = localStorage.getItem('lang') || 'en';
+        let wardsData = [];
+        let currentWard = null;
+        
+        // Translations
+        const translations = {
+            en: {
+                dashboard: 'Dashboard',
+                wards: 'Ward Intelligence',
+                forecast: 'Forecast',
+                actions: 'Action Center',
+                alerts: 'Alert Management',
+                advisory: 'Citizen Advisory'
+            },
+            hi: {
+                dashboard: 'डैशबोर्ड',
+                wards: 'वार्ड खुफिया',
+                forecast: 'पूर्वानुमान',
+                actions: 'कार्य केंद्र',
+                alerts: 'अलर्ट प्रबंधन',
+                advisory: 'नागरिक सलाह'
+            },
+            mr: {
+                dashboard: 'डॅशबोर्ड',
+                wards: 'वॉर्ड इंटेलिजन्स',
+                forecast: 'पूर्वानुमान',
+                actions: 'कृती केंद्र',
+                alerts: 'अलर्ट व्यवस्थापन',
+                advisory: 'नागरिक सल्ला'
+            }
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            initLanguage();
+            initNavigation();
+            loadDashboard();
+            loadWards();
+            loadAlertHistory();
+        });
+        
+        // Theme Management
+        function initTheme() {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === currentTheme);
+            });
+        }
+        
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentTheme = btn.dataset.theme;
+                localStorage.setItem('theme', currentTheme);
+                initTheme();
+            });
+        });
+        
+        // Language Management
+        function initLanguage() {
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === currentLang);
+            });
+        }
+        
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentLang = btn.dataset.lang;
+                localStorage.setItem('lang', currentLang);
+                initLanguage();
+                applyTranslations();
+            });
+        });
+        
+        function applyTranslations() {
+            const t = translations[currentLang];
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const page = item.dataset.page;
+                if (t[page]) {
+                    item.querySelector('span:last-child').textContent = t[page];
+                }
+            });
+        }
+        
+        // Navigation
+        function initNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                    document.getElementById(`page-${item.dataset.page}`).classList.add('active');
+                });
+            });
+            
+            // Mobile menu toggle
+            document.getElementById('menuToggle').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('open');
+            });
+        }
+        
+        // API Calls
+        async function fetchAPI(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, options);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.error(`API Error (${endpoint}):`, error);
+                showToast('error', 'Failed to load data');
+                return null;
+            }
+        }
+        
+        // Load Dashboard
+        async function loadDashboard() {
+            const overview = await fetchAPI('/wards/dashboard/overview');
+            if (overview) {
+                document.getElementById('totalWards').textContent = overview.total_wards;
+                document.getElementById('highRiskWards').textContent = overview.high_risk_wards;
+                document.getElementById('populationAtRisk').textContent = formatNumber(overview.population_at_risk);
+                document.getElementById('avgRiskScore').textContent = `${overview.average_risk_score}/100`;
+                document.getElementById('overallRiskBadge').textContent = overview.overall_risk_level.toUpperCase();
+                
+                // Update badge color
+                const badge = document.getElementById('overallRiskBadge');
+                badge.className = 'badge';
+                if (overview.overall_risk_level === 'Extreme') badge.classList.add('extreme');
+                else if (overview.overall_risk_level === 'Danger') badge.classList.add('high');
+                else if (overview.overall_risk_level === 'Caution') badge.classList.add('moderate');
+                else badge.classList.add('low');
+            }
+            
+            // Load priority wards
+            const wards = await fetchAPI('/wards');
+            if (wards) {
+                wardsData = wards;
+                renderPriorityWards(wards.slice(0, 5));
+                renderWardGrid(wards);
+                populateWardSelects(wards);
+            }
+        }
+        
+        // Load Wards
+        async function loadWards() {
+            const wards = await fetchAPI('/wards');
+            if (wards) {
+                wardsData = wards;
+                renderWardsTable(wards);
+            }
+        }
+        
+        // Render Priority Wards
+        function renderPriorityWards(wards) {
+            const tbody = document.querySelector('#priorityWardsTable tbody');
+            tbody.innerHTML = wards.map((ward, index) => `
+                <tr>
+                    <td><strong>#${index + 1}</strong></td>
+                    <td>${ward.ward_name}</td>
+                    <td>${ward.zone || '-'}</td>
+                    <td><strong>${ward.hvpi_score.toFixed(1)}</strong></td>
+                    <td><span class="badge ${getRiskClass(ward.hvpi_level)}">${ward.hvpi_level}</span></td>
+                    <td>${formatNumber(ward.population)}</td>
+                    <td><button class="btn" onclick="showWardDetail('${ward.ward_id}')">View</button></td>
+                </tr>
+            `).join('');
+        }
+        
+        // Render Ward Grid
+        function renderWardGrid(wards) {
+            const grid = document.getElementById('wardGrid');
+            grid.innerHTML = wards.map(ward => `
+                <div class="ward-card risk-${getRiskClass(ward.hvpi_level)}" onclick="showWardDetail('${ward.ward_id}')">
+                    <div class="ward-card-header">
+                        <span class="ward-name">${ward.ward_name}</span>
+                        <span class="badge ${getRiskClass(ward.hvpi_level)}">${ward.hvpi_level}</span>
+                    </div>
+                    <div class="ward-metrics">
+                        <div class="ward-metric">HVPI: <span class="ward-metric-value">${ward.hvpi_score.toFixed(1)}</span></div>
+                        <div class="ward-metric">Risk: <span class="ward-metric-value">${ward.risk_band}</span></div>
+                        <div class="ward-metric">Population: <span class="ward-metric-value">${formatNumber(ward.population)}</span></div>
+                        <div class="ward-metric">Heat Index: <span class="ward-metric-value">${ward.heat_index.toFixed(1)}°C</span></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Render Wards Table
+        function renderWardsTable(wards) {
+            const tbody = document.querySelector('#wardsTable tbody');
+            tbody.innerHTML = wards.map((ward, index) => `
+                <tr>
+                    <td><strong>#${index + 1}</strong></td>
+                    <td>${ward.ward_name}</td>
+                    <td>${ward.zone || '-'}</td>
+                    <td>${formatNumber(ward.population)}</td>
+                    <td><strong>${ward.hvpi_score.toFixed(1)}</strong></td>
+                    <td><span class="badge ${getRiskClass(ward.hvpi_level)}">${ward.hvpi_level}</span></td>
+                    <td>${ward.heat_index.toFixed(1)}°C</td>
+                    <td>${ward.wbgt.toFixed(1)}°C</td>
+                    <td><button class="btn" onclick="showWardDetail('${ward.ward_id}')">View</button></td>
+                </tr>
+            `).join('');
+        }
+        
+        // Populate Ward Selects
+        function populateWardSelects(wards) {
+            const selects = ['forecastWardSelect', 'actionWardSelect', 'alertWardSelect'];
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '<option value="">Select Ward...</option>' +
+                    wards.map(w => `<option value="${w.ward_id}">${w.ward_name}</option>`).join('');
+            });
+        }
+        
+        // Show Ward Detail
+        async function showWardDetail(wardId) {
+            const ward = await fetchAPI(`/wards/${wardId}`);
+            if (ward) {
+                currentWard = ward;
+                document.getElementById('wardModalTitle').textContent = ward.ward_name;
+                document.getElementById('wardModalContent').innerHTML = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <strong>HVPI Score:</strong> ${ward.hvpi_score.toFixed(1)}/100<br>
+                            <strong>HVPI Level:</strong> <span class="badge ${getRiskClass(ward.hvpi_level)}">${ward.hvpi_level}</span><br>
+                            <strong>Priority Rank:</strong> #${ward.priority_rank || '-'}
+                        </div>
+                        <div>
+                            <strong>Risk Score:</strong> ${ward.risk_score.toFixed(1)}/100<br>
+                            <strong>Risk Level:</strong> <span class="badge ${getRiskClass(ward.risk_band)}">${ward.risk_band}</span><br>
+                            <strong>Population:</strong> ${formatNumber(ward.population)}
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <strong>Temperature:</strong> ${ward.current_temp_c.toFixed(1)}°C | 
+                        <strong>Heat Index:</strong> ${ward.heat_index.toFixed(1)}°C | 
+                        <strong>WBGT:</strong> ${ward.wbgt.toFixed(1)}°C
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <strong>Vulnerability Factors:</strong>
+                        <ul style="margin-top: 8px; padding-left: 20px;">
+                            ${ward.vulnerability_factors.map(f => `<li>${f}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <strong>Why is this Ward at Risk?</strong>
+                        <p style="color: var(--text-secondary); margin-top: 8px;">${ward.hotspot_explanation}</p>
+                    </div>
+                    <div>
+                        <strong>Recommended Actions:</strong>
+                        <ul style="margin-top: 8px; padding-left: 20px;">
+                            ${ward.recommended_actions.map(a => `<li>${a}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                document.getElementById('wardModal').classList.add('active');
+            }
+        }
+        
+        function closeWardModal() {
+            document.getElementById('wardModal').classList.remove('active');
+        }
+        
+        // Forecast
+        document.getElementById('forecastWardSelect').addEventListener('change', async (e) => {
+            const wardId = e.target.value;
+            if (!wardId) return;
+            
+            const forecast = await fetchAPI(`/wards/${wardId}/forecast`);
+            if (forecast) {
+                document.getElementById('forecastContent').innerHTML = `
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 12px;">Current Risk</h4>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                            <div class="kpi-card">
+                                <div class="kpi-label">Risk Level</div>
+                                <div class="kpi-value"><span class="badge ${getRiskClass(forecast.current_risk.band)}">${forecast.current_risk.band}</span></div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Risk Score</div>
+                                <div class="kpi-value">${forecast.current_risk.score.toFixed(1)}</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Heat Index</div>
+                                <div class="kpi-value">${forecast.current_risk.heat_index.toFixed(1)}°C</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-label">WBGT</div>
+                                <div class="kpi-value">${forecast.current_risk.wbgt.toFixed(1)}°C</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${forecast.escalation_warnings.length > 0 ? `
+                        <div style="margin-bottom: 20px; padding: 16px; background-color: var(--risk-extreme-bg); border-left: 4px solid var(--risk-extreme); border-radius: var(--radius-sm);">
+                            <strong style="color: var(--risk-extreme);">⚠️ Risk Escalation Detected</strong>
+                            <p style="margin-top: 8px; color: var(--text-secondary);">
+                                ${forecast.escalation_warnings.map(w => 
+                                    `${w.from_risk} → ${w.to_risk} expected on ${w.day} (${w.hours_until} hours)`
+                                ).join(', ')}
+                            </p>
+                        </div>
+                    ` : ''}
+                    
+                    <div>
+                        <h4 style="margin-bottom: 12px;">5-Day Forecast</h4>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Day</th>
+                                        <th>Temperature</th>
+                                        <th>Humidity</th>
+                                        <th>Heat Index</th>
+                                        <th>WBGT</th>
+                                        <th>Risk Score</th>
+                                        <th>Risk Level</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${forecast.forecast.map(f => `
+                                        <tr>
+                                            <td>${f.day}</td>
+                                            <td>${f.temp_c.toFixed(1)}°C</td>
+                                            <td>${f.humidity_pct.toFixed(0)}%</td>
+                                            <td>${f.heat_index.toFixed(1)}°C</td>
+                                            <td>${f.wbgt.toFixed(1)}°C</td>
+                                            <td>${f.risk_score.toFixed(1)}</td>
+                                            <td><span class="badge ${getRiskClass(f.risk_band)}">${f.risk_band}</span></td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        
+        // Actions
+        document.getElementById('actionWardSelect').addEventListener('change', async (e) => {
+            const wardId = e.target.value;
+            if (!wardId) return;
+            
+            const actions = await fetchAPI(`/wards/${wardId}/actions`);
+            if (actions) {
+                document.getElementById('actionsContent').innerHTML = `
+                    <div style="margin-bottom: 16px;">
+                        <strong>Ward:</strong> ${actions.ward_name}<br>
+                        <strong>Risk Level:</strong> <span class="badge ${getRiskClass(actions.risk_level)}">${actions.risk_level}</span><br>
+                        <strong>Risk Score:</strong> ${actions.risk_score.toFixed(1)}/100
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 12px;">Recommended Municipal Actions</h4>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            ${actions.actions.map((action, index) => `
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background-color: var(--bg-tertiary); border-radius: var(--radius-sm);">
+                                    <input type="checkbox" id="action-${index}" style="width: 18px; height: 18px;">
+                                    <label for="action-${index}" style="flex: 1; cursor: pointer;">${action.action}</label>
+                                    <span class="badge ${action.status === 'Completed' ? 'low' : action.status === 'In Progress' ? 'moderate' : 'high'}">${action.status}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        
+        // Alert Preview
+        document.getElementById('previewAlertBtn').addEventListener('click', async () => {
+            const wardId = document.getElementById('alertWardSelect').value;
+            const riskLevel = document.getElementById('alertRiskSelect').value;
+            
+            if (!wardId) {
+                showToast('error', 'Please select a ward');
+                return;
+            }
+            
+            const preview = await fetchAPI('/alerts/preview', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ward_id: wardId, risk_level: riskLevel })
+            });
+            
+            if (preview) {
+                document.getElementById('alertModalContent').innerHTML = `
+                    <div style="margin-bottom: 16px;">
+                        <strong>Ward:</strong> ${preview.ward_name}<br>
+                        <strong>Risk Level:</strong> <span class="badge ${getRiskClass(preview.risk_level)}">${preview.risk_level}</span><br>
+                        <strong>Recipient:</strong> ${preview.recipient}<br>
+                        ${preview.prototype_mode ? '<span class="badge moderate">PROTOTYPE MODE - Alert will be sent to test number only</span>' : ''}
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <strong>Alert Message:</strong>
+                        <div style="margin-top: 8px; padding: 12px; background-color: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; font-size: 12px;">
+                            ${preview.message}
+                        </div>
+                    </div>
+                    <div>
+                        <strong>Metrics:</strong>
+                        Heat Index: ${preview.heat_index.toFixed(1)}°C | WBGT: ${preview.wbgt.toFixed(1)}°C
+                    </div>
+                `;
+                document.getElementById('alertModal').classList.add('active');
+                
+                // Store for sending
+                document.getElementById('sendAlertBtn').onclick = () => sendAlert(wardId, riskLevel);
+            }
+        });
+        
+        // Send Alert
+        async function sendAlert(wardId, riskLevel) {
+            const btn = document.getElementById('sendAlertBtn');
+            btn.textContent = 'Sending...';
+            btn.disabled = true;
+            
+            const result = await fetchAPI('/alerts/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ward_id: wardId, risk_level: riskLevel })
+            });
+            
+            btn.textContent = 'Send Alert';
+            btn.disabled = false;
+            
+            if (result) {
+                document.getElementById('alertModal').classList.remove('active');
+                showToast('success', `Alert ${result.status} successfully`);
+                loadAlertHistory();
+            }
+        }
+        
+        document.getElementById('cancelAlertBtn').addEventListener('click', () => {
+            document.getElementById('alertModal').classList.remove('active');
+        });
+        
+        // Quick Alert Button
+        document.getElementById('quickAlertBtn').addEventListener('click', () => {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.querySelector('[data-page="alerts"]').classList.add('active');
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-alerts').classList.add('active');
+        });
+        
+        // Ward Alert Button
+        document.getElementById('wardAlertBtn').addEventListener('click', () => {
+            closeWardModal();
+            if (currentWard) {
+                document.getElementById('alertWardSelect').value = currentWard.ward_id;
+                document.getElementById('alertRiskSelect').value = currentWard.risk_band;
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                document.querySelector('[data-page="alerts"]').classList.add('active');
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById('page-alerts').classList.add('active');
+            }
+        });
+        
+        // Load Alert History
+        async function loadAlertHistory() {
+            const history = await fetchAPI('/alerts/history');
+            if (history) {
+                const tbody = document.querySelector('#alertsHistoryTable tbody');
+                tbody.innerHTML = history.alerts.map(alert => `
+                    <tr>
+                        <td><small>${alert.alert_id}</small></td>
+                        <td><small>${new Date(alert.timestamp).toLocaleString()}</small></td>
+                        <td>${alert.ward_name}</td>
+                        <td><span class="badge ${getRiskClass(alert.risk_level)}">${alert.risk_level}</span></td>
+                        <td><small>${alert.recipient}</small></td>
+                        <td><span class="badge ${alert.status === 'Sent' ? 'low' : alert.status === 'Failed' ? 'extreme' : 'moderate'}">${alert.status}</span></td>
+                    </tr>
+                `).join('');
+            }
+        }
+        
+        // Filters
+        document.getElementById('wardSearch').addEventListener('input', filterWards);
+        document.getElementById('riskFilter').addEventListener('change', filterWards);
+        document.getElementById('zoneFilter').addEventListener('change', filterWards);
+        
+        function filterWards() {
+            const search = document.getElementById('wardSearch').value.toLowerCase();
+            const risk = document.getElementById('riskFilter').value;
+            const zone = document.getElementById('zoneFilter').value;
+            
+            const filtered = wardsData.filter(ward => {
+                const matchSearch = !search || ward.ward_name.toLowerCase().includes(search);
+                const matchRisk = !risk || ward.hvpi_level === risk;
+                const matchZone = !zone || ward.zone === zone;
+                return matchSearch && matchRisk && matchZone;
+            });
+            
+            renderWardsTable(filtered);
+        }
+        
+        // Utilities
+        function getRiskClass(level) {
+            const map = {
+                'Extreme': 'extreme',
+                'High': 'high',
+                'Danger': 'high',
+                'Moderate': 'moderate',
+                'Caution': 'moderate',
+                'Low': 'low',
+                'Safe': 'low'
+            };
+            return map[level] || 'moderate';
+        }
+        
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+        
+        function showToast(type, message) {
+            const toast = document.getElementById('toast');
+            toast.className = `toast ${type} active`;
+            document.getElementById('toastIcon').textContent = type === 'success' ? '✅' : '❌';
+            document.getElementById('toastMessage').textContent = message;
+            
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
