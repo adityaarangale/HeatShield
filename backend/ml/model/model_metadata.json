@@ -1,0 +1,33 @@
+{
+  "model_version": "rf-v1",
+  "algorithm": "RandomForestRegressor",
+  "training_period": "2023-01-01 to 2024-12-31",
+  "dataset_records": 17544,
+  "train_records": 14035,
+  "test_records": 3509,
+  "training_date": "2026-09-22 19:42:43",
+  "features_used": [
+    "temp_c",
+    "humidity_pct",
+    "wind_speed_kmh",
+    "surface_pressure_hpa",
+    "solar_radiation_wm2",
+    "precipitation_mm",
+    "wbgt_c",
+    "heat_index_c",
+    "apparent_temp_c",
+    "solar_adj_wbgt_c",
+    "hour",
+    "month",
+    "day_of_year",
+    "temp_roll3",
+    "temp_roll6",
+    "humidity_roll3"
+  ],
+  "metrics": {
+    "mae": 0.072,
+    "rmse": 0.117,
+    "r2": 0.9998
+  },
+  "target_definition": "Scientifically derived Human Thermal Stress & Demographic Vulnerability Index (0-100)"
+}

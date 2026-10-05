@@ -9,7 +9,9 @@
 // ==========================================================================
 // CONFIGURATION & GLOBAL CONSTANTS
 // ==========================================================================
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = (typeof window !== 'undefined' && window.HEATSHIELD_CONFIG) 
+  ? window.HEATSHIELD_CONFIG.API_BASE_URL 
+  : 'http://127.0.0.1:8000/api';
 
 // Complete 8 Pilot Wards / Talukas of Chandrapur District
 const CHANDRAPUR_WARDS = [
@@ -316,60 +318,60 @@ const ADVISOR_I18N = {
     status_live: "FastAPI Backend Connected",
     status_offline: "Offline Standalone Engine Active",
     authority_badge: "Disaster Management • Chandrapur",
-    profile_hdr: "Personal Vulnerability Profile",
-    profile_sub: "Tailors thermal stress to your age, labor exposure & health",
+    profile_hdr: "Your Health & Profile",
+    profile_sub: "Helps us give you personalized heat safety advice for your age and daily work",
     lbl_location: "Your Location (Ward / Taluka)",
     location_sub: "Chandrapur District",
-    btn_geolocate: "Auto-Detect",
+    btn_geolocate: "Auto-Detect Location",
     lbl_age: "Age Group",
-    lbl_age_desc: "Thermoregulation factor",
+    lbl_age_desc: "Age factor",
     age_child: "Child (<12)",
     age_adult: "Adult (12-64)",
     age_elderly: "Elderly (65+)",
     lbl_gender: "Gender (Optional)",
-    lbl_gender_desc: "Biometeorology factor",
+    lbl_gender_desc: "Gender factor",
     gen_male: "Male",
     gen_female: "Female",
     gen_other: "Prefer not to say",
-    lbl_occ: "Occupation / Exposure Type",
-    lbl_occ_desc: "Direct solar load",
+    lbl_occ: "Occupation & Work Type",
+    lbl_occ_desc: "Sunlight exposure",
     occ_manual: "Outdoor Manual Labor",
     occ_non_manual: "Outdoor Transit / Vendor",
     occ_office: "Indoor / Office",
     occ_student: "Student / Home",
-    lbl_health: "Health Flags",
-    lbl_health_desc: "Multi-select",
+    lbl_health: "Health Conditions",
+    lbl_health_desc: "Select any that apply",
     health_cardio: "Heart / Asthma Condition",
     health_preg: "Pregnant",
     health_none: "None Disclosed",
     lbl_activity: "Activity Right Now",
-    lbl_activity_desc: "Metabolic heat load",
+    lbl_activity_desc: "Physical effort right now",
     act_rest: "Resting",
     act_light: "Light Activity",
     act_heavy: "Heavy Exertion",
-    btn_save: "Recalculate Personal Risk →",
-    hero_score: "Personal Risk Index",
-    hero_feels_like: "Heat Index",
-    hero_wbgt: "WBGT",
+    btn_save: "Save Profile & View Risk →",
+    hero_score: "Your Personal Heat Risk",
+    hero_feels_like: "Feels Like",
+    hero_wbgt: "Outdoor Heat (WBGT)",
     hero_humidity: "Humidity",
     hero_wind: "Wind",
     sec_precautions: "Personalized Safety Actions",
     badge_safe_hours: "SAFE HOURS",
     badge_danger_hours: "AVOID SUN",
-    sec_why: "Why This Recommendation?",
-    why_sub: "Biometeorological factors altering your base risk",
-    why_intro: "Heat Shield blends the municipal baseline risk score with your physiological exposure profile using guidance from the CDC Extreme Heat Advisory, NOAA Heat Index, and OSHA Occupational Standards.",
-    accordion_trigger_text: "View Detailed Factor Multipliers & Standards",
+    sec_why: "How We Calculated Your Risk",
+    why_sub: "Personal factors adjusting your daily risk score",
+    why_intro: "Heat Shield combines your local area weather with your age, work type, and physical activity to calculate your personal risk level based on medical and safety standards.",
+    accordion_trigger_text: "View Detailed Breakdown & Health Multipliers",
     col_factor: "Factor",
-    col_val: "Selection",
-    col_impact: "Impact",
-    col_rationale: "Rationale & Citation",
-    sec_forecast: "3-Day Personalized Forecast",
-    sec_shelter: "Nearest Cooling Shelter",
+    col_val: "Your Selection",
+    col_impact: "Impact on Risk",
+    col_rationale: "Why This Matters",
+    sec_forecast: "3-Day Personal Forecast",
+    sec_shelter: "Nearest Cooling Center",
     btn_directions: "Open Directions in Google Maps ↗",
-    sec_emergency_alert: "Emergency Contact Safety Ping",
-    emergency_alert_desc: "One-tap automated SMS dispatch to your family with your live heatwave risk tier and location.",
-    btn_family_alert: "Alert My Family / Emergency Contact",
+    sec_emergency_alert: "Send Safety Alert to Family",
+    emergency_alert_desc: "Send a quick SMS alert to your family with your location and safety status.",
+    btn_family_alert: "Alert Family / Emergency Contact",
     modal_title: "Send Emergency Heat Alert",
     modal_desc: "Sends an instant SMS alert to your family with your personal risk status and recommended precautions.",
     lbl_recipient_name: "Relative / Contact Name",
@@ -381,9 +383,9 @@ const ADVISOR_I18N = {
     toast_sent: "Emergency SMS alert dispatched successfully!",
     toast_geo_ok: "Location matched to nearest ward:",
     toast_geo_err: "Location permission denied; defaulted to Chandrapur City.",
-    band_safe: "Normal / Safe",
-    band_caution: "Caution Alert",
-    band_danger: "Danger Alert",
+    band_safe: "Normal & Safe",
+    band_caution: "Moderate Heat Caution",
+    band_danger: "High Heat Danger",
     band_extreme: "Extreme Emergency",
     unit_km: "km",
     day_prefix: "Day",
@@ -569,6 +571,124 @@ let userProfile = {
   health_flags: ["none"],
   activity_level: "heavy_exertion"
 };
+
+let hasProfileSaved = false;
+
+function updateTabLockState(isUnlocked) {
+  document.querySelectorAll('.cit-tab-btn').forEach(btn => {
+    const tabName = btn.getAttribute('data-tab') || (btn.getAttribute('onclick') || '').match(/'([^']+)'/)?.[1];
+    if (tabName && tabName !== 'profile') {
+      const lockLabel = btn.querySelector('.tab-lock-label');
+      if (!isUnlocked) {
+        btn.style.opacity = '0.45';
+        btn.style.filter = 'grayscale(100%)';
+        btn.style.cursor = 'not-allowed';
+        if (lockLabel) lockLabel.style.display = 'block';
+      } else {
+        btn.style.opacity = '1';
+        btn.style.filter = 'none';
+        btn.style.cursor = 'pointer';
+        if (lockLabel) lockLabel.style.display = 'none';
+      }
+    }
+  });
+}
+
+async function loadCitizenProfileFromBackend() {
+  const token = window.heatshieldToken || sessionStorage.getItem('heatshield_token') || localStorage.getItem('heatshield_access_token');
+  if (!token) return;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/citizen/profile`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.has_profile && data.profile) {
+        hasProfileSaved = true;
+        const prof = data.profile;
+        let parsedHealthFlags = ["none"];
+        if (Array.isArray(prof.health_flags)) {
+          parsedHealthFlags = prof.health_flags;
+        } else if (typeof prof.health_flags === 'string' && prof.health_flags.trim()) {
+          parsedHealthFlags = prof.health_flags.split(',');
+        }
+        userProfile = {
+          ...userProfile,
+          age_group: prof.age_group || userProfile.age_group,
+          gender: prof.gender || userProfile.gender,
+          occupation_type: prof.occupation_type || userProfile.occupation_type,
+          health_flags: parsedHealthFlags,
+          activity_level: prof.activity_level || userProfile.activity_level,
+          ward_id: prof.ward_id || userProfile.ward_id
+        };
+        syncFormWithProfile();
+        updateTabLockState(true);
+        switchCitizenTab('risk');
+        calculatePersonalRisk();
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn("Could not fetch citizen profile from DB:", err);
+  }
+
+  // If no saved profile found in database
+  hasProfileSaved = false;
+  syncFormWithProfile();
+  updateTabLockState(false);
+  switchCitizenTab('profile');
+}
+
+async function submitCitizenProfile() {
+  const token = window.heatshieldToken || sessionStorage.getItem('heatshield_token') || localStorage.getItem('heatshield_access_token');
+  if (!token) {
+    if (typeof showToast === 'function') showToast("Authentication error. Please log in again.");
+    window.location.href = 'auth.html';
+    return;
+  }
+
+  const payload = {
+    age_group: userProfile.age_group || "adult",
+    gender: userProfile.gender || "prefer_not_to_say",
+    occupation_type: userProfile.occupation_type || "outdoor_manual",
+    health_flags: userProfile.health_flags || ["none"],
+    activity_level: userProfile.activity_level || "heavy_exertion",
+    ward_id: userProfile.ward_id || "CHA_001"
+  };
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/citizen/profile`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || "Failed to save profile to database");
+    }
+
+    const data = await res.json();
+    hasProfileSaved = true;
+    saveProfile();
+    updateTabLockState(true);
+    calculatePersonalRisk();
+    switchCitizenTab('risk');
+    if (typeof showToast === 'function') {
+      showToast("✓ Profile saved successfully! Personal risk updated.");
+    }
+    document.getElementById("heroCard")?.scrollIntoView({ behavior: "smooth" });
+  } catch (err) {
+    console.error("Error submitting citizen profile:", err);
+    if (typeof showToast === 'function') {
+      showToast(`Error: ${err.message}`);
+    }
+  }
+}
 
 // Cached Active Assessment Result
 let currentResult = null;
@@ -841,26 +961,26 @@ function getLocalizedDeltaText(personalScore, baseScore, personalBand, baseBand,
   const diff = personalScore - baseScore;
   if (lang === 'mr') {
     if (diff > 5) {
-      return `वाढलेला धोका: तुमचे वय, व्यवसाय किंवा शारीरिक हालचालींमुळे तुमचा वैयक्तिक धोका सामान्य नागरिकांपेक्षा जास्त आहे (${personalScore} विरुद्ध प्रभाग ${baseScore}).`;
+      return `तुमचा आजचा धोका सामान्य नागरिकांपेक्षा जास्त आहे, कारण तुमचे वय आणि उन्हातील काम.`;
     } else if (diff < -5) {
-      return `कमी धोका: इनडोअर काम किंवा विश्रांतीमुळे तुमचा वैयक्तिक धोका सामान्य प्रभागापेक्षा कमी आहे (${personalScore} विरुद्ध प्रभाग ${baseScore}).`;
+      return `तुमचा आजचा धोका सामान्य नागरिकांपेक्षा कमी आहे, कारण तुम्ही घरात आहात किंवा विश्रांती घेत आहात.`;
     }
-    return `समान पातळी: तुमचा वैयक्तिक धोका प्रभागाच्या सामान्य सार्वजनिक इशाऱ्याशी जुळत आहे (${personalScore}).`;
+    return `तुमचा आजचा धोका तुमच्या परिसरातील सामान्य सार्वजनिक इशाऱ्याशी जुळत आहे.`;
   } else if (lang === 'hi') {
     if (diff > 5) {
-      return `बढ़ा हुआ जोखिम: आपकी आयु, व्यवसाय या परिश्रम के कारण आपका व्यक्तिगत जोखिम आम जनता से अधिक है (${personalScore} बनाम वार्ड ${baseScore})।`;
+      return `आपका जोखिम आज आम जनता से अधिक है, क्योंकि आपकी आयु और धूप में कार्य स्थिति है।`;
     } else if (diff < -5) {
-      return `कम जोखिम: घर के अंदर रहने या आराम के कारण आपका व्यक्तिगत जोखिम सार्वजनिक स्तर से कम है (${personalScore} बनाम वार्ड ${baseScore})।`;
+      return `आपका जोखिम आज आम जनता से कम है, क्योंकि आप घर के अंदर या छाया में आराम कर रहे हैं।`;
     }
-    return `समान स्तर: आपका व्यक्तिगत जोखिम वार्ड की सामान्य चेतावनी के अनुरूप है (${personalScore})।`;
+    return `आपका जोखिम स्तर आज आपके क्षेत्र की सामान्य चेतावनी के अनुरूप है।`;
   }
   // English
   if (diff > 5) {
-    return `Elevated: Personal risk is higher than public baseline (${personalBand} ${personalScore} vs Public ${baseBand} ${baseScore}) due to heightened exposure or vulnerability.`;
+    return `Your risk today is higher than the general public's, because of your age and outdoor work type.`;
   } else if (diff < -5) {
-    return `Reduced: Personal risk is lower than public baseline (${personalBand} ${personalScore} vs Public ${baseBand} ${baseScore}) due to indoor protection or rest.`;
+    return `Your risk today is lower than the general public's, because you are indoors or resting in shade.`;
   }
-  return `Aligned: Your personal risk matches the public ward warning tier (${personalBand} ${personalScore}).`;
+  return `Your risk level today matches the general public warning for your area.`;
 }
 
 function getLocalizedSafeHours(riskBand, lang) {
@@ -1419,6 +1539,25 @@ async function calculatePersonalRisk() {
   const statusDot = document.getElementById("statusPulseDot");
   const statusText = document.getElementById("backendStatusText");
 
+  const queryLat = userCoords ? userCoords.lat : 19.9615;
+  const queryLon = userCoords ? userCoords.lon : 79.2961;
+
+  // Query server-side 10-minute cached endpoint GET /api/weather/live
+  try {
+    const liveWRes = await fetch(`${API_BASE_URL}/api/weather/live?lat=${queryLat}&lon=${queryLon}`);
+    if (liveWRes.ok) {
+      const liveWData = await liveWRes.json();
+      const srcNameEl = document.getElementById("weatherDataSourceName");
+      if (srcNameEl) {
+        srcNameEl.textContent = liveWData.cached ? 
+          `FastAPI Server Cache (${liveWData.cache_age_seconds}s old)` : 
+          `FastAPI Backend (/api/weather/live)`;
+      }
+    }
+  } catch (e) {
+    console.log("Direct /api/weather/live ping skipped or offline.");
+  }
+
   const payload = {
     ward_id: userProfile.ward_id,
     age_group: userProfile.age_group,
@@ -1583,6 +1722,35 @@ function renderResults(data) {
   if (humEl) humEl.textContent = `${data.metrics.humidity_pct}%`;
   const windEl = document.getElementById("metricWind");
   if (windEl) windEl.textContent = `${data.metrics.wind_speed_kmh} km/h`;
+
+  // Update Data Source, Debug Audit & Timestamp Banner
+  const srcNameEl = document.getElementById("weatherDataSourceName");
+  if (srcNameEl) srcNameEl.textContent = data.data_source || "Open-Meteo Live API";
+  const liveTagEl = document.getElementById("weatherDataLiveTag");
+  const liveDotEl = document.getElementById("liveDataDot");
+  if (liveTagEl) {
+    liveTagEl.textContent = data.is_live !== false ? "CONNECTED (LIVE API)" : "LIVE WEATHER UNAVAILABLE";
+    liveTagEl.style.color = data.is_live !== false ? "#16a34a" : "#dc2626";
+    liveTagEl.style.background = data.is_live !== false ? "#f0fdf4" : "#fef2f2";
+    liveTagEl.style.borderColor = data.is_live !== false ? "#bbf7d0" : "#fecaca";
+  }
+  if (liveDotEl) {
+    liveDotEl.style.background = data.is_live !== false ? "#16a34a" : "#dc2626";
+  }
+  const timeEl = document.getElementById("weatherLastUpdatedTime");
+  if (timeEl) {
+    timeEl.textContent = data.timestamp ? new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+  const debugEndpoint = document.getElementById("debugEndpointUrl");
+  if (debugEndpoint) {
+    const lat = (data.user_location && data.user_location.lat) ? data.user_location.lat : 19.9615;
+    const lon = (data.user_location && data.user_location.lon) ? data.user_location.lon : 79.2961;
+    debugEndpoint.textContent = `${API_BASE_URL}/weather/live?lat=${lat}&lon=${lon}`;
+  }
+  const debugCoords = document.getElementById("debugCoordsDisplay");
+  if (debugCoords && data.user_location) {
+    debugCoords.textContent = `${data.user_location.lat.toFixed(4)}° N, ${data.user_location.lon.toFixed(4)}° E`;
+  }
 
   // 2. Safe Hours Box (Localized)
   const safeHours = getLocalizedSafeHours(data.personal_risk_band, currentLang);
@@ -1808,7 +1976,8 @@ function renderShelter(shelter, userLoc) {
     }).setView([shelter.lat, shelter.lon], 13);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 18
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19
     }).addTo(shelterMapInstance);
 
     shelterMarkerGroup = L.layerGroup().addTo(shelterMapInstance);
@@ -1994,3 +2163,368 @@ function showToast(msg) {
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 3600);
 }
+
+// ==========================================================================
+// AUTHENTICATION & ROLE-BASED ACCESS CONTROL (RBAC) SYSTEM
+// ==========================================================================
+
+let currentUser = null;
+let currentAuthRole = 'CITIZEN';
+
+function checkUserSession() {
+  const token = window.heatshieldToken || sessionStorage.getItem('heatshield_token') || localStorage.getItem('heatshield_access_token');
+  if (!token) {
+    window.location.href = 'auth.html';
+    return;
+  }
+  
+  fetch(`${API_BASE_URL}/auth/me`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+  .then(res => {
+    if (!res.ok) {
+      throw new Error('Invalid or expired token');
+    }
+    return res.json();
+  })
+  .then(user => {
+    const userRole = (user && user.role) ? user.role.toLowerCase() : '';
+    if (userRole !== 'citizen') {
+      console.warn("Access denied: Citizen role required for Citizen Advisor.");
+      window.location.href = 'auth.html';
+      return;
+    }
+    currentUser = user;
+    updateAuthUI(user);
+    loadCitizenProfileFromBackend();
+  })
+  .catch(err => {
+    console.warn("Citizen auth session error:", err.message);
+    window.heatshieldToken = null;
+    sessionStorage.removeItem('heatshield_token');
+    sessionStorage.removeItem('heatshield_user');
+    localStorage.removeItem('heatshield_access_token');
+    window.location.href = 'auth.html';
+  });
+}
+
+function updateAuthUI(user) {
+  const authBtnText = document.getElementById('authPortalBtnText');
+  const authBtn = document.getElementById('authPortalBtn');
+  const logoutNavBtn = document.getElementById('logoutNavBtn');
+  const userBadge = document.getElementById('citizenUserBadge');
+  const userNameEl = document.getElementById('citizenUserName');
+  
+  if (user) {
+    if (authBtnText) {
+      authBtnText.textContent = `${user.name} (${user.role})`;
+    }
+    if (userNameEl) {
+      userNameEl.textContent = user.name || 'Citizen';
+    }
+    if (userBadge) {
+      userBadge.style.display = 'inline-block';
+    }
+    if (authBtn) {
+      authBtn.style.display = 'none'; // Hide login button when already authenticated
+    }
+    if (logoutNavBtn) {
+      logoutNavBtn.style.display = 'inline-flex';
+    }
+  } else {
+    if (userBadge) {
+      userBadge.style.display = 'none';
+    }
+    if (authBtnText) {
+      authBtnText.textContent = "Login / Signup";
+    }
+    if (authBtn) {
+      authBtn.style.display = 'inline-flex';
+      authBtn.style.background = '#0284c7';
+      authBtn.style.borderColor = '#0369a1';
+      authBtn.onclick = () => { window.location.href = 'auth.html'; };
+      authBtn.title = "Open Auth Portal";
+    }
+    if (logoutNavBtn) {
+      logoutNavBtn.style.display = 'none';
+    }
+  }
+}
+
+function handleLogout() {
+  window.heatshieldToken = null;
+  sessionStorage.removeItem('heatshield_token');
+  sessionStorage.removeItem('heatshield_user');
+  localStorage.removeItem('heatshield_access_token');
+  currentUser = null;
+  updateAuthUI(null);
+  if (typeof showToast === 'function') {
+    showToast("Logged out successfully. Redirecting to login...");
+  }
+  setTimeout(() => {
+    window.location.href = 'auth.html';
+  }, 400);
+}
+
+function openAuthModal() {
+  const modal = document.getElementById('authPortalModal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeAuthModal() {
+  const modal = document.getElementById('authPortalModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function switchAuthTab(role) {
+  currentAuthRole = role;
+  const citBtn = document.getElementById('tabCitizenAuth');
+  const authBtn = document.getElementById('tabAuthorityAuth');
+  const citCont = document.getElementById('citizenAuthContainer');
+  const authCont = document.getElementById('authorityAuthContainer');
+
+  if (role === 'CITIZEN') {
+    citBtn.style.background = '#ffffff';
+    citBtn.style.color = '#ea580c';
+    citBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+    authBtn.style.background = 'transparent';
+    authBtn.style.color = '#64748b';
+    authBtn.style.boxShadow = 'none';
+    citCont.style.display = 'block';
+    authCont.style.display = 'none';
+  } else {
+    authBtn.style.background = '#ffffff';
+    authBtn.style.color = '#0f172a';
+    authBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+    citBtn.style.background = 'transparent';
+    citBtn.style.color = '#64748b';
+    citBtn.style.boxShadow = 'none';
+    citCont.style.display = 'none';
+    authCont.style.display = 'block';
+  }
+}
+
+function switchCitizenAuthMode(mode) {
+  const loginBtn = document.getElementById('subTabCitizenLogin');
+  const signupBtn = document.getElementById('subTabCitizenSignup');
+  const loginForm = document.getElementById('citizenLoginForm');
+  const signupForm = document.getElementById('citizenSignupForm');
+
+  if (mode === 'login') {
+    loginBtn.style.color = '#ea580c';
+    loginBtn.style.borderBottom = '2px solid #ea580c';
+    signupBtn.style.color = '#64748b';
+    signupBtn.style.borderBottom = '2px solid transparent';
+    loginForm.style.display = 'block';
+    signupForm.style.display = 'none';
+  } else {
+    signupBtn.style.color = '#ea580c';
+    signupBtn.style.borderBottom = '2px solid #ea580c';
+    loginBtn.style.color = '#64748b';
+    loginBtn.style.borderBottom = '2px solid transparent';
+    signupForm.style.display = 'block';
+    loginForm.style.display = 'none';
+  }
+}
+
+function switchAuthorityAuthMode(mode) {
+  const loginBtn = document.getElementById('subTabAuthLogin');
+  const regBtn = document.getElementById('subTabAuthRegister');
+  const loginForm = document.getElementById('authorityLoginForm');
+  const regForm = document.getElementById('authorityRegisterForm');
+
+  if (mode === 'login') {
+    loginBtn.style.color = '#0f172a';
+    loginBtn.style.borderBottom = '2px solid #0f172a';
+    regBtn.style.color = '#64748b';
+    regBtn.style.borderBottom = '2px solid transparent';
+    loginForm.style.display = 'block';
+    regForm.style.display = 'none';
+  } else {
+    regBtn.style.color = '#0f172a';
+    regBtn.style.borderBottom = '2px solid #0f172a';
+    loginBtn.style.color = '#64748b';
+    loginBtn.style.borderBottom = '2px solid transparent';
+    regForm.style.display = 'block';
+    loginForm.style.display = 'none';
+  }
+}
+
+function handleCitizenLogin(event) {
+  event.preventDefault();
+  const email = document.getElementById('citLoginEmail').value;
+  const password = document.getElementById('citLoginPassword').value;
+
+  fetch(`${API_BASE_URL}/auth/citizen/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  })
+  .then(res => {
+    if (!res.ok) return res.json().then(d => { throw new Error(d.detail || "Login failed"); });
+    return res.json();
+  })
+  .then(data => {
+    localStorage.setItem('heatshield_access_token', data.access_token);
+    currentUser = data.user;
+    updateAuthUI(data.user);
+    closeAuthModal();
+    showToast(`Welcome back, ${data.user.name}! (Citizen)`);
+  })
+  .catch(err => {
+    showToast(`Error: ${err.message}`);
+  });
+}
+
+function handleCitizenSignup(event) {
+  event.preventDefault();
+  const name = document.getElementById('citSignupName').value;
+  const email = document.getElementById('citSignupEmail').value;
+  const password = document.getElementById('citSignupPassword').value;
+
+  fetch(`${API_BASE_URL}/auth/citizen/signup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, password })
+  })
+  .then(res => {
+    if (!res.ok) return res.json().then(d => { throw new Error(d.detail || "Signup failed"); });
+    return res.json();
+  })
+  .then(data => {
+    localStorage.setItem('heatshield_access_token', data.access_token);
+    currentUser = data.user;
+    updateAuthUI(data.user);
+    closeAuthModal();
+    showToast(`Account created! Welcome, ${data.user.name}!`);
+  })
+  .catch(err => {
+    showToast(`Error: ${err.message}`);
+  });
+}
+
+function handleAuthorityLogin(event) {
+  event.preventDefault();
+  const email = document.getElementById('authLoginEmail').value;
+  const password = document.getElementById('authLoginPassword').value;
+
+  fetch(`${API_BASE_URL}/auth/authority/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  })
+  .then(res => {
+    if (!res.ok) return res.json().then(d => { throw new Error(d.detail || "Authority login failed"); });
+    return res.json();
+  })
+  .then(data => {
+    localStorage.setItem('heatshield_access_token', data.access_token);
+    currentUser = data.user;
+    updateAuthUI(data.user);
+    closeAuthModal();
+    showToast(`Authority Authenticated! Redirecting to Control Room...`);
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 1000);
+  })
+  .catch(err => {
+    showToast(`Error: ${err.message}`);
+  });
+}
+
+function handleAuthorityRegister(event) {
+  event.preventDefault();
+  const name = document.getElementById('authRegName').value;
+  const email = document.getElementById('authRegEmail').value;
+  const password = document.getElementById('authRegPassword').value;
+  const registration_code = document.getElementById('authRegCode').value;
+
+  fetch(`${API_BASE_URL}/auth/authority/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, password, registration_code })
+  })
+  .then(res => {
+    if (!res.ok) return res.json().then(d => { throw new Error(d.detail || "Authority registration failed"); });
+    return res.json();
+  })
+  .then(data => {
+    localStorage.setItem('heatshield_access_token', data.access_token);
+    currentUser = data.user;
+    updateAuthUI(data.user);
+    closeAuthModal();
+    showToast(`Officer Registered! Redirecting to Control Room...`);
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 1000);
+  })
+  .catch(err => {
+    showToast(`Error: ${err.message}`);
+  });
+}
+
+function switchCitizenTab(secId, btnEl) {
+  if (!hasProfileSaved && secId !== 'profile') {
+    if (typeof showToast === 'function') {
+      showToast("Complete your profile to see this section");
+    }
+    secId = 'profile';
+    btnEl = document.querySelector('.cit-tab-btn[data-tab="profile"]') || document.querySelector('.cit-tab-btn[onclick*="\'profile\'"]');
+  }
+
+  // Hide all sections
+  document.querySelectorAll('.cit-tab-content').forEach(el => {
+    el.style.display = 'none';
+    el.classList.remove('active');
+  });
+
+  // Highlight active tab button
+  document.querySelectorAll('.cit-tab-btn').forEach(btn => {
+    btn.style.background = 'transparent';
+    btn.style.color = '#64748b';
+    btn.style.boxShadow = 'none';
+    btn.classList.remove('active');
+  });
+
+  const targetSec = document.getElementById(`cit-sec-${secId}`);
+  if (targetSec) {
+    targetSec.style.display = 'block';
+    targetSec.classList.add('active');
+  }
+
+  if (!btnEl) {
+    btnEl = document.querySelector(`.cit-tab-btn[onclick*="'${secId}'"]`);
+  }
+
+  if (btnEl) {
+    btnEl.style.background = '#ea580c';
+    btnEl.style.color = '#ffffff';
+    btnEl.style.boxShadow = '0 2px 6px rgba(234, 88, 12, 0.25)';
+    btnEl.classList.add('active');
+  }
+
+  // Handle map & chart resize invalidations on tab change
+  if (secId === 'safety') {
+    setTimeout(() => {
+      if (typeof shelterMapInstance !== 'undefined' && shelterMapInstance) {
+        shelterMapInstance.invalidateSize();
+      }
+    }, 150);
+  } else if (secId === 'forecast') {
+    setTimeout(() => {
+      if (typeof forecastChartInstance !== 'undefined' && forecastChartInstance) {
+        forecastChartInstance.resize();
+      }
+    }, 150);
+  }
+}
+
+function refreshLiveDataClick() {
+  showToast("Fetching live weather parameters from FastAPI Backend (/api/weather/live)...");
+  calculatePersonalRisk();
+}
+
+// Initialize user session check on page load
+document.addEventListener("DOMContentLoaded", () => {
+  checkUserSession();
+});

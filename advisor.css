@@ -4,54 +4,54 @@
    ========================================================================== */
 
 :root {
-  /* Core Base Colors */
-  --bg-app: #f1f5f9;
-  --card-bg: rgba(255, 255, 255, 0.92);
-  --card-border: rgba(226, 232, 240, 0.9);
+  /* Core Calm Light Base Colors for Citizens */
+  --bg-app: #f8fafc;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
   --text-main: #0f172a;
-  --text-muted: #64748b;
+  --text-muted: #475569;
   --text-dim: #94a3b8;
   
-  /* Brand Accents */
-  --brand-orange: #ea580c;
-  --brand-orange-light: #fff7ed;
-  --brand-orange-border: #fed7aa;
+  /* Friendly Primary Accent (Reserving Orange for Risk Alerts Only) */
+  --brand-orange: #0284c7;
+  --brand-orange-light: #f0f9ff;
+  --brand-orange-border: #bae6fd;
   
-  /* Dynamic Risk Tiers */
+  /* Dynamic Risk Level Colors (Used ONLY for Risk Indicators) */
   --risk-safe: #16a34a;
-  --risk-safe-bg: linear-gradient(135deg, #15803d 0%, #16a34a 60%, #22c55e 100%);
+  --risk-safe-bg: linear-gradient(135deg, #0f766e 0%, #16a34a 100%);
   --risk-safe-subtle: #f0fdf4;
   --risk-safe-border: #bbf7d0;
 
   --risk-caution: #d97706;
-  --risk-caution-bg: linear-gradient(135deg, #b45309 0%, #d97706 60%, #f59e0b 100%);
+  --risk-caution-bg: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
   --risk-caution-subtle: #fffbeb;
   --risk-caution-border: #fde68a;
 
   --risk-danger: #ea580c;
-  --risk-danger-bg: linear-gradient(135deg, #c2410c 0%, #ea580c 60%, #f97316 100%);
+  --risk-danger-bg: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
   --risk-danger-subtle: #fff7ed;
   --risk-danger-border: #fed7aa;
 
   --risk-extreme: #dc2626;
-  --risk-extreme-bg: linear-gradient(135deg, #991b1b 0%, #dc2626 50%, #ef4444 100%);
+  --risk-extreme-bg: linear-gradient(135deg, #991b1b 0%, #dc2626 100%);
   --risk-extreme-subtle: #fef2f2;
   --risk-extreme-border: #fecaca;
 
-  /* Typography */
+  /* Larger Public-Friendly Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-heading: 'Plus Jakarta Sans', var(--font-sans);
   --font-devanagari: 'Noto Sans Devanagari', var(--font-sans);
 
-  /* Radius & Shadows */
-  --radius-xl: 24px;
-  --radius-lg: 18px;
+  /* Radius & Soft Shadows */
+  --radius-xl: 20px;
+  --radius-lg: 16px;
   --radius-md: 12px;
   --radius-sm: 8px;
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.12);
-  --shadow-hero: 0 16px 36px -8px rgba(0, 0, 0, 0.22);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08);
+  --shadow-hero: 0 12px 28px -6px rgba(15, 23, 42, 0.15);
 }
 
 /* Reset & Box Sizing */
@@ -65,7 +65,8 @@ body {
   font-family: var(--font-sans);
   background-color: var(--bg-app);
   color: var(--text-main);
-  line-height: 1.5;
+  font-size: 14.5px;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   padding-bottom: 60px;
 }
@@ -78,9 +79,10 @@ body {
 /* App Container */
 .app-container {
   width: 100%;
-  max-width: 620px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 20px 16px;
+  box-sizing: border-box;
 }
 
 /* ==========================================================================
@@ -91,9 +93,8 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 12px 18px;
   background: var(--card-bg);
-  backdrop-filter: blur(12px);
   border: 1px solid var(--card-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
@@ -109,15 +110,15 @@ body {
 }
 
 .brand-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.35);
+  box-shadow: 0 3px 8px rgba(2, 132, 199, 0.25);
   flex-shrink: 0;
 }
 
@@ -128,7 +129,7 @@ body {
 
 .brand-text h1 {
   font-family: var(--font-heading);
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.15;
@@ -136,8 +137,12 @@ body {
 }
 
 .brand-tagline {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #0284c7;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
   color: var(--brand-orange);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -196,6 +201,87 @@ body {
 .admin-link-btn:hover {
   background: #e2e8f0;
   border-color: #94a3b8;
+}
+
+/* Citizen Dashboard Tab Bar Navigation */
+.citizen-tabs-bar {
+  display: flex;
+  gap: 6px;
+  background: #ffffff;
+  padding: 6px;
+  border-radius: 14px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cit-tab-btn {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 8px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  color: #64748b;
+  text-align: center;
+}
+
+.cit-tab-btn-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.cit-tab-btn.active {
+  background: #ea580c;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(234, 88, 12, 0.25);
+}
+
+.tab-lock-label {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #dc2626;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.cit-tab-btn.active .tab-lock-label {
+  color: #fef2f2;
+}
+
+@media (max-width: 480px) {
+  .citizen-tabs-bar {
+    gap: 4px;
+    padding: 4px;
+  }
+  .cit-tab-btn {
+    padding: 8px 3px;
+    font-size: 11px;
+    gap: 2px;
+  }
+  .cit-tab-btn-content {
+    gap: 3px;
+  }
+  .cit-tab-btn-content svg {
+    width: 13px;
+    height: 13px;
+  }
+  .tab-lock-label {
+    font-size: 8px;
+  }
 }
 
 /* Status Bar Pill */

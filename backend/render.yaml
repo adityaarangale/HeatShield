@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: heatshield-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: HEATSHIELD_JWT_SECRET
+        generateValue: true
+      - key: AUTHORITY_REGISTRATION_CODE
+        value: HEATSHIELD_AUTH_SECRET_2026
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173"

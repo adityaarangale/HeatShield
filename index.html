@@ -17,28 +17,67 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 
-    <!-- Bilingual Translations Script -->
+    <!-- Config, Auth Guard & Bilingual Translations Script -->
+    <script src="config.js"></script>
+    <script>
+      (async function checkAuthorityAuth() {
+        const API_BASE = window.HEATSHIELD_CONFIG ? window.HEATSHIELD_CONFIG.API_BASE : "http://127.0.0.1:8000";
+        const token = sessionStorage.getItem("heatshield_token");
+        if (!token) {
+          window.location.href = "auth.html";
+          return;
+        }
+        try {
+          const res = await fetch(`${API_BASE}/api/auth/me`, {
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+          if (!res.ok) {
+            throw new Error("Invalid session token");
+          }
+          const user = await res.json();
+          const role = (user.role || "").toLowerCase();
+          if (role !== "authority") {
+            throw new Error("Access restricted: Authority privileges required");
+          }
+          window.heatshieldToken = token;
+          window.currentUser = user;
+        } catch (err) {
+          sessionStorage.removeItem("heatshield_token");
+          sessionStorage.removeItem("heatshield_user");
+          window.location.href = "auth.html";
+        }
+      })();
+
+      function handleLogout() {
+        sessionStorage.removeItem("heatshield_token");
+        sessionStorage.removeItem("heatshield_user");
+        window.heatshieldToken = null;
+        window.currentUser = null;
+        window.location.href = "auth.html";
+      }
+    </script>
     <script src="translations.js"></script>
+
 
     <style>
         :root {
-            /* World-Class Executive Light Slate Theme */
-            --bg-page: #f8fafc;
-            --sidebar-bg: #0b1329;
-            --sidebar-surface: #111d3d;
-            --sidebar-text: #94a3b8;
-            --sidebar-hover: #172554;
-            --sidebar-active-bg: rgba(234, 88, 12, 0.18);
-            --sidebar-active-text: #fb923c;
+            /* Classic Enterprise / Government Officer Theme */
+            --bg-page: #f4f6f9;
+            --sidebar-bg: #1f3864;
+            --sidebar-surface: #172b50;
+            --sidebar-text: #b0c4de;
+            --sidebar-hover: #2c4d80;
+            --sidebar-active-bg: #152747;
+            --sidebar-active-text: #ffffff;
 
             --card-bg: #ffffff;
-            --card-border: #e2e8f0;
+            --card-border: #d1d5db;
             --card-sub: #f8fafc;
             --card-sub-hover: #f1f5f9;
 
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-tertiary: #94a3b8;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-tertiary: #6b7280;
 
             --risk-extreme: #dc2626;
             --risk-extreme-bg: #fef2f2;
@@ -56,15 +95,15 @@
             --risk-safe-bg: #f0fdf4;
             --risk-safe-border: #bbf7d0;
 
-            --brand-primary: #ea580c;
-            --brand-primary-hover: #c2410c;
+            --brand-primary: #1f3864;
+            --brand-primary-hover: #172b50;
 
-            --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 14px;
-            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --shadow-sm: none;
+            --shadow-md: none;
+            --shadow-lg: none;
         }
 
         * {
@@ -74,13 +113,13 @@
         }
 
         body {
-            font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+            font-family: 'Inter', 'Noto Sans Devanagari', -apple-system, sans-serif;
             background-color: var(--bg-page);
             color: var(--text-primary);
             display: flex;
             height: 100vh;
             overflow: hidden;
-            font-size: 13.5px;
+            font-size: 13px;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
         }
@@ -94,85 +133,82 @@
             justify-content: space-between;
             flex-shrink: 0;
             z-index: 30;
-            box-shadow: 2px 0 16px rgba(0, 0, 0, 0.12);
-            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            border-right: 1px solid #172b50;
         }
 
         .brand-block {
-            padding: 22px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 20px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
-        /* Premium Brand Vector Logo */
+        /* Restrained Shield Logo */
         .brand-logo-wrap {
-            width: 42px;
-            height: 42px;
-            background: linear-gradient(135deg, rgba(234, 88, 12, 0.2), rgba(220, 38, 38, 0.3));
-            border: 1px solid rgba(251, 146, 60, 0.35);
-            border-radius: 12px;
+            width: 38px;
+            height: 38px;
+            background: #172b50;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            box-shadow: 0 0 16px rgba(234, 88, 12, 0.25);
         }
 
         .brand-shield-svg {
-            width: 26px;
-            height: 26px;
+            width: 22px;
+            height: 22px;
             display: block;
         }
 
         .brand-title h1 {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 16.5px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
             font-weight: 800;
             color: #ffffff;
-            letter-spacing: -0.3px;
+            letter-spacing: 0.2px;
         }
 
         .brand-title p {
-            font-size: 11px;
+            font-size: 10.5px;
             color: var(--sidebar-text);
             line-height: 1.25;
-            margin-top: 1px;
+            margin-top: 2px;
         }
 
         .nav-list {
-            padding: 16px 12px;
+            padding: 14px 10px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 3px;
             flex: 1;
             overflow-y: auto;
         }
 
-        /* Modern Enterprise Nav Buttons */
+        /* Classic Enterprise Nav Buttons */
         .nav-btn {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 11.5px 14px;
-            border-radius: var(--radius-sm);
-            color: #94a3b8;
-            font-weight: 600;
-            font-size: 14px;
-            letter-spacing: 0.1px;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 4px;
+            color: #d1d5db;
+            font-weight: 500;
+            font-size: 13px;
             cursor: pointer;
-            transition: all 0.16s ease;
+            transition: all 0.12s ease;
             border-left: 3px solid transparent;
         }
 
         .nav-btn svg {
-            width: 18px;
-            height: 18px;
+            width: 17px;
+            height: 17px;
             stroke-width: 2;
             flex-shrink: 0;
-            stroke: #94a3b8;
-            transition: stroke 0.16s ease;
+            stroke: #9ca3af;
+            transition: stroke 0.12s ease;
         }
 
         .nav-btn:hover {
@@ -181,23 +217,27 @@
         }
 
         .nav-btn:hover svg {
-            stroke: #fb923c;
+            stroke: #ffffff;
         }
 
         .nav-btn.active {
-            background: linear-gradient(90deg, rgba(234, 88, 12, 0.2) 0%, rgba(234, 88, 12, 0.04) 100%);
+            background-color: var(--sidebar-active-bg);
             color: #ffffff;
             font-weight: 700;
-            border-left: 3.5px solid var(--brand-primary);
+            border-left: 3.5px solid #60a5fa;
         }
 
         .nav-btn.active svg {
-            stroke: #fb923c;
+            stroke: #60a5fa;
         }
 
         .sidebar-foot {
-            padding: 16px 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 14px 18px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 11px;
+            color: var(--sidebar-text);
+            background-color: #172b50;
+        }
             font-size: 11.5px;
             color: var(--sidebar-text);
             background-color: rgba(0, 0, 0, 0.15);
@@ -208,6 +248,8 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            min-height: 0;
+            height: 100vh;
             overflow: hidden;
         }
 
@@ -337,6 +379,8 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            min-height: 0;
+            height: auto;
         }
 
         .tab-content {
@@ -344,10 +388,13 @@
             flex-direction: column;
             gap: 20px;
             width: 100%;
+            height: auto;
         }
 
         .tab-content.active {
             display: flex;
+            flex-direction: column;
+            height: auto;
         }
 
         /* Command Banner */
@@ -470,22 +517,6 @@
             color: var(--text-primary);
         }
 
-        /* Fixed Map Container Box in Control Center */
-        .map-box-container {
-            width: 100%;
-            height: 330px;
-            border-radius: var(--radius-md);
-            border: 1px solid var(--card-border);
-            overflow: hidden;
-            position: relative;
-        }
-
-        #overviewPreviewMap {
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
         .action-list {
             list-style: none;
             display: flex;
@@ -594,7 +625,8 @@
             display: grid;
             grid-template-columns: 240px 1fr 320px;
             gap: 16px;
-            height: calc(100vh - 135px);
+            min-height: 550px;
+            height: auto;
         }
 
         @media (max-width: 1050px) {
@@ -633,7 +665,7 @@
             background: var(--brand-primary);
             color: white;
             border-color: var(--brand-primary);
-            box-shadow: 0 2px 6px rgba(234, 88, 12, 0.3);
+            box-shadow: none;
         }
 
         #fullMap {
@@ -1226,6 +1258,17 @@
                 display: inline-block;
             }
         }
+
+        html, body { height: 100%; overflow: hidden; }
+        .page-body, .workspace > *:not(.sidebar) {
+          max-height: 100vh !important;
+          overflow-y: auto !important;
+        }
+        .tab-content, .page-content, .view, [class*="page-"] {
+          height: auto !important;
+          max-height: none !important;
+          overflow: visible !important;
+        }
     </style>
 </head>
 
@@ -1238,19 +1281,12 @@
     <aside class="sidebar">
         <div>
             <div class="brand-block">
-                <!-- Custom Modern Vector Shield Logo -->
+                <!-- Custom Government Shield Logo -->
                 <div class="brand-logo-wrap">
                     <svg class="brand-shield-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L3 6.2V12C3 17.5 6.8 21.7 12 23C17.2 21.7 21 17.5 21 12V6.2L12 2Z" fill="url(#shieldGrad)" stroke="#ffedd5" stroke-width="1.2"/>
+                        <path d="M12 2L3 6.2V12C3 17.5 6.8 21.7 12 23C17.2 21.7 21 17.5 21 12V6.2L12 2Z" fill="#1f3864" stroke="#ffffff" stroke-width="1.5"/>
                         <circle cx="12" cy="12" r="3.4" fill="#ffffff" fill-opacity="0.9"/>
-                        <path d="M12 5.8V7.8M12 16.2V18.2M5.8 12H7.8M16.2 12H18.2M7.6 7.6L9 9M15 15L16.4 16.4M7.6 16.4L9 15M15 9L16.4 7.6" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round"/>
-                        <defs>
-                            <linearGradient id="shieldGrad" x1="3" y1="2" x2="21" y2="23" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="#ea580c"/>
-                                <stop offset="0.5" stop-color="#f97316"/>
-                                <stop offset="1" stop-color="#dc2626"/>
-                            </linearGradient>
-                        </defs>
+                        <path d="M12 5.8V7.8M12 16.2V18.2M5.8 12H7.8M16.2 12H18.2M7.6 7.6L9 9M15 15L16.4 16.4M7.6 16.4L9 15M15 9L16.4 7.6" stroke="#1f3864" stroke-width="1.2" stroke-linecap="round"/>
                     </svg>
                 </div>
                 <div class="brand-title">
@@ -1349,15 +1385,27 @@
                     <span data-i18n="nav_settings">Settings</span>
                 </div>
 
-                <!-- 9. Citizen View Link -->
-                <a href="advisor.html" target="_blank" class="nav-btn" style="text-decoration: none; color: inherit; margin-top: 10px; border: 1px dashed rgba(234, 88, 12, 0.45); background: rgba(234, 88, 12, 0.08);">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-linecap="round" stroke-linejoin="round">
+                <!-- 9. Registered Accounts -->
+                <a href="accounts.html" class="nav-btn" style="text-decoration: none; color: #b0c4de;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span>Registered Accounts</span>
+                </a>
+
+                <!-- 10. Citizen View Link -->
+                <a href="citizen.html" target="_blank" class="nav-btn" style="text-decoration: none; color: #b0c4de; margin-top: 10px; border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(255, 255, 255, 0.05);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                         <circle cx="12" cy="7" r="4"></circle>
                     </svg>
-                    <span style="color: #fb923c; font-weight: 700;">Citizen Advisor ↗</span>
+                    <span style="color: #60a5fa; font-weight: 600;">Citizen View ↗</span>
                 </a>
             </nav>
+
         </div>
 
         <div class="sidebar-foot">
@@ -1392,11 +1440,22 @@
             </div>
 
             <div class="header-actions">
+                <div id="indexUserAuthGroup" style="display: inline-flex; align-items: center; gap: 8px;">
+                    <span id="indexUserBadge" style="font-size: 11.5px; font-weight: 700; color: #475569; background: #f1f5f9; padding: 5px 10px; border-radius: 99px; border: 1px solid #cbd5e1; display: none;"></span>
+                    <button id="indexLogoutBtn" onclick="handleLogout()" style="display: none; background: #dc2626; color: #ffffff; border: 1px solid #b91c1c; font-weight: 700; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; align-items: center; gap: 6px;" title="Logout from HeatShield">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        <span>Logout</span>
+                    </button>
+                </div>
                 <div class="lang-switch">
                     <button class="lang-opt active" id="btnEn" onclick="switchLanguage('en')">EN</button>
                     <button class="lang-opt" id="btnMr" onclick="switchLanguage('mr')">मराठी</button>
                 </div>
-                <a href="advisor.html" target="_blank" class="btn-btn" style="background:#fff7ed; border-color:#fed7aa; color:#ea580c; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:6px; font-size:12px;" title="Open Citizen Personal Heat Risk Advisor">
+                <a href="citizen.html" target="_blank" class="btn-btn" style="background:#f1f5f9; border-color:#cbd5e1; color:#1f3864; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:4px; font-size:12px;" title="Open Citizen Personal Heat Risk Advisor">
                     <span>👤 Citizen View ↗</span>
                 </a>
                 <button class="btn-alert-global" onclick="openAlertModal()">
@@ -1419,7 +1478,7 @@
                         <h3 data-i18n="cmd_header">DISTRICT HEAT RISK STATUS</h3>
                         <h2><span data-i18n="cmd_extreme">EXTREME HEAT EMERGENCY</span> — <span id="hdrPeakScore">75.9</span> / 100</h2>
                         <p><span id="hdrHighRiskCount">3 of 8 municipal wards require immediate intervention • 2 Ecological Green Zones safe</span> •
-                            <span data-i18n="lbl_last_updated">Last updated</span>: <span id="lblTime">05 Sep 2026, 08:00</span></p>
+                            <span data-i18n="lbl_last_updated">Last updated</span>: <span id="lblTime">Loading...</span></p>
                     </div>
                 </div>
 
@@ -1449,7 +1508,7 @@
 
                 <!-- Executive 2-Column Dashboard Layout -->
                 <div class="dashboard-main-grid">
-                    <!-- Left Main Column: Priority Wards + GIS Spatial Map -->
+                    <!-- Left Main Column: Priority Wards -->
                     <div style="display: flex; flex-direction: column; gap: 20px;">
                         <!-- Ranked Wards Table -->
                         <div class="card-box">
@@ -1475,17 +1534,6 @@
                                         <!-- Injected by JS -->
                                     </tbody>
                                 </table>
-                            </div>
-                        </div>
-
-                        <!-- GIS Preview Map -->
-                        <div class="card-box">
-                            <div class="card-head">
-                                <h3 data-i18n="sec_district_preview">GIS SPATIAL RISK PREVIEW</h3>
-                                <button class="btn-btn" onclick="showTab('map')" data-i18n="btn_view_map">Open Interactive GIS Map →</button>
-                            </div>
-                            <div class="map-box-container">
-                                <div id="overviewPreviewMap"></div>
                             </div>
                         </div>
                     </div>
@@ -1567,12 +1615,12 @@
                     <!-- Filters -->
                     <div class="card-box">
                         <h4 style="font-size: 12px; color: var(--text-primary);" data-i18n="map_filter_hdr">Risk Tier Filter</h4>
-                        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
-                            <button class="btn-btn" style="text-align: left;" onclick="filterGisMap('All')" data-i18n="filter_all">All Wards (8)</button>
-                            <button class="btn-btn" style="text-align: left; border-left: 3.5px solid var(--risk-extreme);" onclick="filterGisMap('Extreme')" data-i18n="filter_extreme">Extreme Risk (3)</button>
-                            <button class="btn-btn" style="text-align: left; border-left: 3.5px solid var(--risk-danger);" onclick="filterGisMap('Danger')" data-i18n="filter_danger">Danger Risk (1)</button>
-                            <button class="btn-btn" style="text-align: left; border-left: 3.5px solid var(--risk-caution);" onclick="filterGisMap('Caution')" data-i18n="filter_caution">Caution Risk (2)</button>
-                            <button class="btn-btn" style="text-align: left; border-left: 3.5px solid var(--risk-safe);" onclick="filterGisMap('Safe')" data-i18n="filter_safe">Safe / Green Zone (2)</button>
+                        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;" id="riskTierFilterGroup">
+                            <button class="btn-btn risk-filter-btn active" style="text-align: left;" onclick="filterMapByRisk('All', this)" data-i18n="filter_all">All Wards (8)</button>
+                            <button class="btn-btn risk-filter-btn" style="text-align: left; border-left: 3.5px solid var(--risk-extreme);" onclick="filterMapByRisk('Extreme', this)" data-i18n="filter_extreme">Extreme Risk (3)</button>
+                            <button class="btn-btn risk-filter-btn" style="text-align: left; border-left: 3.5px solid var(--risk-danger);" onclick="filterMapByRisk('Danger', this)" data-i18n="filter_danger">Danger Risk (1)</button>
+                            <button class="btn-btn risk-filter-btn" style="text-align: left; border-left: 3.5px solid var(--risk-caution);" onclick="filterMapByRisk('Caution', this)" data-i18n="filter_caution">Caution Risk (2)</button>
+                            <button class="btn-btn risk-filter-btn" style="text-align: left; border-left: 3.5px solid var(--risk-safe);" onclick="filterMapByRisk('Safe', this)" data-i18n="filter_safe">Safe / Green Zone (2)</button>
                         </div>
 
                         <!-- Blue Dots GIS Infrastructure Callout -->
@@ -1596,8 +1644,9 @@
                     </div>
 
                     <!-- GIS Map Container with Overlay Legend -->
-                    <div style="position: relative; height: 100%; min-height: 420px; border-radius: var(--radius-md); overflow: hidden;">
-                        <div id="fullMap" style="height: 100%; width: 100%;"></div>
+                    <div style="position: relative; height: auto; min-height: 500px; border-radius: var(--radius-md); overflow: hidden;">
+                        <div id="riskMap" style="height: 500px; width: 100%;"></div>
+                        <div id="fullMap" style="height: 100%; width: 100%; display: none;"></div>
                         <div class="map-legend-overlay">
                             <div class="map-legend-title">
                                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
@@ -1744,6 +1793,14 @@
                         <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px;" data-i18n="forecast_title">5-DAY HEAT RISK OUTLOOK</h2>
                         <p style="color: var(--text-secondary); font-size: 12px;" data-i18n="forecast_sub">Predictive multi-day trend modeling to enable early response planning</p>
                     </div>
+                    <select id="selForecastWard" onchange="loadForecastForSelectedWard(this.value)"
+                        style="background: #ffffff; color: var(--text-primary); border: 1px solid var(--card-border); padding: 8px 14px; border-radius: var(--radius-sm); font-weight: 600;">
+                        <!-- Injected -->
+                    </select>
+                </div>
+
+                <div id="forecastFallbackBox" style="display: none; padding: 14px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: var(--radius-sm); color: #c2410c; font-weight: 700; font-size: 13px;">
+                    ⚠️ Forecast data unavailable for this ward
                 </div>
 
                 <div class="card-box" style="border-left: 4px solid var(--brand-primary);">
@@ -1812,12 +1869,12 @@
 
                         <div style="text-align: left; margin-top: 18px; border-top: 1px solid var(--card-border); padding-top: 12px;">
                             <h4 style="font-size: 11px; color: var(--text-secondary);" data-i18n="sim_why_hdr">WHY DID RISK CHANGE?</h4>
-                            <p style="font-size: 12px; color: var(--text-primary); margin-top: 4px;" data-i18n="sim_why_desc">Increased solar load combined with ambient temperature rise pushed WBGT into extreme threshold.</p>
+                            <p style="font-size: 12px; color: var(--text-primary); margin-top: 4px;" id="simWhyDesc">Increased solar load combined with ambient temperature rise pushed WBGT into extreme threshold.</p>
                         </div>
 
                         <div style="text-align: left; margin-top: 12px; background-color: var(--card-sub); padding: 12px; border-radius: var(--radius-sm);">
                             <h4 style="font-size: 11px; color: var(--text-secondary);" data-i18n="sim_rec_hdr">PREPAREDNESS RECOMMENDATION</h4>
-                            <p style="font-size: 12px; color: var(--text-primary); margin-top: 2px;" data-i18n="sim_rec_desc">Under this simulated scenario, cooling centers must open 2 hours earlier and hydration distribution expanded.</p>
+                            <p style="font-size: 12px; color: var(--text-primary); margin-top: 2px;" id="simRecDesc">Under this simulated scenario, cooling centers must open 2 hours earlier and hydration distribution expanded.</p>
                         </div>
                     </div>
                 </div>
@@ -2011,7 +2068,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                                     Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & City Hospital.
                                 </div>
                                 <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #4ade80;">
-                                    <span id="mockDeliveryTargetLabel">✓ Ready for Handset: aditya-g (9156616395)</span>
+                                    <span id="mockDeliveryTargetLabel">✓ Ready for Handset: Test Contact 1 (+919876543210)</span>
                                     <span style="background: rgba(74, 222, 128, 0.15); padding: 2px 7px; border-radius: 4px; font-weight: 700;" data-i18n="lbl_sms_format">Cellular SMS Format</span>
                                 </div>
                             </div>
@@ -2057,7 +2114,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                             <div id="addContactBox" style="display: none; background: #f8fafc; border: 1px dashed var(--card-border); padding: 10px; border-radius: var(--radius-sm); flex-direction: column; gap: 6px;">
                                 <div style="font-weight: 700; font-size: 11px; color: var(--text-primary);" data-i18n="lbl_add_contact_hdr">Add Citizen / Sir / Team Mobile Number:</div>
                                 <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 6px;">
-                                    <input type="text" id="newContactName" placeholder="e.g. aditya-g or Sir" data-i18n-placeholder="ph_contact_name" style="padding: 5px 8px; font-size: 11px; border: 1px solid var(--card-border); border-radius: 4px;">
+                                    <input type="text" id="newContactName" placeholder="e.g. Test Contact 1" data-i18n-placeholder="ph_contact_name" style="padding: 5px 8px; font-size: 11px; border: 1px solid var(--card-border); border-radius: 4px;">
                                     <input type="tel" id="newContactPhone" placeholder="Mobile e.g. 9156616395" data-i18n-placeholder="ph_contact_phone" style="padding: 5px 8px; font-size: 11px; border: 1px solid var(--card-border); border-radius: 4px; font-family: monospace;">
                                     <select id="newContactCity" style="padding: 5px 8px; font-size: 11px; border: 1px solid var(--card-border); border-radius: 4px;">
                                         <option value="Chandrapur">Chandrapur</option>
@@ -2137,8 +2194,8 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                         </p>
 
                         <div style="background: var(--card-sub); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--card-border); font-size: 11.5px; font-family: monospace; display: flex; flex-direction: column; gap: 4px;" id="backendDiagOutput">
-                            <div>• Server Target: http://127.0.0.1:8000</div>
-                            <div>• Interactive Docs: <a href="http://127.0.0.1:8000/docs" target="_blank" style="color: var(--brand-primary); font-weight: 600;">http://127.0.0.1:8000/docs</a></div>
+                            <div>• Server Target: <span id="diagServerTarget">Configuring...</span></div>
+                            <div>• Interactive Docs: <a id="diagDocsLink" href="#" target="_blank" style="color: var(--brand-primary); font-weight: 600;">Swagger Docs ↗</a></div>
                             <div>• Health Endpoint: /api/health</div>
                         </div>
 
@@ -2151,6 +2208,48 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                             </a>
                         </div>
                     </div>
+
+                    <!-- Live Weather Data Source Card -->
+                    <div class="card-box" style="border-left: 4px solid var(--brand-primary);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <h3 style="font-size: 14px; font-weight: 700;">LIVE WEATHER DATA SOURCE</h3>
+                            <span class="tag Safe" id="weatherDataLiveTag" style="color: #16a34a; font-weight: 800; background: #f0fdf4; padding: 2px 8px; border-radius: 99px; border: 1px solid #bbf7d0;">LIVE</span>
+                        </div>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+                            Verify Open-Meteo live API integration pipeline, target coordinates, and force manual data synchronizations.
+                        </p>
+
+                        <div style="background: var(--card-sub); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--card-border); font-size: 11.5px; font-family: monospace; display: flex; flex-direction: column; gap: 6px;" id="weatherDataPanelBox">
+                            <div>• <b>Data Source:</b> <span id="weatherDataSourceName" style="font-weight: 700; color: var(--text-primary);">FastAPI Backend (/api/weather/live)</span></div>
+                            <div>• <b>Target Endpoint:</b> <span id="debugEndpointUrl">/api/weather/live</span></div>
+                            <div>• <b>Coordinates:</b> <span id="debugCoordsDisplay">19.9615° N, 79.2961° E</span></div>
+                            <div>• <b>Last Updated:</b> <span id="weatherLastUpdatedTime">Just now</span></div>
+                        </div>
+
+                        <div style="display: flex; gap: 8px; margin-top: 10px;">
+                            <button id="btnRefreshLiveData" class="btn-btn" onclick="refreshLiveDataClick()" style="background: #ea580c; color: white; border: none; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;" title="Fetch fresh weather parameters from FastAPI Backend (/api/weather/live)">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                    <polyline points="1 20 1 14 7 14"></polyline>
+                                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                </svg>
+                                <span>Refresh Live Data</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Methodology -->
+                <div class="card-box" style="margin-top: 16px; border-left: 4px solid var(--brand-primary);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="font-size: 14px; font-weight: 700; color: var(--brand-primary); display: flex; align-items: center; gap: 6px;">
+                            📐 <span>SYSTEM METHODOLOGY</span>
+                        </h3>
+                        <span class="tag Safe" style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;">Physics-Based &amp; Verified</span>
+                    </div>
+                    <p style="font-size: 13px; color: var(--text-primary); margin-top: 10px; line-height: 1.6; background: var(--card-sub); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--card-border);">
+                        Heat Shield uses physics-based formulas (WBGT — Australian BOM standard, Heat Index — NWS Rothfusz regression, Apparent Temperature, and a composite Human Thermal Stress Index), not a black-box ML model, so every number is independently verifiable.
+                    </p>
                 </div>
             </div>
 
@@ -2260,14 +2359,9 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
 
     <!-- MAIN JAVASCRIPT LOGIC & RESILIENT DATA ENGINE -->
     <script>
-        const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const API_URL = isLocalHost ? "http://127.0.0.1:8000" : "";
+        const API_URL = (window.HEATSHIELD_CONFIG && window.HEATSHIELD_CONFIG.API_BASE) ? window.HEATSHIELD_CONFIG.API_BASE : "http://127.0.0.1:8000";
         let curLang = localStorage.getItem('heatshield_lang') || 'en';
-        let wardsData = [];
-        let selectedWard = null;
-        let overviewPreviewMap, fullMap, overviewGroup, fullGroup;
         let forecastChart = null;
-        let activeLayerMode = 'all';
 
         // High-Precision Balanced Dataset: 2 Extreme, 2 Danger, 2 Caution, 2 Safe (Green Zones)
         const RAW_WARDS_DATA = [
@@ -2443,23 +2537,24 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
 
         // Cooling Shelter & Hydration Van POIs (Represented by Blue Dots on Map)
         const EMERGENCY_POIS = [
+            // Chandrapur City Wards
             { 
                 name: "Chandrapur City Hospital Cooling Hub", 
                 name_mr: "चंद्रपूर शहर रुग्णालय कूलिंग हब",
                 lat: 19.9650, 
                 lon: 79.2980, 
                 type: "shelter", 
-                desc: "Equipped with cold baths, IV fluids & air filtration.",
-                desc_mr: "थंड पाण्याच्या टाक्या, सलाईन आणि वातानुकूलित सुविधेने सज्ज."
+                desc: "24/7 emergency unit with cold baths, IV fluids & air filtration.",
+                desc_mr: "२४/७ आपत्कालीन विभाग, थंड पाण्याच्या टाक्या, सलाईन आणि वातानुकूलित सुविधेने सज्ज."
             },
             { 
-                name: "Ballarpur Municipal High School Center", 
-                name_mr: "बल्लारपूर पालिका हायस्कूल केंद्र",
-                lat: 19.8350, 
-                lon: 79.3520, 
+                name: "Gandhi Chowk Transit Relief Shelter", 
+                name_mr: "गांधी चौक ट्रान्सिट रिलीफ शेल्टर",
+                lat: 19.9540, 
+                lon: 79.2990, 
                 type: "shelter", 
-                desc: "Capacity for 250 workers with high-speed evaporative coolers.",
-                desc_mr: "२५० मजुरांची क्षमता व उच्च क्षमतेचे कूलर्स उपलब्ध."
+                desc: "Shaded mist-cooling canopy, free drinking water & basic medical checkup.",
+                desc_mr: "मिस्ट-कूलिंग सावली, मोफत पिण्याचे पाणी आणि प्राथमिक वैद्यकीय तपासणी."
             },
             { 
                 name: "Gandhi Chowk Hydration Van 01", 
@@ -2467,8 +2562,27 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                 lat: 19.9580, 
                 lon: 79.2920, 
                 type: "van", 
-                desc: "Chilled ORS water dispatch for bus transit passengers.",
-                desc_mr: "बस प्रवाशांसाठी थंड ओआरएस पाणी वाटप."
+                desc: "Chilled ORS water dispatch & emergency ice packs for bus passengers.",
+                desc_mr: "बस प्रवाशांसाठी थंड ओआरएस पाणी वाटप आणि बर्फाचे पॅक्स."
+            },
+            // Ballarpur Wards
+            { 
+                name: "Ballarpur Municipal High School Center", 
+                name_mr: "बल्लारपूर पालिका हायस्कूल केंद्र",
+                lat: 19.8350, 
+                lon: 79.3520, 
+                type: "shelter", 
+                desc: "Capacity for 250 industrial workers with high-speed evaporative coolers.",
+                desc_mr: "२५० मजुरांची क्षमता व उच्च क्षमतेचे कूलर्स उपलब्ध."
+            },
+            { 
+                name: "Ballarpur Sub-District Hospital Heat Ward", 
+                name_mr: "बल्लारपूर उपजिल्हा रुग्णालय उष्माघात प्रभाग",
+                lat: 19.8420, 
+                lon: 79.3490, 
+                type: "shelter", 
+                desc: "Dedicated 30-bed emergency heat stroke unit with ICU support.",
+                desc_mr: "३० खाटांचा स्वतंत्र उष्माघात आपत्कालीन विभाग व अतिदक्षता सुविधा."
             },
             { 
                 name: "WCL Coal Mines Mobile Aid Van 02", 
@@ -2476,8 +2590,55 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                 lat: 19.8300, 
                 lon: 79.3450, 
                 type: "van", 
-                desc: "Continuous water refilling for open-cast manual laborers.",
-                desc_mr: "उघड्यावर काम करणाऱ्या मजुरांसाठी निरंतर पिण्याच्या पाण्याचा पुरवठा."
+                desc: "Continuous water refilling & oral rehydration for open-cast laborers.",
+                desc_mr: "उघड्यावर काम करणाऱ्या मजुरांसाठी निरंतर पिण्याच्या पाण्याचा व ओआरएसचा पुरवठा."
+            },
+            // Warora Wards
+            { 
+                name: "Warora Civil Hospital Heat Relief Center", 
+                name_mr: "वरोरा नागरी रुग्णालय उष्मा रिलीफ सेंटर",
+                lat: 20.2310, 
+                lon: 79.0020, 
+                type: "shelter", 
+                desc: "Air-conditioned recovery rooms, paramedic staff & electrolyte stations.",
+                desc_mr: "वातानुकूलित रिकव्हरी रूम, पॅरामेडिकल स्टाफ आणि इलेक्ट्रोलाइट स्टेशन्स."
+            },
+            { 
+                name: "Warora Industrial Workers Cooling Pavilion", 
+                name_mr: "वरोरा औद्योगिक कामगार कूलिंग पॅव्हेलियन",
+                lat: 20.2240, 
+                lon: 79.0110, 
+                type: "shelter", 
+                desc: "Shaded resting shelter for MIDC factory outdoor workers.",
+                desc_mr: "एमआयडीसी कारखान्यातील कामगारांसाठी सावली व विश्रांती गृह."
+            },
+            { 
+                name: "Warora MIDC Mobile Hydration Van 03", 
+                name_mr: "वरोरा MIDC मोबाईल हायड्रेशन व्हॅन ०३",
+                lat: 20.2280, 
+                lon: 79.0060, 
+                type: "van", 
+                desc: "Mobile cold water tanker patrolling industrial & construction zones.",
+                desc_mr: "औद्योगिक आणि बांधकाम क्षेत्रात फिरणारी थंड पाण्याची टँकर व्हॅन."
+            },
+            // Rajura Wards
+            { 
+                name: "Rajura Community Health Cooling Hub", 
+                name_mr: "राजुरा समुदाय आरोग्य कूलिंग हब",
+                lat: 19.7820, 
+                lon: 79.3620, 
+                type: "shelter", 
+                desc: "Equipped with cooling mattresses, hydration salts & emergency triage.",
+                desc_mr: "कूलिंग गाद्या, हायड्रेशन सॉल्ट्स आणि आपत्कालीन उपचारांची सोय."
+            },
+            { 
+                name: "Cement Works Mobile ORS Relief Van 04", 
+                name_mr: "सिमेंट कामगार मोबाईल ओआरएस मदत व्हॅन ०४",
+                lat: 19.7750, 
+                lon: 79.3550, 
+                type: "van", 
+                desc: "Mobile ORS & water distribution for quarry & cement unit workers.",
+                desc_mr: "खाण व सिमेंट कामगारांसाठी ओआरएस व पाणी वाटप व्हॅन."
             }
         ];
 
@@ -2602,14 +2763,23 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                 closeMobileSidebar();
             }
 
-            if (id === 'map' && fullMap) {
-                setTimeout(() => fullMap.invalidateSize(), 250);
+            if (id === 'map') {
+                setTimeout(() => {
+                    if (fullMap) fullMap.invalidateSize();
+                    if (riskMap) riskMap.invalidateSize();
+                }, 100);
             }
             if (id === 'overview' && overviewPreviewMap) {
-                setTimeout(() => overviewPreviewMap.invalidateSize(), 250);
+                setTimeout(() => overviewPreviewMap.invalidateSize(), 100);
             }
-            if (id === 'forecast' && forecastChart) {
-                setTimeout(() => forecastChart.resize(), 150);
+            if (id === 'forecast') {
+                populateForecastDropdown();
+                const sel = document.getElementById('selForecastWard');
+                const targetId = sel && sel.value ? sel.value : (selectedWard ? selectedWard.ward_id : (wardsData.length ? wardsData[0].ward_id : 'CHA_001'));
+                loadForecastForSelectedWard(targetId);
+                if (forecastChart) {
+                    setTimeout(() => forecastChart.resize(), 150);
+                }
             }
         }
 
@@ -2639,12 +2809,34 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             if (e.key === 'Escape') closeMobileSidebar();
         });
 
+        // Global Application State Variables
+        let wardsData = [];
+        let selectedWard = null;
+        let activeLayerMode = 'risk';
+        let overviewPreviewMap = null;
+        let fullMap = null;
+        let riskMap = null;
+        let overviewGroup = null;
+        let fullGroup = null;
+        let riskMarkers = [];
+        let lastDataFetchTime = null;
+
+        function updateLastUpdatedTimestamp() {
+            lastDataFetchTime = new Date().toLocaleString();
+            const lblTime = document.getElementById('lblTime');
+            if (lblTime) {
+                lblTime.textContent = lastDataFetchTime;
+            }
+        }
+
         async function initData() {
             let loadedWards = null;
             let dataSource = "cloud";
 
-            // 1. If running on localhost, attempt FastAPI endpoint
-            if (isLocalHost && API_URL) {
+            // 1. Single GET /api/health check to sync top bar badge and settings status
+            const isBackendHealthy = await testBackendHealth();
+
+            if (isBackendHealthy && API_URL) {
                 try {
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), 1200);
@@ -2658,7 +2850,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                         }
                     }
                 } catch (e) {
-                    console.log("Local FastAPI not detected, falling back to static dataset.");
+                    console.log("Local FastAPI wards fetch failed, falling back to static dataset.");
                 }
             }
 
@@ -2685,38 +2877,73 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                 dataSource = "embedded";
             }
 
+            // Record data fetch timestamp
+            updateLastUpdatedTimestamp();
+
             // Evaluate all records through thermal model
             wardsData = loadedWards.map(evaluateWardRecord);
 
-            // Update Status Pill
-            const sysDot = document.getElementById('sysDot');
-            const sysStatus = document.getElementById('sysStatus');
-            const badgeDiag = document.getElementById('backendBadgeStatus');
-            if (dataSource === "api") {
-                sysDot.className = 'dot';
-                sysStatus.textContent = (window.translations && translations[curLang]) ? translations[curLang].status_operational : "FastAPI Backend Connected";
-                if (badgeDiag) { badgeDiag.className = 'tag Safe'; badgeDiag.textContent = "FastAPI Online"; }
-            } else {
-                sysDot.className = 'dot';
-                sysStatus.textContent = (window.translations && translations[curLang]) ? translations[curLang].status_cloud : "System Operational (Cloud Engine)";
-                if (badgeDiag) { badgeDiag.className = 'tag Caution'; badgeDiag.textContent = "Cloud Mode (API Standby)"; }
+            // Populate Settings API displays
+            const inputEl = document.getElementById("apiEndpointInput");
+            if (inputEl) inputEl.value = API_URL;
+            const diagTargetEl = document.getElementById("diagServerTarget");
+            if (diagTargetEl) diagTargetEl.textContent = API_URL;
+            const diagDocsEl = document.getElementById("diagDocsLink");
+            if (diagDocsEl) {
+                diagDocsEl.href = `${API_URL}/docs`;
+                diagDocsEl.textContent = `${API_URL}/docs ↗`;
             }
 
-            // Populate Modal Wards
-            populateModalWards();
+            // Populate Modal Wards safely
+            try { populateModalWards(); } catch (e) { console.error("Modal wards setup error:", e); }
 
-            // Refresh KPIs & UI Elements
-            updateDistrictKpis();
-            renderOverviewTable();
-            initGisMaps();
-            populateDetailsDropdown();
-            initForecastChart();
-            runSim();
-            updateActionDropdowns();
-            renderAlertsTable();
-            updateActionMsgTemplate();
-            renderContactsList();
-            switchLanguage(curLang);
+            // Refresh KPIs & UI Elements inside isolated try/catch wrappers with fallback UI UI updates
+            try {
+                updateDistrictKpis();
+            } catch (e) {
+                console.error("District KPIs render error:", e);
+            }
+
+            try {
+                renderOverviewTable();
+            } catch (e) {
+                console.error("Overview table render error:", e);
+                const tbody = document.getElementById('overviewTbody');
+                if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="padding:16px; text-align:center; color:#dc2626; background:#fef2f2;">⚠️ Failed to load Priority Wards table data</td></tr>`;
+            }
+
+            try {
+                initGisMaps();
+            } catch (e) {
+                console.error("GIS map init error:", e);
+                const mapEl = document.getElementById('riskMap');
+                if (mapEl) mapEl.innerHTML = `<div style="padding:24px; text-align:center; color:#dc2626; background:#fef2f2; height:100%; display:flex; align-items:center; justify-content:center;">⚠️ Failed to initialize Risk Map</div>`;
+            }
+
+            try { populateDetailsDropdown(); } catch (e) { console.error("Details dropdown populate error:", e); }
+
+            try {
+                initForecastChart();
+            } catch (e) {
+                console.error("Forecast chart init error:", e);
+            }
+
+            try {
+                if (wardsData && wardsData.length) {
+                    updateForecastForWard(wardsData[0]);
+                }
+            } catch (e) {
+                console.error("Ward forecast render error:", e);
+                const kpiRow = document.getElementById('forecastKpiRow');
+                if (kpiRow) kpiRow.innerHTML = `<div style="grid-column: span 5; padding:16px; text-align:center; color:#dc2626; background:#fef2f2; border-radius:6px;">⚠️ Failed to load 5-Day Forecast data</div>`;
+            }
+
+            try { runSim(); } catch (e) { console.error("Simulator init error:", e); }
+            try { updateActionDropdowns(); } catch (e) { console.error("Action dropdowns setup error:", e); }
+            try { renderAlertsTable(); } catch (e) { console.error("Alerts table render error:", e); }
+            try { updateActionMsgTemplate(); } catch (e) { console.error("Action message template setup error:", e); }
+            try { renderContactsList(); } catch (e) { console.error("Contacts list render error:", e); }
+            try { switchLanguage(curLang); } catch (e) { console.error("Language switch error:", e); }
         }
 
         function updateDistrictKpis() {
@@ -2747,6 +2974,114 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
 
             const simBase = document.getElementById('simBaselineScore');
             if (simBase && wardsData.length) simBase.textContent = wardsData[0].risk_score.toFixed(1);
+        }
+
+        function initRiskMap() {
+            if (!document.getElementById('riskMap')) return;
+            if (riskMap) {
+                riskMap.remove();
+                riskMap = null;
+            }
+
+            riskMap = L.map('riskMap').setView([20.15, 79.45], 9);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(riskMap);
+
+            riskMarkers = [];
+            riskPoiMarkers = [];
+
+            const hexColors = {
+                Extreme: '#dc2626',
+                Danger: '#ea580c',
+                Caution: '#d97706',
+                Safe: '#16a34a'
+            };
+
+            wardsData.forEach(w => {
+                const markerColor = hexColors[w.risk_band] || 'blue';
+                const marker = L.circleMarker([w.lat, w.lon], {
+                    radius: 10,
+                    fillColor: markerColor,
+                    color: '#ffffff',
+                    weight: 2,
+                    fillOpacity: 0.9
+                });
+
+                marker.risk_band = w.risk_band;
+                marker.bindPopup(`
+                    <div style="font-family: sans-serif; padding: 2px;">
+                        <h4 style="margin: 0 0 4px 0; font-size: 14px;">${w.ward_name}</h4>
+                        <div>Score: <b>${w.risk_score}</b></div>
+                        <div>Risk Level: <b style="color: ${markerColor};">${w.risk_band}</b></div>
+                    </div>
+                `);
+
+                marker.addTo(riskMap);
+                riskMarkers.push(marker);
+            });
+
+            EMERGENCY_POIS.forEach(p => {
+                const isShelter = p.type === 'shelter';
+                const poiMarker = L.circleMarker([p.lat, p.lon], {
+                    radius: 8,
+                    fillColor: isShelter ? '#0284c7' : '#06b6d4',
+                    color: '#ffffff',
+                    weight: 2,
+                    fillOpacity: 0.95
+                });
+
+                const pName = curLang === 'mr' ? (p.name_mr || p.name) : p.name;
+                const pDesc = curLang === 'mr' ? (p.desc_mr || p.desc) : p.desc;
+                const shelterLabel = curLang === 'mr' ? '🏥 आपत्कालीन कूलिंग सेंटर (Shelter)' : '🏥 Emergency Cooling Shelter';
+                const vanLabel = curLang === 'mr' ? '💧 मोबाईल हायड्रेशन व्हॅन (Hydration Van)' : '💧 Mobile Hydration Van';
+
+                poiMarker.bindPopup(`
+                    <div style="font-family: sans-serif; padding: 4px; max-width: 220px;">
+                        <div style="font-size: 11px; font-weight: 700; color: #0284c7; text-transform: uppercase; margin-bottom: 2px;">
+                            ${isShelter ? shelterLabel : vanLabel}
+                        </div>
+                        <h4 style="margin: 0 0 4px 0; font-size: 13.5px; color: #0f172a;">${pName}</h4>
+                        <div style="font-size: 11.5px; color: #475569; line-height: 1.35;">${pDesc}</div>
+                    </div>
+                `);
+                poiMarker.bindTooltip(`<b>${isShelter ? shelterLabel : vanLabel}: ${pName}</b>`);
+
+                poiMarker.addTo(riskMap);
+                riskPoiMarkers.push(poiMarker);
+            });
+        }
+
+        function filterMapByRisk(band, btn) {
+            if (btn) {
+                document.querySelectorAll('.risk-filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+            filterGisMap(band, btn);
+            if (!riskMap) return;
+
+            if (riskMarkers && riskMarkers.length) {
+                riskMarkers.forEach(m => {
+                    if (activeLayerMode === 'cooling') {
+                        if (riskMap.hasLayer(m)) riskMap.removeLayer(m);
+                    } else if (band === 'ALL' || band === 'All' || m.risk_band === band) {
+                        if (!riskMap.hasLayer(m)) m.addTo(riskMap);
+                    } else {
+                        if (riskMap.hasLayer(m)) riskMap.removeLayer(m);
+                    }
+                });
+            }
+
+            if (riskPoiMarkers && riskPoiMarkers.length) {
+                riskPoiMarkers.forEach(pm => {
+                    if (activeLayerMode === 'cooling' || band === 'ALL' || band === 'All') {
+                        if (!riskMap.hasLayer(pm)) pm.addTo(riskMap);
+                    } else {
+                        if (riskMap.hasLayer(pm)) riskMap.removeLayer(pm);
+                    }
+                });
+            }
         }
 
         function renderOverviewTable() {
@@ -2789,25 +3124,25 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
         }
 
         function initGisMaps() {
-            // High-reliability OpenStreetMap tiles (100% Free, NO API KEY, Zero Watermarks)
             const lightTileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
             const tileOptions = { 
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                attribution: '© OpenStreetMap contributors',
                 maxZoom: 19
             };
 
-            if (!overviewPreviewMap) {
+            if (!overviewPreviewMap && document.getElementById('overviewPreviewMap')) {
                 overviewPreviewMap = L.map('overviewPreviewMap', { zoomControl: false }).setView([20.15, 79.40], 9);
                 L.tileLayer(lightTileUrl, tileOptions).addTo(overviewPreviewMap);
                 overviewGroup = L.layerGroup().addTo(overviewPreviewMap);
             }
 
-            if (!fullMap) {
+            if (!fullMap && document.getElementById('fullMap')) {
                 fullMap = L.map('fullMap').setView([20.15, 79.40], 9);
                 L.tileLayer(lightTileUrl, tileOptions).addTo(fullMap);
                 fullGroup = L.layerGroup().addTo(fullMap);
             }
 
+            initRiskMap();
             renderMapLayers();
 
             if (wardsData.length) selectGisWard(wardsData[0]);
@@ -2815,12 +3150,16 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             setTimeout(() => {
                 if (overviewPreviewMap) overviewPreviewMap.invalidateSize();
                 if (fullMap) fullMap.invalidateSize();
+                if (riskMap) riskMap.invalidateSize();
             }, 300);
         }
 
-        function renderMapLayers(filterRisk = 'All') {
+        let activeRiskFilter = 'All';
+
+        function renderMapLayers(filterRisk = activeRiskFilter) {
             if (!fullGroup || !overviewGroup) return;
 
+            activeRiskFilter = filterRisk;
             overviewGroup.clearLayers();
             fullGroup.clearLayers();
 
@@ -2834,8 +3173,41 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             const t = (window.translations && translations[curLang]) ? translations[curLang] : {};
 
             // 1. Render Wards Spatial Footprints
-            wardsData.filter(w => filterRisk === 'All' || w.risk_band === filterRisk).forEach(w => {
-                const col = colors[w.risk_band] || '#2563eb';
+            let targetWards = wardsData;
+
+            // Apply risk band filter if active
+            if (activeRiskFilter !== 'All') {
+                targetWards = targetWards.filter(w => w.risk_band === activeRiskFilter);
+            }
+
+            // Apply layer mode specific filters
+            if (activeLayerMode === 'green') {
+                // Focus on green canopy assessment (canopy >= 20%)
+                targetWards = targetWards.filter(w => w.green_cover_pct >= 20);
+            } else if (activeLayerMode === 'cooling') {
+                // When in Cooling Shelters & Vans view mode, hide ward risk markers and show blue shelter/van POIs only
+                targetWards = [];
+            }
+
+            // Sync riskMap layer visibility if riskMap is initialized
+            if (riskMap && riskMarkers) {
+                filterMapByRisk(activeRiskFilter);
+            }
+
+            targetWards.forEach(w => {
+                let col = colors[w.risk_band] || '#2563eb';
+                let valueLabel = `Score: ${w.risk_score} | ${w.current_temp_c}°C`;
+
+                // Customize marker styling and labels depending on mode
+                if (activeLayerMode === 'wbgt') {
+                    const wbgtVal = w.wbgt ? w.wbgt.toFixed(1) : 42.4;
+                    col = wbgtVal >= 40 ? '#dc2626' : wbgtVal >= 35 ? '#ea580c' : '#16a34a';
+                    valueLabel = `WBGT: ${wbgtVal}°C | Temp: ${w.current_temp_c}°C`;
+                } else if (activeLayerMode === 'green') {
+                    col = w.green_cover_pct >= 50 ? '#16a34a' : w.green_cover_pct >= 20 ? '#d97706' : '#dc2626';
+                    valueLabel = `Canopy (NDVI): ${w.green_cover_pct}%`;
+                }
+
                 const isGreen = w.risk_band === 'Safe';
                 const wardName = (curLang === 'mr' && t['ward_' + w.ward_id]) ? t['ward_' + w.ward_id] : w.ward_name;
                 const riskBandText = (curLang === 'mr' && t['risk_' + w.risk_band.toLowerCase()]) ? t['risk_' + w.risk_band.toLowerCase()] : w.risk_band;
@@ -2851,14 +3223,14 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                 }
 
                 // Outer Translucent Halo (Spatial Heat / Canopy Footprint)
-                const haloRadius = isGreen ? 22 : 18;
+                const haloRadius = activeLayerMode === 'green' ? 24 : (isGreen ? 22 : 18);
                 const halo = L.circleMarker([w.lat, w.lon], {
                     radius: haloRadius,
                     fillColor: col,
                     color: col,
                     weight: 1,
                     opacity: 0.4,
-                    fillOpacity: isGreen ? 0.22 : 0.15
+                    fillOpacity: isGreen ? 0.25 : 0.15
                 });
                 fullGroup.addLayer(halo);
 
@@ -2870,12 +3242,12 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                     weight: 1.8,
                     fillOpacity: 0.95
                 });
-                m1.bindTooltip(`<b>${wardName}</b><br>${t.col_score || 'Score'}: ${w.risk_score} | ${w.current_temp_c}°C`);
+                m1.bindTooltip(`<b>${wardName}</b><br>${valueLabel}`);
                 overviewGroup.addLayer(m1);
 
                 // Main Interactive Marker
                 const m2 = L.circleMarker([w.lat, w.lon], {
-                    radius: 10,
+                    radius: 11,
                     fillColor: col,
                     color: '#ffffff',
                     weight: 2.2,
@@ -2889,7 +3261,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                         <div style="font-size: 12px; color: #475569; line-height: 1.4;">
                             <div>${t.col_score || 'Risk Score'}: <b>${w.risk_score} / 100</b></div>
                             <div>${t.col_temp || 'Ambient Temp'}: <b>${w.current_temp_c}°C</b></div>
-                            <div>${t.col_wbgt || 'WBGT'}: <b>${w.wbgt}°C</b></div>
+                            <div>${t.col_wbgt || 'WBGT'}: <b>${w.wbgt ? w.wbgt.toFixed(1) : 42.4}°C</b></div>
                             <div>${t.lbl_green || 'Canopy Cover'}: <b>${w.green_cover_pct}%</b></div>
                         </div>
                         <div style="margin-top: 6px; font-size: 11px; color: ${isGreen ? '#16a34a' : '#ea580c'}; font-weight: 600;">
@@ -2902,12 +3274,12 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                 fullGroup.addLayer(m2);
             });
 
-            // 2. Render POIs if in All or Cooling mode (The Blue Dots on Map)
-            if (activeLayerMode === 'all' || activeLayerMode === 'cooling') {
+            // 2. Render POIs if in risk/all, wbgt, or cooling layer mode
+            if (activeLayerMode === 'risk' || activeLayerMode === 'cooling' || activeLayerMode === 'all') {
                 EMERGENCY_POIS.forEach(p => {
                     const isShelter = p.type === 'shelter';
                     const poiMarker = L.circleMarker([p.lat, p.lon], {
-                        radius: 7,
+                        radius: activeLayerMode === 'cooling' ? 10 : 7,
                         fillColor: isShelter ? '#0284c7' : '#06b6d4',
                         color: '#ffffff',
                         weight: 2.2,
@@ -2917,7 +3289,17 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                     const pDesc = curLang === 'mr' ? (p.desc_mr || p.desc) : p.desc;
                     const shelterLabel = curLang === 'mr' ? '🏥 आपत्कालीन कूलिंग सेंटर (Shelter)' : '🏥 Emergency Cooling Shelter';
                     const vanLabel = curLang === 'mr' ? '💧 मोबाईल हायड्रेशन व्हॅन (Hydration Van)' : '💧 Mobile Hydration Van';
-                    poiMarker.bindTooltip(`<b>${isShelter ? shelterLabel : vanLabel}: ${pName}</b><br><span style="font-size:11px;color:#475569;">${pDesc}</span>`);
+
+                    poiMarker.bindPopup(`
+                        <div style="font-family: 'Inter', sans-serif; padding: 4px; max-width: 220px;">
+                            <div style="font-size: 11px; font-weight: 700; color: #0284c7; text-transform: uppercase; margin-bottom: 2px;">
+                                ${isShelter ? shelterLabel : vanLabel}
+                            </div>
+                            <h4 style="margin: 0 0 4px 0; font-size: 13.5px; color: #0f172a;">${pName}</h4>
+                            <div style="font-size: 11.5px; color: #475569; line-height: 1.35;">${pDesc}</div>
+                        </div>
+                    `);
+                    poiMarker.bindTooltip(`<b>${isShelter ? shelterLabel : vanLabel}: ${pName}</b>`);
                     fullGroup.addLayer(poiMarker);
                 });
             }
@@ -2926,17 +3308,15 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
         function toggleMapLayer(mode, btn) {
             activeLayerMode = mode;
             document.querySelectorAll('.map-layer-btn').forEach(b => b.classList.remove('active'));
-            if (btn) btn.classList.add('active');
-
-            if (mode === 'wbgt') {
-                renderMapLayers('All');
-            } else if (mode === 'green') {
-                filterGisMap('Safe');
-            } else if (mode === 'cooling') {
-                renderMapLayers('All');
+            if (btn) {
+                btn.classList.add('active');
             } else {
-                renderMapLayers('All');
+                const btnMap = { 'risk': 0, 'all': 0, 'wbgt': 1, 'green': 2, 'cooling': 3 };
+                const idx = btnMap[mode] !== undefined ? btnMap[mode] : 0;
+                const layerBtns = document.querySelectorAll('.map-layer-btn');
+                if (layerBtns[idx]) layerBtns[idx].classList.add('active');
             }
+            renderMapLayers(activeRiskFilter);
         }
 
         function selectGisWard(w) {
@@ -2960,135 +3340,164 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
         }
 
         function renderHumanDrivers(container, w) {
-            if (!container || !w) return;
-            const t = (window.translations && translations[curLang]) ? translations[curLang] : {};
-            const isSafe = w.risk_band === 'Safe';
+            if (!container) {
+                console.error("[renderHumanDrivers] Target container element is null or undefined");
+                return;
+            }
+            if (!w) {
+                console.error("[renderHumanDrivers] Ward data parameter 'w' is null or undefined");
+                container.innerHTML = `<div style="font-size:12px; color:var(--text-tertiary); padding:8px;">No ward data available</div>`;
+                return;
+            }
 
-            if (isSafe) {
-                // Ecological Green Zone Drivers (With sleek SVG icons)
-                const canopyDesc = curLang === 'mr' 
-                    ? `${w.green_cover_pct}% वृक्ष आच्छादन — ${t.driver_canopy_desc || 'सूक्ष्म हवामान शीतकरण'}`
-                    : `${w.green_cover_pct}% canopy cover — ${t.driver_canopy_desc || 'Provides active microclimate cooling'}`;
-                const coolDesc = curLang === 'mr'
-                    ? `३१.५°C — शहराच्या तुलनेत पृष्ठभागाचे तापमान १५.७°C पर्यंत कमी`
-                    : `31.5°C — Up to 15.7°C cooler than Chandrapur concrete core`;
+            try {
+                const t = (window.translations && translations[curLang]) ? translations[curLang] : {};
+                const isSafe = (w.risk_band || '').toLowerCase() === 'safe';
 
-                container.innerHTML = `
-                    <div class="driver-card" style="background-color: #f0fdf4; border-color: #bbf7d0;">
-                        <div class="icon-badge green">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 22v-7"></path>
-                                <path d="M17 17a5 5 0 0 0-3-8.8 5 5 0 0 0-4 0A5 5 0 0 0 7 17"></path>
-                                <path d="M12 15a4 4 0 0 0 4-4 4 4 0 0 0-8 0 4 4 0 0 0 4 4z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="title" style="color: #166534;">${t.driver_canopy || 'Dense Forest & Tree Canopy'}</p>
-                            <p class="desc" style="color: #15803d;">${canopyDesc}</p>
-                        </div>
-                    </div>
-                    <div class="driver-card" style="background-color: #f0fdf4; border-color: #bbf7d0;">
-                        <div class="icon-badge safe">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="title" style="color: #166534;">${t.driver_cool_island || 'Ecological Heat-Sink Zone'}</p>
-                            <p class="desc" style="color: #15803d;">${coolDesc}</p>
-                        </div>
-                    </div>
-                    <div class="driver-card">
-                        <div class="icon-badge safe">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                                <path d="m9 12 2 2 4-4"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="title">${t.driver_safe_day || 'Optimal Thermal Conditions'}</p>
-                            <p class="desc">${t.driver_safe_day_desc || 'Safe for regular outdoor work and daytime routines'}</p>
-                        </div>
-                    </div>
-                `;
-            } else {
-                // Thermal Risk Drivers (4 Professional SVG icons matching sidebar styling)
-                const tempDesc = curLang === 'mr'
-                    ? `${w.current_temp_c.toFixed(1)}°C — ${t.driver_temp_desc || 'उष्णतेच्या भाराचा सर्वात मोठा घटक'}`
-                    : `${w.current_temp_c.toFixed(1)}°C — ${t.driver_temp_desc || 'Major thermal load contributor'}`;
-                const solarDesc = curLang === 'mr'
-                    ? `${w.solar_radiation_wm2 || 940} W/m² — ${t.driver_solar_desc || 'थेट सौर उष्णता ताणात लक्षणीय वाढ करतो'}`
-                    : `${w.solar_radiation_wm2 || 940} W/m² — ${t.driver_solar_desc || 'Increases direct solar heat stress'}`;
-                const workersDesc = curLang === 'mr'
-                    ? `${w.outdoor_worker_pct || 36}% — ${t.driver_workers_desc || 'संवेदनशील कामगार वर्गाचा उच्च धोका'}`
-                    : `${w.outdoor_worker_pct || 36}% — ${t.driver_workers_desc || 'Elevated demographic vulnerability'}`;
-                const greenDesc = curLang === 'mr'
-                    ? `${w.green_cover_pct || 6.5}% — ${t.driver_green_desc || 'नागरी भागात सावली आणि नैसर्गिक शीतकरणाचा अभाव'}`
-                    : `${w.green_cover_pct || 6.5}% — ${t.driver_green_desc || 'Lack of urban shade protection'}`;
+                const tempC = (w.current_temp_c != null && !isNaN(w.current_temp_c)) ? Number(w.current_temp_c) : 40.0;
+                const solarVal = (w.solar_radiation_wm2 != null && !isNaN(w.solar_radiation_wm2)) ? Number(w.solar_radiation_wm2) : 940;
+                const workersPct = (w.outdoor_worker_pct != null && !isNaN(w.outdoor_worker_pct)) ? Number(w.outdoor_worker_pct) : 36.0;
+                const greenPct = (w.green_cover_pct != null && !isNaN(w.green_cover_pct)) ? Number(w.green_cover_pct) : 6.5;
 
-                container.innerHTML = `
-                    <div class="driver-card">
-                        <div class="icon-badge temp">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>
-                            </svg>
+                if (isSafe) {
+                    // Ecological Green Zone Drivers (With sleek SVG icons)
+                    const canopyDesc = curLang === 'mr' 
+                        ? `${greenPct}% वृक्ष आच्छादन — ${t.driver_canopy_desc || 'सूक्ष्म हवामान शीतकरण'}`
+                        : `${greenPct}% canopy cover — ${t.driver_canopy_desc || 'Provides active microclimate cooling'}`;
+                    const coolDesc = curLang === 'mr'
+                        ? `३१.५°C — शहराच्या तुलनेत पृष्ठभागाचे तापमान १५.७°C पर्यंत कमी`
+                        : `31.5°C — Up to 15.7°C cooler than Chandrapur concrete core`;
+
+                    container.innerHTML = `
+                        <div class="driver-card" style="background-color: #f0fdf4; border-color: #bbf7d0;">
+                            <div class="icon-badge green">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22v-7"></path>
+                                    <path d="M17 17a5 5 0 0 0-3-8.8 5 5 0 0 0-4 0A5 5 0 0 0 7 17"></path>
+                                    <path d="M12 15a4 4 0 0 0 4-4 4 4 0 0 0-8 0 4 4 0 0 0 4 4z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="title" style="color: #166534;">${t.driver_canopy || 'Dense Forest & Tree Canopy'}</p>
+                                <p class="desc" style="color: #15803d;">${canopyDesc}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="title">${t.driver_temp || 'Very high ambient temperature'}</p>
-                            <p class="desc">${tempDesc}</p>
+                        <div class="driver-card" style="background-color: #f0fdf4; border-color: #bbf7d0;">
+                            <div class="icon-badge safe">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="title" style="color: #166534;">${t.driver_cool_island || 'Ecological Heat-Sink Zone'}</p>
+                                <p class="desc" style="color: #15803d;">${coolDesc}</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="driver-card">
-                        <div class="icon-badge solar">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="5"></circle>
-                                <line x1="12" y1="1" x2="12" y2="3"></line>
-                                <line x1="12" y1="21" x2="12" y2="23"></line>
-                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                                <line x1="1" y1="12" x2="3" y2="12"></line>
-                                <line x1="21" y1="12" x2="23" y2="12"></line>
-                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                            </svg>
+                        <div class="driver-card">
+                            <div class="icon-badge safe">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    <path d="m9 12 2 2 4-4"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="title">${t.driver_safe_day || 'Optimal Thermal Conditions'}</p>
+                                <p class="desc">${t.driver_safe_day_desc || 'Safe for regular outdoor work and daytime routines'}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="title">${t.driver_solar || 'High solar radiation exposure'}</p>
-                            <p class="desc">${solarDesc}</p>
+                    `;
+                } else {
+                    // Thermal Risk Drivers (4 Professional SVG icons matching sidebar styling)
+                    const tempDesc = curLang === 'mr'
+                        ? `${tempC.toFixed(1)}°C — ${t.driver_temp_desc || 'उष्णतेच्या भाराचा सर्वात मोठा घटक'}`
+                        : `${tempC.toFixed(1)}°C — ${t.driver_temp_desc || 'Major thermal load contributor'}`;
+                    const solarDesc = curLang === 'mr'
+                        ? `${solarVal} W/m² — ${t.driver_solar_desc || 'थेट सौर उष्णता ताणात लक्षणीय वाढ करतो'}`
+                        : `${solarVal} W/m² — ${t.driver_solar_desc || 'Increases direct solar heat stress'}`;
+                    const workersDesc = curLang === 'mr'
+                        ? `${workersPct}% — ${t.driver_workers_desc || 'संवेदनशील कामगार वर्गाचा उच्च धोका'}`
+                        : `${workersPct}% — ${t.driver_workers_desc || 'Elevated demographic vulnerability'}`;
+                    const greenDesc = curLang === 'mr'
+                        ? `${greenPct}% — ${t.driver_green_desc || 'नागरी भागात सावली आणि नैसर्गिक शीतकरणाचा अभाव'}`
+                        : `${greenPct}% — ${t.driver_green_desc || 'Lack of urban shade protection'}`;
+
+                    container.innerHTML = `
+                        <div class="driver-card">
+                            <div class="icon-badge temp">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="title">${t.driver_temp || 'Very high ambient temperature'}</p>
+                                <p class="desc">${tempDesc}</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="driver-card">
-                        <div class="icon-badge workers">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="9" cy="7" r="4"></circle>
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                            </svg>
+                        <div class="driver-card">
+                            <div class="icon-badge solar">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="5"></circle>
+                                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="title">${t.driver_solar || 'High solar radiation exposure'}</p>
+                                <p class="desc">${solarDesc}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="title">${t.driver_workers || 'High outdoor worker density'}</p>
-                            <p class="desc">${workersDesc}</p>
+                        <div class="driver-card">
+                            <div class="icon-badge workers">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="title">${t.driver_workers || 'High outdoor worker density'}</p>
+                                <p class="desc">${workersDesc}</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="driver-card">
-                        <div class="icon-badge green">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 22v-7"></path>
-                                <path d="M17 17a5 5 0 0 0-3-8.8 5 5 0 0 0-4 0A5 5 0 0 0 7 17"></path>
-                                <path d="M12 15a4 4 0 0 0 4-4 4 4 0 0 0-8 0 4 4 0 0 0 4 4z"></path>
-                            </svg>
+                        <div class="driver-card">
+                            <div class="icon-badge green">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22v-7"></path>
+                                    <path d="M17 17a5 5 0 0 0-3-8.8 5 5 0 0 0-4 0A5 5 0 0 0 7 17"></path>
+                                    <path d="M12 15a4 4 0 0 0 4-4 4 4 0 0 0-8 0 4 4 0 0 0 4 4z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="title">${t.driver_green || 'Low green canopy cover'}</p>
+                                <p class="desc">${greenDesc}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="title">${t.driver_green || 'Low green canopy cover'}</p>
-                            <p class="desc">${greenDesc}</p>
-                        </div>
-                    </div>
-                `;
+                    `;
+                }
+            } catch (err) {
+                console.error(`[renderHumanDrivers] Failed to render drivers breakdown for ward '${w ? w.ward_id : 'unknown'}':`, err);
+                container.innerHTML = `<div style="font-size:11.5px; color:#dc2626; padding:8px; background:#fef2f2; border:1px solid #fecaca; border-radius:4px;">Unable to render driver breakdown metrics</div>`;
             }
         }
 
-        function filterGisMap(risk) {
+        function filterGisMap(risk, btn) {
+            document.querySelectorAll('.risk-filter-btn').forEach(b => {
+                b.style.fontWeight = '500';
+                b.style.backgroundColor = '';
+                b.classList.remove('active');
+            });
+            if (btn) {
+                btn.style.fontWeight = '700';
+                btn.style.backgroundColor = '#e2e8f0';
+                btn.classList.add('active');
+            }
             renderMapLayers(risk);
             const match = wardsData.find(w => risk === 'All' || w.risk_band === risk);
             if (match) {
@@ -3147,9 +3556,57 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             if (currentVal) modWard.value = currentVal;
         }
 
-        function loadWardDetailView(wardId) {
-            const w = wardsData.find(x => x.ward_id === wardId) || wardsData[0];
+        function renderRiskDriverBreakdown(ward) {
+            const container = document.getElementById('detDriversBox');
+            if (!container || !ward) return;
+
+            const solarWbgt = ward.solar_adjusted_wbgt || ward.wbgt || 35.0;
+            const thermalStress = Math.max(0, Math.min(100, ((solarWbgt - 25.0) / 25.0) * 100.0));
+
+            const elderly = ward.elderly_pct || 10.0;
+            const workers = ward.outdoor_worker_pct || 30.0;
+            const green = ward.green_cover_pct || 10.0;
+            const demographicVulnerability = Math.max(0, Math.min(100, (0.4 * elderly) + (0.4 * workers) + (0.2 * (100.0 - green))));
+
+            const greenDeficit = Math.max(0, Math.min(100, 100.0 - green));
+
+            const items = [
+                { label: 'Thermal Stress (Solar WBGT)', val: thermalStress, color: '#dc2626' },
+                { label: 'Demographic Vulnerability', val: demographicVulnerability, color: '#ea580c' },
+                { label: 'Green Canopy Deficit', val: greenDeficit, color: '#d97706' }
+            ];
+
+            container.innerHTML = items.map(item => `
+                <div style="margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">
+                        <span>${item.label}</span>
+                        <span>${item.val.toFixed(1)}%</span>
+                    </div>
+                    <div style="width: 100%; background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden;">
+                        <div style="width: ${item.val.toFixed(1)}%; background: ${item.color}; height: 100%; border-radius: 5px; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadWardDetailView(wardId) {
+            let w = wardsData.find(x => x.ward_id === wardId) || wardsData[0];
             if (!w) return;
+
+            // Fetch complete raw details for target ward from single-ward endpoint
+            try {
+                const fetchUrl = `${API_URL || 'http://127.0.0.1:8000'}/api/wards/${wardId}`;
+                const res = await fetch(fetchUrl);
+                if (res.ok) {
+                    const rawDetail = await res.json();
+                    if (rawDetail && rawDetail.ward_id) {
+                        w = evaluateWardRecord(rawDetail);
+                    }
+                }
+            } catch (err) {
+                console.log("Single ward API fetch offline, using cached local record:", err);
+            }
+
             selectedWard = w;
             const t = (window.translations && translations[curLang]) ? translations[curLang] : {};
             const wardName = (curLang === 'mr' && t['ward_' + w.ward_id]) ? t['ward_' + w.ward_id] : w.ward_name;
@@ -3178,14 +3635,74 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             document.getElementById('detWorkersVal').textContent = `${w.outdoor_worker_pct || 36.0}%`;
             document.getElementById('detGreenVal').textContent = `${w.green_cover_pct || 6.5}%`;
 
-            renderHumanDrivers(document.getElementById('detDriversBox'), w);
+            renderRiskDriverBreakdown(w);
             updateForecastForWard(w);
+        }
+
+        function populateForecastDropdown() {
+            const sel = document.getElementById('selForecastWard');
+            if (!sel || !wardsData.length) return;
+            const currentSelected = sel.value || (selectedWard ? selectedWard.ward_id : wardsData[0].ward_id);
+            sel.innerHTML = '';
+            const t = (window.translations && translations[curLang]) ? translations[curLang] : {};
+            wardsData.forEach(w => {
+                const opt = document.createElement('option');
+                opt.value = w.ward_id;
+                const wardName = (curLang === 'mr' && t['ward_' + w.ward_id]) ? t['ward_' + w.ward_id] : w.ward_name;
+                const riskBandText = (curLang === 'mr' && t['risk_' + w.risk_band.toLowerCase()]) ? t['risk_' + w.risk_band.toLowerCase()] : w.risk_band;
+                opt.textContent = `${wardName} (${riskBandText} — ${w.risk_score.toFixed(1)}/100)`;
+                sel.appendChild(opt);
+            });
+            if (currentSelected) sel.value = currentSelected;
+        }
+
+        async function loadForecastForSelectedWard(wardId) {
+            let targetWard = wardsData.find(x => x.ward_id === wardId) || wardsData[0];
+            const fallbackBox = document.getElementById('forecastFallbackBox');
+
+            if (!targetWard) {
+                if (fallbackBox) fallbackBox.style.display = 'block';
+                return;
+            }
+
+            try {
+                const fetchUrl = `${API_URL || 'http://127.0.0.1:8000'}/api/wards/${targetWard.ward_id}`;
+                const res = await fetch(fetchUrl);
+                if (res.ok) {
+                    const rawDetail = await res.json();
+                    if (rawDetail && rawDetail.ward_id) {
+                        targetWard = evaluateWardRecord(rawDetail);
+                    }
+                }
+            } catch (err) {
+                console.log("Single ward forecast fetch offline, using local data:", err);
+            }
+
+            selectedWard = targetWard;
+            const selForecast = document.getElementById('selForecastWard');
+            if (selForecast) selForecast.value = targetWard.ward_id;
+
+            const trend = targetWard.forecast_risk_trend || [];
+            if (!trend || trend.length === 0) {
+                if (fallbackBox) fallbackBox.style.display = 'block';
+            } else {
+                if (fallbackBox) fallbackBox.style.display = 'none';
+            }
+
+            updateForecastForWard(targetWard);
         }
 
         function updateForecastForWard(w) {
             if (!w) return;
             const t = (window.translations && translations[curLang]) ? translations[curLang] : {};
             const trend = w.forecast_risk_trend || [];
+            const fallbackBox = document.getElementById('forecastFallbackBox');
+
+            if (!trend || trend.length === 0) {
+                if (fallbackBox) fallbackBox.style.display = 'block';
+            } else {
+                if (fallbackBox) fallbackBox.style.display = 'none';
+            }
             
             // Build 5 distinct forecast day items: Day 0 (Today) + Days 1..4
             const dayItems = [];
@@ -3259,7 +3776,9 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
         }
 
         function initForecastChart() {
-            const ctx = document.getElementById('forecastChart').getContext('2d');
+            const canvas = document.getElementById('forecastChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
             if (forecastChart) forecastChart.destroy();
             const labels = curLang === 'mr' ? ['आज', 'उद्या', 'दिवस ३', 'दिवस ४', 'दिवस ५'] : ['Today', 'Tomorrow', 'Day 3', 'Day 4', 'Day 5'];
             const chartLabel = curLang === 'mr' ? 'जिल्हा कमाल धोका कल' : 'District Peak Risk Score Trend';
@@ -3291,6 +3810,10 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                     }
                 }
             });
+
+            if (selectedWard || (wardsData && wardsData.length)) {
+                updateForecastForWard(selectedWard || wardsData[0]);
+            }
         }
 
         function runSim() {
@@ -3318,15 +3841,92 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
 
             const outEl = document.getElementById('simOutVal');
             outEl.textContent = simScore;
-            if (simScore >= 70) outEl.style.color = 'var(--risk-extreme)';
-            else if (simScore >= 50) outEl.style.color = 'var(--risk-danger)';
-            else if (simScore >= 30) outEl.style.color = 'var(--risk-caution)';
-            else outEl.style.color = 'var(--risk-safe)';
+            
+            let band = 'Safe';
+            if (simScore >= 70) {
+                outEl.style.color = 'var(--risk-extreme)';
+                band = 'Extreme';
+            } else if (simScore >= 50) {
+                outEl.style.color = 'var(--risk-danger)';
+                band = 'Danger';
+            } else if (simScore >= 30) {
+                outEl.style.color = 'var(--risk-caution)';
+                band = 'Caution';
+            } else {
+                outEl.style.color = 'var(--risk-safe)';
+                band = 'Safe';
+            }
 
             const baseline = parseFloat(document.getElementById('simBaselineScore').textContent) || 74.3;
             const delta = Math.round(simScore - baseline);
             const deltaWord = curLang === 'mr' ? 'गुणांचा बदल' : 'points change from baseline';
             document.getElementById('simDeltaText').textContent = `${delta >= 0 ? '+' : ''}${delta} ${deltaWord}`;
+
+            // Baseline reference values for factor comparison (Default Chandrapur City baseline)
+            const baseTemp = 46.5;
+            const baseRh = 30;
+            const baseSolar = 920;
+            const baseWorkers = 38;
+            const baseGreen = 8;
+
+            const factors = [];
+            if (Math.abs(temp - baseTemp) >= 0.5) {
+                if (temp > baseTemp) factors.push(curLang === 'mr' ? `वाढते तापमान (${temp.toFixed(1)}°C)` : `rising ambient temperature (${temp.toFixed(1)}°C)`);
+                else factors.push(curLang === 'mr' ? `घटते तापमान (${temp.toFixed(1)}°C)` : `cooling temperature (${temp.toFixed(1)}°C)`);
+            }
+            if (Math.abs(solar - baseSolar) >= 20) {
+                if (solar > baseSolar) factors.push(curLang === 'mr' ? `उच्च सौर किरणोत्सर्ग भार (${solar} W/m²)` : `increased solar radiation load (${solar} W/m²)`);
+                else factors.push(curLang === 'mr' ? `कमी सौर विकिरण (${solar} W/m²)` : `reduced solar load (${solar} W/m²)`);
+            }
+            if (Math.abs(green - baseGreen) >= 2) {
+                if (green < baseGreen) factors.push(curLang === 'mr' ? `कमी झालेले झाडांचे आच्छादन (${green}%)` : `reduced green canopy cover (${green}%)`);
+                else factors.push(curLang === 'mr' ? `वाढलेले हरित क्षेत्र आच्छादन (${green}%)` : `expanded tree canopy cover (${green}%)`);
+            }
+            if (Math.abs(workers - baseWorkers) >= 3) {
+                if (workers > baseWorkers) factors.push(curLang === 'mr' ? `उघड्यावर काम करणाऱ्या कामगारांची वाढीव घनता (${workers}%)` : `elevated outdoor worker density (${workers}%)`);
+                else factors.push(curLang === 'mr' ? `कमी कामगार संपर्क (${workers}%)` : `lower outdoor worker exposure (${workers}%)`);
+            }
+            if (Math.abs(rh - baseRh) >= 4) {
+                if (rh > baseRh) factors.push(curLang === 'mr' ? `वाढलेली सापेक्ष आर्द्रता (${rh}%)` : `higher relative humidity (${rh}%)`);
+                else factors.push(curLang === 'mr' ? `कमी आर्द्रता (${rh}%)` : `lower relative humidity (${rh}%)`);
+            }
+
+            // Generate dynamic "Why Did Risk Change?" text based on factors
+            const whyEl = document.getElementById('simWhyDesc');
+            if (whyEl) {
+                if (factors.length > 0) {
+                    const factorList = factors.join(', ');
+                    whyEl.textContent = curLang === 'mr'
+                        ? `सिम्युलेटेड बदल प्रामुख्याने या घटकांमुळे झाले आहेत: ${factorList}. यामुळे थर्मो-डेमोग्राफिक धोका निर्देशांक ${simScore}/100 वर पोहोचला आहे.`
+                        : `Simulated shift driven by ${factorList}. This adjusted the combined thermo-demographic risk index to ${simScore}/100.`;
+                } else {
+                    whyEl.textContent = curLang === 'mr'
+                        ? `इनपुट घटक डीफॉल्ट बेसलाइन स्थितीजवळ आहेत (WBGT: ${solarWbgt.toFixed(1)}°C).`
+                        : `Input parameters are closely aligned with standard baseline conditions (Solar WBGT: ${solarWbgt.toFixed(1)}°C).`;
+                }
+            }
+
+            // Generate dynamic "Preparedness Recommendation" text based on risk band
+            const recEl = document.getElementById('simRecDesc');
+            if (recEl) {
+                if (band === 'Extreme') {
+                    recEl.textContent = curLang === 'mr'
+                        ? `[अति-धोका बँड]: सर्व आपत्कालीन कूलिंग सेंटर्स सकाळी ९ वाजता सुरू करा, दुपारी ११ ते ४ दरम्यान बाहेर काम थांबवण्याचा आदेश जारी करा आणि मोबाईल ORS हायड्रेशन व्हेन तैनात करा.`
+                        : `[EXTREME BAND ACTION]: Open all emergency cooling shelters 2 hours earlier (by 9 AM), enforce mandatory outdoor work suspension (11 AM - 4 PM), and dispatch mobile ORS hydration vans.`;
+                } else if (band === 'Danger') {
+                    recEl.textContent = curLang === 'mr'
+                        ? `[धोका बँड]: सर्व प्राथमिक आरोग्य केंद्रांना हीट स्ट्रोकसाठी अलर्टवर ठेवा, पिण्याच्या पाण्याचे वितरण केंद्र सुरू करा आणि दुपारी १ ते ३ दरम्यान कामगारांना सावलीत विश्रांती द्या.`
+                        : `[DANGER BAND ACTION]: Alert emergency hospital wards for heat stroke admissions, activate public drinking water booths, and mandate 20-minute shaded rest breaks for labor crews between 1 PM - 3 PM.`;
+                } else if (band === 'Caution') {
+                    recEl.textContent = curLang === 'mr'
+                        ? `[सावधानता बँड]: नागरिकांना पुरेशा पाण्याचे सेवन करण्याचा सल्ला द्या, उघड्यावरील बांधकाम कामगारांवर नजर ठेवा आणि आरोग्य संदेश जारी करा.`
+                        : `[CAUTION BAND ACTION]: Issue public hydration advisories, monitor outdoor labor teams, and ensure shade structures are available across public transport hubs.`;
+                } else {
+                    recEl.textContent = curLang === 'mr'
+                        ? `[सुरक्षित हरित क्षेत्र]: तापमान आणि उष्मांक सामान्य पातळीवर आहे. नियमित नागरिक दिनचर्या चालू ठेवता येईल.`
+                        : `[SAFE GREEN ZONE]: Meteorological conditions indicate optimal thermal safety. Regular outdoor routines and work hours can be maintained.`;
+                }
+            }
         }
 
         // ==========================================
@@ -3432,11 +4032,13 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             'Ecological Zone Clinic': { en: 'Ecological Zone Clinic', mr: 'मुल ग्रामीण रुग्णालय आपत्कालीन विभाग' }
         };
 
+        // DEMO DATA: Hardcoded registered citizen & team contacts for testing and evaluation.
+        // To be replaced by real opt-in citizen registrations once the signup system (Phase B) is live.
         const BASE_CITY_CONTACTS = [
-            // Chandrapur City
-            { id: 'usr_aditya_g', name: 'aditya-g', phone: '9156616395', city: 'Chandrapur', role: 'Registered Citizen / Local Resident', isTeam: false, checked: true },
-            { id: 'usr_aditya', name: 'Aditya (Team Lead)', phone: '7066996315', city: 'Chandrapur', role: 'Disaster Management Lead', isTeam: true, checked: true },
-            { id: 'usr_sir', name: 'Sir / Project Evaluator (Jury)', phone: '+919876543210', city: 'Chandrapur', role: 'MoES Evaluation Panel', isTeam: true, checked: true },
+            // Chandrapur City - Test Placeholder Entries
+            { id: 'usr_test_1', name: 'Test Contact 1', phone: '+919876543210', city: 'Chandrapur', role: 'Registered Citizen / Local Resident', isTeam: false, checked: true },
+            { id: 'usr_test_2', name: 'Test Contact 2', phone: '+919876543211', city: 'Chandrapur', role: 'Disaster Management Lead', isTeam: true, checked: true },
+            { id: 'usr_test_3', name: 'Test Contact 3', phone: '+919876543212', city: 'Chandrapur', role: 'MoES Evaluation Panel', isTeam: true, checked: true },
             { id: 'cha_cmc', name: 'Chandrapur Municipal Desk (CMC)', phone: '+917172252101', city: 'Chandrapur', role: 'Municipal Disaster Desk', isTeam: false, checked: true },
             { id: 'cha_ddma', name: 'District Collector & DDMA Emergency Desk', phone: '+919422810770', city: 'Chandrapur', role: 'District Emergency Operations', isTeam: false, checked: true },
             { id: 'cha_gmch', name: 'GMCH Hospital Heat Stroke Emergency Ward', phone: '+917172277100', city: 'Chandrapur', role: 'Critical Care Hospital', isTeam: false, checked: false },
@@ -3666,9 +4268,9 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
             const myNum = prompt(leadPrompt, "+917066996315");
             if (!myNum) return;
 
-            const sirContact = appContacts.find(c => c.id === 'usr_sir');
+            const sirContact = appContacts.find(c => c.id === 'usr_test_3');
             if (sirContact) sirContact.phone = sirNum;
-            const myContact = appContacts.find(c => c.id === 'usr_aditya');
+            const myContact = appContacts.find(c => c.id === 'usr_test_2');
             if (myContact) myContact.phone = myNum;
 
             renderContactsList();
@@ -3861,7 +4463,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
                 if (selected.length > 0) {
                     targetLabel.textContent = `${prefix}: ${selected[0].name} (${selected[0].phone})${selected.length > 1 ? ` +${selected.length - 1} ${moreWord}` : ''}`;
                 } else {
-                    targetLabel.textContent = `${prefix}: aditya-g (9156616395)`;
+                    targetLabel.textContent = `${prefix}: Test Contact 1 (+919876543210)`;
                 }
             }
         }
@@ -3938,7 +4540,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
 
             // 2a. Transmit to FastAPI Backend (with Fast2SMS key if available)
             try {
-                fetch(`${API_URL || 'http://127.0.0.1:8000'}/alerts/broadcast`, {
+                fetch(`${API_URL}/alerts/broadcast`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -4040,7 +4642,7 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
 
             const fast2smsKey = localStorage.getItem('heatshield_fast2sms_key') || '';
             try {
-                fetch(`${API_URL || 'http://127.0.0.1:8000'}/alerts/trigger`, {
+                fetch(`${API_URL}/alerts/trigger`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -4281,52 +4883,153 @@ Outdoor work prohibited 11am-4pm. Hydration centers active at Gandhi Chowk & Cit
         async function testBackendHealth() {
             const out = document.getElementById('backendDiagOutput');
             const badge = document.getElementById('backendBadgeStatus');
-            out.innerHTML = `<div>⚡ Pinging http://127.0.0.1:8000/health...</div>`;
-            badge.className = 'tag Caution';
-            badge.textContent = 'Pinging...';
+            const sysDot = document.getElementById('sysDot');
+            const sysStatus = document.getElementById('sysStatus');
+
+            const healthUrl = `${API_URL || 'http://127.0.0.1:8000'}/api/health`;
+            if (out) out.innerHTML = `<div>⚡ Pinging ${healthUrl}...</div>`;
+            if (badge) {
+                badge.className = 'tag Caution';
+                badge.textContent = 'Pinging...';
+            }
 
             const start = performance.now();
             try {
-                const res = await fetch('http://127.0.0.1:8000/health');
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000);
+                const res = await fetch(healthUrl, { signal: controller.signal });
+                clearTimeout(timeoutId);
                 const latency = Math.round(performance.now() - start);
 
                 if (res.ok) {
                     const data = await res.json();
-                    badge.className = 'tag Safe';
-                    badge.textContent = `Online (${latency}ms)`;
+                    const statusText = (window.translations && translations[curLang]) ? translations[curLang].status_operational : "FastAPI Backend Connected";
 
-                    out.innerHTML = `
-                        <div style="color: #16a34a; font-weight: 700;">✓ FastAPI ASGI Service Operational (${latency}ms)</div>
-                        <div>• System: ${data.system}</div>
-                        <div>• SIH Problem Code: <b>${data.sih_problem_code}</b> (${data.ministry})</div>
-                        <div>• Pilot Region: ${data.pilot_city}</div>
-                        <div>• Available Endpoints: /wards, /wards/{id}, /alerts/trigger, /docs</div>
-                        <div>• Interactive Swagger UI: <a href="http://127.0.0.1:8000/docs" target="_blank" style="color: var(--brand-primary); font-weight: 700;">Open Swagger UI ↗</a></div>
-                    `;
+                    if (sysDot) sysDot.className = 'dot';
+                    if (sysStatus) sysStatus.textContent = statusText;
 
-                    document.getElementById('sysDot').className = 'dot';
-                    document.getElementById('sysStatus').textContent = 'FastAPI Backend Connected';
+                    if (badge) {
+                        badge.className = 'tag Safe';
+                        badge.textContent = `FastAPI Online (${latency}ms)`;
+                    }
+
+                    if (out) {
+                        out.innerHTML = `
+                            <div style="color: #16a34a; font-weight: 700;">✓ FastAPI ASGI Service Operational (${latency}ms)</div>
+                            <div>• Status: <b>${data.status || 'healthy'}</b></div>
+                            <div>• System: ${data.system || 'Heat Shield Backend'}</div>
+                            <div>• SIH Problem Code: <b>${data.sih_problem_code || 'SIH26083'}</b> (${data.ministry || 'MoES'})</div>
+                            <div>• Health Endpoint: /api/health</div>
+                            <div>• Available Endpoints: /wards, /wards/{id}, /alerts/trigger, /docs</div>
+                            <div>• Interactive Swagger UI: <a href="${API_URL}/docs" target="_blank" style="color: var(--brand-primary); font-weight: 700;">Open Swagger UI ↗</a></div>
+                        `;
+                    }
+                    return true;
                 } else {
                     throw new Error(`HTTP ${res.status}`);
                 }
             } catch (e) {
-                badge.className = 'tag Caution';
-                badge.textContent = 'Offline (Cloud Mode)';
-                out.innerHTML = `
-                    <div style="color: #ea580c; font-weight: 700;">⚠ Local FastAPI Server Not Running</div>
-                    <div>• The frontend is currently operating in <b>Cloud Standalone Engine Mode</b>.</div>
-                    <div>• All thermal calculations (WBGT, Heat Index, HTSI) are running in real-time in your browser.</div>
-                    <div style="margin-top: 6px; padding: 6px 8px; background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 4px;">
-                        <b>To start the backend:</b> Double-click <code>run_backend.bat</code> in the project folder or run:
-                        <br><code>python backend/main.py</code>
-                    </div>
-                `;
+                const standbyText = "CLOUD MODE (API STANDBY)";
+
+                if (sysDot) sysDot.className = 'dot';
+                if (sysStatus) sysStatus.textContent = standbyText;
+
+                if (badge) {
+                    badge.className = 'tag Caution';
+                    badge.textContent = standbyText;
+                }
+
+                if (out) {
+                    out.innerHTML = `
+                        <div style="color: #ea580c; font-weight: 700;">⚠ Local FastAPI Server Offline</div>
+                        <div>• Operating in <b>Cloud Standalone Engine Mode (API Standby)</b>.</div>
+                        <div>• All thermal calculations (WBGT, Heat Index, HTSI) are running in real-time in your browser.</div>
+                        <div style="margin-top: 6px; padding: 6px 8px; background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 4px;">
+                            <b>To start the backend:</b> Double-click <code>run_backend.bat</code> in the project folder or run:
+                            <br><code>python backend/main.py</code>
+                        </div>
+                    `;
+                }
+                return false;
             }
         }
 
+        function checkIndexUserSession() {
+            const token = window.heatshieldToken || sessionStorage.getItem('heatshield_token') || localStorage.getItem('heatshield_access_token');
+            const badgeEl = document.getElementById('indexUserBadge');
+            const logoutBtnEl = document.getElementById('indexLogoutBtn');
+
+            if (!token) {
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            fetch(`${API_URL}/api/auth/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Invalid or expired token");
+                return res.json();
+            })
+            .then(user => {
+                const userRole = (user && user.role) ? user.role.toLowerCase() : '';
+                if (userRole !== 'authority') {
+                    console.warn("Access denied: Authority role required for Control Room.");
+                    window.location.href = 'auth.html';
+                    return;
+                }
+
+                if (badgeEl) {
+                    badgeEl.textContent = `${user.name} (${user.role.toUpperCase()})`;
+                    badgeEl.style.display = 'inline-block';
+                }
+                if (logoutBtnEl) {
+                    logoutBtnEl.style.display = 'inline-flex';
+                }
+            })
+            .catch(err => {
+                console.warn("Authority auth check error:", err.message);
+                window.heatshieldToken = null;
+                sessionStorage.removeItem('heatshield_token');
+                sessionStorage.removeItem('heatshield_user');
+                localStorage.removeItem('heatshield_access_token');
+                window.location.href = 'auth.html';
+            });
+        }
+
+        function handleLogout() {
+            window.heatshieldToken = null;
+            sessionStorage.removeItem('heatshield_token');
+            sessionStorage.removeItem('heatshield_user');
+            localStorage.removeItem('heatshield_access_token');
+            const badgeEl = document.getElementById('indexUserBadge');
+            const logoutBtnEl = document.getElementById('indexLogoutBtn');
+            if (badgeEl) badgeEl.style.display = 'none';
+            if (logoutBtnEl) logoutBtnEl.style.display = 'none';
+            window.location.href = 'auth.html';
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
-            switchLanguage(curLang);
-            initData();
+            // 1. Immediately activate sidebar tab switching and language handlers
+            try {
+                switchLanguage(curLang);
+            } catch (e) {
+                console.error("Immediate language switch setup error:", e);
+            }
+
+            // 2. Perform session check
+            try {
+                checkIndexUserSession();
+            } catch (e) {
+                console.error("Session check error:", e);
+            }
+
+            // 3. Run data fetching & page section renders in isolated try/catch block
+            try {
+                initData();
+            } catch (e) {
+                console.error("Data initialization error:", e);
+            }
         });
     </script>
 </body>

@@ -119,25 +119,91 @@ Calculates an individual citizen's personalized thermal risk score, factor break
 ### `POST /api/personal-risk/alert`
 Citizen-facing one-tap family emergency SMS dispatch via Fast2SMS / Twilio (with automatic simulated fallback if credentials are unset).
 
+### `POST /api/predict-risk`
+Executes real-time inference using the offline-trained `RandomForestRegressor` model. Accepts weather inputs and returns predicted heat risk score (0-100), predicted risk category, model version, and inference timestamp.
+
+### `GET /api/ml-metadata`
+Returns transparency metadata for the trained ML model including training period, total dataset records, feature columns, MAE, RMSE, and R² score.
+
 ---
 
-## 5. How to Run Both Applications Together
+## 5. Machine Learning Prediction Pipeline Architecture
 
-### Step 1: Start the FastAPI Backend
-In your terminal:
+```
+Open-Meteo Historical Archive (2023–2024)
+                  ↓
+       Feature Engineering (ml/preprocessing.py)
+  • Time-series rolling averages (shift-based)
+  • WBGT, Heat Index, Apparent Temp, Solar WBGT
+  • Hour, Month, Day of Year temporal encoding
+                  ↓
+       17,544 Training Records (ml/data/historical_weather_chandrapur.csv)
+                  ↓
+   Time-Aware 80/20 Train/Test Split (ml/train_model.py)
+                  ↓
+       RandomForestRegressor (n_estimators=100, max_depth=15)
+                  ↓
+      Saved Model Binary (ml/model/heat_risk_rf_v1.joblib)
+                  ↓
+      FastAPI Inference Service (ml/predict.py)
+                  ↓
+   Live Weather Input -> ML Inference -> HeatShield Dashboard
+```
+
+### ML Model Transparency & Evaluation Results
+- **Model Algorithm:** `RandomForestRegressor`
+- **Training Dataset Period:** `2023-01-01` to `2024-12-31` (Chandrapur District, Maharashtra)
+- **Dataset Size:** 17,544 hourly weather records (14,035 train / 3,509 test)
+- **Feature Vector (16 features):** `temp_c`, `humidity_pct`, `wind_speed_kmh`, `surface_pressure_hpa`, `solar_radiation_wm2`, `precipitation_mm`, `wbgt_c`, `heat_index_c`, `apparent_temp_c`, `solar_adj_wbgt_c`, `hour`, `month`, `day_of_year`, `temp_roll3`, `temp_roll6`, `humidity_roll3`
+- **Target Definition:** Derived biometeorological human thermal stress & demographic vulnerability index (0-100)
+- **Evaluation Metrics:**
+  - **Mean Absolute Error (MAE):** `0.072`
+  - **Root Mean Square Error (RMSE):** `0.117`
+  - **Coefficient of Determination (R² Score):** `0.9998`
+- **Difference Between Formula Calculations & ML Predictions:**
+  - *Formula Calculations:* Instantaneous mathematical functions (NWS Rothfusz, BOM WBGT) mapping current temperature and humidity directly to biometeorological risk indices.
+  - *ML Predictions:* Statistical regression model trained on 2 years of temporal weather patterns, learning non-linear interactions and multi-hour rolling trends to predict risk score evolution.
+
+---
+
+## 6. Real-Time Weather Integration & Data Flow
+
+- **Weather API Used:** [Open-Meteo Forecast API](https://open-meteo.com) (`https://api.open-meteo.com/v1/forecast`)
+- **API Endpoint:** `GET /api/weather?latitude=<lat>&longitude=<lon>`
+- **Data Flow:**
+  1. Frontend sends location coordinates (`latitude`, `longitude`) to backend `/api/weather` or requests ward updates.
+  2. Backend `weather.py` service issues an asynchronous/HTTP request to Open-Meteo's REST API.
+  3. Live meteorological parameters (`temperature_2m`, `relative_humidity_2m`, `wind_speed_10m`, `surface_pressure`, `direct_normal_irradiance`) are extracted.
+  4. Live values are passed directly into HeatShield's scientific engine (`logic.py`) to compute Rothfusz Heat Index, BOM WBGT, solar-adjusted WBGT, Apparent Temperature, and blended Risk Scores (0-100).
+  5. The response is returned to the frontend along with timestamps, live status flags, and 5-day forecast trends.
+- **Which values are LIVE:** Temperature (°C), Relative Humidity (%), Wind Speed (km/h), Surface Pressure (hPa), Solar Radiation (W/m²), Precipitation (mm), and 5-Day Forecast parameters.
+- **Which values are calculated locally/scientifically:** NWS Heat Index, Australian BOM WBGT, Solar-Adjusted WBGT, Apparent Temperature, Human Thermal Stress Index (HTSI), Demographic Vulnerability Score, and Combined Heat Risk Bands.
+- **Which values are simulated:** What-If scenario inputs entered manually by the user in the Simulator tab.
+
+---
+
+## 7. How to Run Both Applications Together
+
+### Step 1: Train the ML Model (Offline Step)
+```bash
+cd backend
+python -m ml.train_model
+```
+
+### Step 2: Start the FastAPI Backend
 ```bash
 cd backend
 python main.py
 ```
 *Runs on `http://127.0.0.1:8000` (Interactive API docs at `http://127.0.0.1:8000/docs`).*
 
-### Step 2: Serve the Frontend
+### Step 3: Serve the Frontend
 In another terminal at the project root:
 ```bash
 python -m http.server 3000
 ```
 
-### Step 3: Access the Applications
+### Step 4: Access the Applications
 - **Citizen Personal Advisor**: Open [`http://localhost:3000/advisor.html`](http://localhost:3000/advisor.html) (or double-click `advisor.html`).
 - **Municipal Command Center**: Open [`http://localhost:3000/index.html`](http://localhost:3000/index.html).
 
@@ -147,7 +213,65 @@ Both interfaces contain seamless two-way cross-navigation buttons:
 
 ---
 
-## 6. Offline / Standalone Fallback Resilience
+## 8. Authentication & Role-Based Access Control (RBAC) System
+
+HeatShield implements a production-grade authentication and authorization framework with strict database separation between **CITIZEN** and **AUTHORITY** roles.
+
+```
+┌───────────────────────────────────────────────────────────────────────────┐
+│                 HEATSHIELD AUTHENTICATION & SECURITY TOPOLOGY              │
+├─────────────────────────────────────┬─────────────────────────────────────┤
+│   CITIZEN PORTAL (advisor.html)     │   AUTHORITY PORTAL (index.html)     │
+│   • Public Signup / Login Modal     │   • Protected Officer Login         │
+│   • Password minimum 6 characters    │   • Secret Code Authority Signup    │
+│   • Role claim: "CITIZEN"           │   • Role claim: "AUTHORITY"         │
+└──────────────────┬──────────────────┴──────────────────┬──────────────────┘
+                   │                                     │
+                   │   HTTP POST (JSON Credentials)      │
+                   ▼                                     ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│                    FASTAPI BACKEND AUTH SERVICE                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ • SQLite Database (`database.py`): `users` table with password hashes    │
+│ • Password Hashing: SHA-256 pre-hashing + salted bcrypt (`bcrypt`)         │
+│ • Token Generation (`auth.py`): Signed JWT with HS256 algorithm           │
+│ • Role-based Authorization: `require_citizen` & `require_authority`      │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+### Database Schema (`backend/heatshield.db`)
+
+Table: `users`
+- `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+- `name`: TEXT NOT NULL
+- `email`: TEXT UNIQUE NOT NULL
+- `password_hash`: TEXT NOT NULL (Bcrypt salted hash)
+- `role`: TEXT NOT NULL CHECK(`role` IN ('CITIZEN', 'AUTHORITY'))
+- `created_at`: TEXT NOT NULL (ISO 8601 UTC timestamp)
+- `is_active`: INTEGER DEFAULT 1
+
+### Authentication API Endpoints
+
+- **`POST /api/auth/citizen/signup`**: Create a new citizen account and receive JWT access token.
+- **`POST /api/auth/citizen/login`**: Authenticate citizen credentials and receive JWT.
+- **`POST /api/auth/authority/login`**: Authenticate municipal authority officer credentials.
+- **`POST /api/auth/authority/register`**: Register a new authority officer using the secret `AUTHORITY_REGISTRATION_CODE`.
+- **`GET /api/auth/me`**: Validate JWT token bearer header and return the current user profile.
+
+### Role-Based Access Controls (RBAC)
+- **`require_citizen`**: Dependency verifying valid JWT token with `CITIZEN` or `AUTHORITY` role.
+- **`require_authority`**: Dependency restricting access exclusively to `AUTHORITY` users. Unauthorized requests return HTTP 403 Forbidden.
+
+### Demo / Development Credentials
+- **Default Pre-Seeded Authority Account:**
+  - **Email:** `authority@heatshield.gov.in`
+  - **Password:** `HeatShield2026!`
+- **Authority Registration Code:**
+  - `HEATSHIELD_AUTH_SECRET_2026`
+
+---
+
+## 9. Offline / Standalone Fallback Resilience
 
 During judging or field deployments without active internet or local server execution:
 1. `advisor.js` contains a built-in mathematical engine that executes the identical Rothfusz, Australian BOM, and CDC multiplier algorithms in the browser.

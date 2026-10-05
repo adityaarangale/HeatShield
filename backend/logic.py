@@ -211,7 +211,7 @@ def classify_heatwave_risk(temp_c: float, wbgt_c: float, vuln_score: float) -> D
 
 def load_wards_dataset() -> List[Ward]:
     """
-    Load ward dataset from data/wards.json file.
+    Load ward dataset from data/wards.json file and dynamically enrich with real-time weather from Open-Meteo API.
     """
     json_path = os.path.join(os.path.dirname(__file__), "data", "wards.json")
     if not os.path.exists(json_path):
@@ -220,7 +220,30 @@ def load_wards_dataset() -> List[Ward]:
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
     
-    return [Ward(**item) for item in data]
+    # Import here to avoid circular dependencies
+    from weather import fetch_realtime_weather
+    from models import ForecastDay
+
+    wards = []
+    for item in data:
+        lat = item.get("lat")
+        lon = item.get("lon")
+        if lat and lon:
+            realtime_info = fetch_realtime_weather(lat, lon)
+            if realtime_info.get("is_live") and "weather" in realtime_info:
+                w = realtime_info["weather"]
+                item["current_temp_c"] = w["temperature_c"]
+                item["humidity_pct"] = w["relative_humidity_pct"]
+                item["wind_speed_kmh"] = w["wind_speed_kmh"]
+                item["solar_radiation_wm2"] = w["solar_radiation_wm2"]
+                
+                # Update forecast list
+                fc_data = realtime_info.get("forecast_5day", [])
+                if fc_data:
+                    item["forecast_3day"] = fc_data
+
+        wards.append(Ward(**item))
+    return wards
 
 
 def evaluate_ward_detail(ward: Ward, include_trend: bool = False) -> WardResponse:
@@ -241,6 +264,14 @@ def evaluate_ward_detail(ward: Ward, include_trend: bool = False) -> WardRespons
     forecast_trend = None
     if include_trend:
         forecast_trend = []
+        # Attempt to load ML predictor safely
+        ml_predictor = None
+        try:
+            from ml.predict import predict_single_risk
+            ml_predictor = predict_single_risk
+        except Exception:
+            pass
+
         for fc in ward.forecast_3day:
             fc_solar = getattr(fc, "solar_radiation_wm2", 850.0)
             f_risk = calculate_risk_score(
@@ -252,6 +283,22 @@ def evaluate_ward_detail(ward: Ward, include_trend: bool = False) -> WardRespons
                 wind_speed_kmh=ward.wind_speed_kmh,
                 solar_radiation_wm2=fc_solar
             )
+            
+            ml_score = None
+            ml_cat = None
+            if ml_predictor:
+                try:
+                    ml_res = ml_predictor(
+                        temp_c=fc.temp_c,
+                        humidity_pct=fc.humidity_pct,
+                        wind_speed_kmh=ward.wind_speed_kmh,
+                        solar_radiation_wm2=fc_solar
+                    )
+                    ml_score = ml_res["predicted_risk_score"]
+                    ml_cat = ml_res["predicted_risk_category"]
+                except Exception:
+                    pass
+
             forecast_trend.append(ForecastRiskTrendItem(
                 day=fc.day,
                 temp_c=fc.temp_c,
@@ -262,7 +309,9 @@ def evaluate_ward_detail(ward: Ward, include_trend: bool = False) -> WardRespons
                 apparent_temperature_c=f_risk["apparent_temperature_c"],
                 human_thermal_stress_index=f_risk["human_thermal_stress_index"],
                 risk_score=f_risk["risk_score"],
-                risk_band=f_risk["risk_band"]
+                risk_band=f_risk["risk_band"],
+                ml_predicted_risk_score=ml_score,
+                ml_predicted_risk_category=ml_cat
             ))
 
     return WardResponse(

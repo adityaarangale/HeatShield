@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>HEAT SHIELD — Personal Heat Risk Advisor</title>
+  <meta name="description" content="Citizen-facing personal thermal stress and heat safety advisor. Tailored heatwave guidance for Chandrapur District, Maharashtra. Disaster Management Authority.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22><path d=%22M12 2L3 6.2V12C3 17.5 6.8 21.7 12 23C17.2 21.7 21 17.5 21 12V6.2L12 2Z%22 fill=%22%23ea580c%22/><circle cx=%2212%22 cy=%2212%22 r=%223.5%22 fill=%22%23ffffff%22/></svg>">
+
+  <!-- Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Leaflet & Chart.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+  <!-- Config & Auth Guard Script -->
+  <script src="config.js"></script>
+  <script>
+    (async function checkCitizenAuth() {
+      const API_BASE = window.HEATSHIELD_CONFIG ? window.HEATSHIELD_CONFIG.API_BASE : "http://127.0.0.1:8000";
+      const token = sessionStorage.getItem("heatshield_token");
+      if (!token) {
+        window.location.href = "auth.html";
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/me`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          throw new Error("Invalid session token");
+        }
+        const user = await res.json();
+        const role = (user.role || "").toLowerCase();
+        if (role !== "citizen" && role !== "authority") {
+          throw new Error("Access restricted to registered citizens");
+        }
+        window.heatshieldToken = token;
+        window.currentUser = user;
+      } catch (err) {
+        sessionStorage.removeItem("heatshield_token");
+        sessionStorage.removeItem("heatshield_user");
+        window.location.href = "auth.html";
+      }
+    })();
+
+    function handleLogout() {
+      sessionStorage.removeItem("heatshield_token");
+      sessionStorage.removeItem("heatshield_user");
+      window.heatshieldToken = null;
+      window.currentUser = null;
+      window.location.href = "auth.html";
+    }
+  </script>
+
+  <!-- Advisor Stylesheet -->
+  <link rel="stylesheet" href="advisor.css">
+</head>
+
+<body>
+
+  <div class="app-container">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="top-nav">
+      <a href="citizen.html" class="brand-wrapper">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M12 2L3 6.2V12C3 17.5 6.8 21.7 12 23C17.2 21.7 21 17.5 21 12V6.2L12 2Z" fill="currentColor"/>
+            <circle cx="12" cy="12" r="3.5" fill="#ffffff"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 data-i18n="brand_title">HEAT SHIELD</h1>
+          <span class="brand-tagline" data-i18n="brand_subtitle">Personal Risk Advisor</span>
+        </div>
+      </a>
+
+      <div class="top-actions">
+        <div id="userAuthBadge" style="display: flex; align-items: center; gap: 8px;">
+          <span id="citizenUserBadge" style="display: none; font-size: 11.5px; font-weight: 700; color: #0284c7; background: #f0f9ff; border: 1px solid #bae6fd; padding: 5px 10px; border-radius: 99px;">
+            Logged in as: <strong id="citizenUserName">Citizen</strong>
+          </span>
+          <button class="admin-link-btn" id="authPortalBtn" onclick="window.location.href='auth.html'" style="background: #0284c7; color: #ffffff; border-color: #0369a1; font-weight: 700;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span id="authPortalBtnText">Login / Signup</span>
+          </button>
+          <button class="admin-link-btn" id="logoutNavBtn" onclick="handleLogout()" style="display: none; background: #dc2626; color: #ffffff; border-color: #b91c1c; font-weight: 700;" title="Logout from HeatShield">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Logout</span>
+          </button>
+        </div>
+
+        <!-- Language Switcher -->
+        <div class="lang-selector">
+          <button class="lang-btn active" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="hi">हिंदी</button>
+          <button class="lang-btn" data-lang="mr">मराठी</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- LIVE STATUS PILL -->
+    <div class="status-pill" id="backendStatusPill">
+      <div class="status-indicator">
+        <span class="pulse-dot" id="statusPulseDot"></span>
+        <span id="backendStatusText" data-i18n="status_live">FastAPI Backend Connected</span>
+      </div>
+      <div class="authority-badge-text" data-i18n="authority_badge">
+        Disaster Management • Chandrapur
+      </div>
+    </div>
+
+
+
+    <!-- CITIZEN DASHBOARD TOP TAB BAR NAVIGATION -->
+    <nav class="citizen-tabs-bar">
+      <button class="cit-tab-btn active" data-tab="risk" onclick="switchCitizenTab('risk', this)">
+        <div class="cit-tab-btn-content">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L3 6.2V12C3 17.5 6.8 21.7 12 23C17.2 21.7 21 17.5 21 12V6.2L12 2Z"></path>
+          </svg>
+          <span>My Risk</span>
+        </div>
+        <span class="tab-lock-label" style="display: none;">Complete your profile to see this</span>
+      </button>
+
+      <button class="cit-tab-btn" data-tab="profile" onclick="switchCitizenTab('profile', this)">
+        <div class="cit-tab-btn-content">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="7" r="4"></circle>
+            <path d="M5.5 21a8.5 8.5 0 0 1 13 0"></path>
+          </svg>
+          <span>My Profile</span>
+        </div>
+      </button>
+
+      <button class="cit-tab-btn" data-tab="forecast" onclick="switchCitizenTab('forecast', this)">
+        <div class="cit-tab-btn-content">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Forecast</span>
+        </div>
+        <span class="tab-lock-label" style="display: none;">Complete your profile to see this</span>
+      </button>
+
+      <button class="cit-tab-btn" data-tab="safety" onclick="switchCitizenTab('safety', this)">
+        <div class="cit-tab-btn-content">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>Safety &amp; Shelter</span>
+        </div>
+        <span class="tab-lock-label" style="display: none;">Complete your profile to see this</span>
+      </button>
+    </nav>
+
+    <!-- SECTION 1: MY RISK (HERO CARD & FACTORS) -->
+    <div class="cit-tab-content active" id="cit-sec-risk" style="display: block;">
+      <!-- WEATHER-APP HERO CARD (DYNAMIC RISK THEME) -->
+      <main class="hero-weather-card Caution" id="heroCard">
+        <!-- Top Row: Location & Badge -->
+        <div class="hero-top-row">
+          <div>
+            <div class="hero-location-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              <h2 class="hero-taluka-name" id="heroTalukaName">Chandrapur City</h2>
+            </div>
+            <div class="hero-profile-summary" id="heroProfileSummary">Adult • Outdoor Manual Labor</div>
+          </div>
+
+          <div class="hero-badge-pill">
+            <span class="hero-badge-dot"></span>
+            <span id="heroBadgeText" data-i18n="band_caution">Moderate Heat Caution</span>
+          </div>
+        </div>
+
+        <!-- Main Temperature & Risk Score -->
+        <div class="hero-main-stats">
+          <div class="hero-temp-block">
+            <span class="hero-temp-num" id="heroTempNum">47</span>
+            <span class="hero-temp-deg">°C</span>
+          </div>
+
+          <div class="hero-score-block">
+            <div class="hero-score-label" data-i18n="hero_score">Your Personal Heat Risk</div>
+            <div>
+              <span class="hero-score-num" id="heroScoreNum">100.0</span>
+              <span class="hero-score-denom">/100</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Delta Comparison Banner -->
+        <div class="hero-delta-box">
+          <span class="hero-delta-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </span>
+          <span id="heroDeltaText">Your risk today is calculated based on your location, age, and activity.</span>
+        </div>
+
+        <!-- Quick Metrics Grid -->
+        <div class="hero-metrics-grid">
+          <div class="hero-metric-item">
+            <span class="hero-metric-label" data-i18n="hero_wbgt">Outdoor Heat (WBGT)</span>
+            <span class="hero-metric-val" id="metricWbgt">32.6°C</span>
+          </div>
+          <div class="hero-metric-item">
+            <span class="hero-metric-label" data-i18n="hero_feels_like">Feels Like</span>
+            <span class="hero-metric-val" id="metricHi">51.2°C</span>
+          </div>
+          <div class="hero-metric-item">
+            <span class="hero-metric-label" data-i18n="hero_humidity">Humidity</span>
+            <span class="hero-metric-val" id="metricHumidity">28%</span>
+          </div>
+          <div class="hero-metric-item">
+            <span class="hero-metric-label" data-i18n="hero_wind">Wind</span>
+            <span class="hero-metric-val" id="metricWind">12 km/h</span>
+          </div>
+        </div>
+      </main>
+
+      <!-- TRANSPARENCY ACCORDION ("HOW WE CALCULATED YOUR RISK") -->
+      <section class="card" style="padding-bottom: 14px;">
+        <div class="card-title-row" style="margin-bottom: 8px;">
+          <h3 class="card-title">
+            <span class="card-title-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg>
+            </span>
+            <span data-i18n="sec_why">How We Calculated Your Risk</span>
+          </h3>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;" data-i18n="why_sub">
+          Personal factors adjusting your daily risk score
+        </p>
+
+        <div class="transparency-accordion">
+          <button class="accordion-trigger" id="accordionTrigger" type="button">
+            <span data-i18n="accordion_trigger_text">View Detailed Factor Multipliers &amp; Standards</span>
+            <svg class="acc-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="accordion-body" id="accordionBody">
+            <p style="font-size: 11.5px; line-height: 1.4; color: #475569;" data-i18n="why_intro">
+              Heat Shield blends the municipal baseline risk score with your physiological exposure profile
+              using guidance from the CDC Extreme Heat Advisory, NOAA Heat Index,
+              and OSHA Occupational Standards.
+            </p>
+            <div class="factor-table-container">
+              <div class="scroll-hint">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8L22 12L18 16"/><path d="M6 8L2 12L6 16"/></svg>
+                <span data-i18n="table_scroll_hint">Scroll horizontally to view full table</span>
+              </div>
+              <div class="factor-table-scroll">
+                <table class="factor-table">
+                  <thead>
+                    <tr>
+                      <th data-i18n="col_factor">Factor</th>
+                      <th data-i18n="col_val">Selection</th>
+                      <th data-i18n="col_impact">Impact</th>
+                      <th data-i18n="col_rationale">Rationale &amp; Citation</th>
+                    </tr>
+                  </thead>
+                  <tbody id="factorsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+            <div id="totalMultiplierSummary" style="margin-top: 10px; font-weight: 700; font-size: 11.5px; color: var(--brand-orange);"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- SECTION 2: MY PROFILE (VULNERABILITY SETUP FORM) -->
+    <div class="cit-tab-content" id="cit-sec-profile" style="display: none;">
+      <!-- PERSONAL VULNERABILITY PROFILE SETUP CARD -->
+      <section class="setup-card" id="setupCard" style="display: block;">
+        <div class="setup-header" id="setupHeader">
+          <div class="setup-title">
+            <div class="setup-title-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" y1="21" x2="4" y2="14"></line>
+                <line x1="4" y1="10" x2="4" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12" y2="3"></line>
+                <line x1="20" y1="21" x2="20" y2="16"></line>
+                <line x1="20" y1="12" x2="20" y2="3"></line>
+                <line x1="1" y1="14" x2="7" y2="14"></line>
+                <line x1="9" y1="8" x2="15" y2="8"></line>
+                <line x1="17" y1="16" x2="23" y2="16"></line>
+              </svg>
+            </div>
+            <div>
+              <h2 data-i18n="profile_hdr">Personal Vulnerability Profile</h2>
+              <p data-i18n="profile_sub">Tailors thermal stress to your age, labor exposure &amp; health</p>
+            </div>
+          </div>
+          <button class="setup-toggle-btn" id="setupToggleIcon" aria-label="Toggle profile setup">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <div class="form-section" id="formSection">
+          <!-- Location Selector & GPS -->
+          <div class="form-group">
+            <label class="form-label" for="talukaSelect">
+              <span data-i18n="lbl_location">Your Location (Ward / Taluka)</span>
+              <span class="form-label-desc" data-i18n="location_sub">Chandrapur District</span>
+            </label>
+            <div class="location-input-wrapper">
+              <select class="select-taluka" id="talukaSelect"></select>
+              <button class="geo-btn" id="geoBtn" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                </svg>
+                <span id="geoBtnText" data-i18n="btn_geolocate">Auto-Detect</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Age Group -->
+          <div class="form-group">
+            <label class="form-label">
+              <span data-i18n="lbl_age">Age Group</span>
+              <span class="form-label-desc" data-i18n="lbl_age_desc">Thermoregulation factor</span>
+            </label>
+            <div class="chip-grid">
+              <button class="chip-btn" data-type="age" data-val="child" type="button">
+                <span class="chip-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 4a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"></path>
+                    <path d="M18 19c0-3.3-2.7-6-6-6s-6 2.7-6 6"></path>
+                  </svg>
+                </span>
+                <span data-i18n="age_child">Child (&lt;12)</span>
+              </button>
+              <button class="chip-btn active" data-type="age" data-val="adult" type="button">
+                <span class="chip-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="7" r="4"></circle>
+                    <path d="M5.5 21a8.5 8.5 0 0 1 13 0"></path>
+                  </svg>
+                </span>
+                <span data-i18n="age_adult">Adult (12-64)</span>
+              </button>
+              <button class="chip-btn" data-type="age" data-val="elderly" type="button">
+                <span class="chip-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="7" r="4"></circle>
+                    <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"></path>
+                    <line x1="19" y1="14" x2="19" y2="21"></line>
+                  </svg>
+                </span>
+                <span data-i18n="age_elderly">Elderly (65+)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Gender (Optional) -->
+          <div class="form-group">
+            <label class="form-label">
+              <span data-i18n="lbl_gender">Gender (Optional)</span>
+              <span class="form-label-desc" data-i18n="lbl_gender_desc">Biometeorology factor</span>
+            </label>
+            <div class="chip-grid">
+              <button class="chip-btn" data-type="gender" data-val="male" type="button">
+                <span data-i18n="gen_male">Male</span>
+              </button>
+              <button class="chip-btn" data-type="gender" data-val="female" type="button">
+                <span data-i18n="gen_female">Female</span>
+              </button>
+              <button class="chip-btn active" data-type="gender" data-val="prefer_not_to_say" type="button">
+                <span data-i18n="gen_other">Prefer not to say</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Occupation / Exposure Profile -->
+          <div class="form-group">
+            <label class="form-label">
+              <span data-i18n="lbl_occ">Occupation / Exposure Type</span>
+              <span class="form-label-desc" data-i18n="lbl_occ_desc">Direct solar load</span>
+            </label>
+            <div class="chip-grid-2 chip-grid">
+              <button class="chip-btn active" data-type="occ" data-val="outdoor_manual" type="button">
+                <span class="chip-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 20h20"></path>
+                    <path d="M5 20v-8a7 7 0 0 1 14 0v8"></path>
+                    <path d="M12 4v4"></path>
+                  </svg>
+                </span>
+                <span data-i18n="occ_manual">Outdoor Manual Labor</span>
+              </button>
+              <button class="chip-btn" data-type="occ" data-val="outdoor_non_manual" type="button">
+                <span class="chip-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="1" y="3" width="15" height="13"></rect>
+                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                    <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                    <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                  </svg>
+                </span>
+                <span data-i18n="occ_non_manual">Outdoor Transit / Vendor</span>
+              </button>
+              <button class="chip-btn" data-type="occ" data-val="indoor_office" type="button">
+                <span class="chip-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                    <line x1="9" y1="22" x2="9" y2="22.01"></line>
+                    <line x1="15" y1="22" x2="15" y2="22.01"></line>
+                    <line x1="8" y1="6" x2="10" y2="6"></line>
+                    <line x1="14" y1="6" x2="16" y2="6"></line>
+                    <line x1="8" y1="10" x2="10" y2="10"></line>
+                    <line x1="14" y1="10" x2="16" y2="10"></line>
+                    <line x1="8" y1="14" x2="10" y2="14"></line>
+                    <line x1="14" y1="14" x2="16" y2="14"></line>
+                  </svg>
+                </span>
+                <span data-i18n="occ_office">Indoor / Office</span>
+              </button>
+              <button class="chip-btn" data-type="occ" data-val="student" type="button">
+                <span class="chip-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                  </svg>
+                </span>
+                <span data-i18n="occ_student">Student / Home</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Health Flags -->
+          <div class="form-group">
+            <label class="form-label">
+              <span data-i18n="lbl_health">Health Flags</span>
+              <span class="form-label-desc" data-i18n="lbl_health_desc">Multi-select</span>
+            </label>
+            <div class="tags-row">
+              <span class="tag-check" data-val="cardiovascular_respiratory">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <span data-i18n="health_cardio">Heart / Asthma Condition</span>
+              </span>
+              <span class="tag-check" data-val="pregnant">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="16"></line>
+                  <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                <span data-i18n="health_preg">Pregnant</span>
+              </span>
+              <span class="tag-check active-none" data-val="none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  <polyline points="9 12 11 14 15 10"></polyline>
+                </svg>
+                <span data-i18n="health_none">None Disclosed</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Current Physical Activity -->
+          <div class="form-group">
+            <label class="form-label">
+              <span data-i18n="lbl_activity">Activity Right Now</span>
+              <span class="form-label-desc" data-i18n="lbl_activity_desc">Metabolic heat load</span>
+            </label>
+            <div class="chip-grid">
+              <button class="chip-btn" data-type="activity" data-val="resting" type="button">
+                <span class="chip-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                    <line x1="6" y1="1" x2="6" y2="4"></line>
+                    <line x1="10" y1="1" x2="10" y2="4"></line>
+                    <line x1="14" y1="1" x2="14" y2="4"></line>
+                  </svg>
+                </span>
+                <span data-i18n="act_rest">Resting</span>
+              </button>
+              <button class="chip-btn" data-type="activity" data-val="light" type="button">
+                <span class="chip-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="5" r="2"></circle>
+                    <path d="M10 22l2-7 3 3v4"></path>
+                    <path d="M14 12l-2-2-4 3"></path>
+                    <path d="M8 17l2-4"></path>
+                  </svg>
+                </span>
+                <span data-i18n="act_light">Light Activity</span>
+              </button>
+              <button class="chip-btn active" data-type="activity" data-val="heavy_exertion" type="button">
+                <span class="chip-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="15" cy="4" r="2"></circle>
+                    <path d="M8 22l3-6 2 2 3-3"></path>
+                    <path d="M19 13l-4-3-4 3 2 4"></path>
+                    <path d="M5 14l4-2"></path>
+                  </svg>
+                </span>
+                <span data-i18n="act_heavy">Heavy Exertion</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Recalculate CTA -->
+          <button class="calculate-btn" id="calcBtn" type="button" onclick="submitCitizenProfile();">
+            <span data-i18n="btn_save">Save Profile &amp; View Risk →</span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- SECTION 3: FORECAST (3-DAY PERSONALIZED FORECAST) -->
+    <div class="cit-tab-content" id="cit-sec-forecast" style="display: none;">
+      <!-- 3-DAY PERSONALIZED FORECAST STRIP & CHART -->
+      <section class="card">
+        <div class="card-title-row">
+          <h3 class="card-title">
+            <span class="card-title-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </span>
+            <span data-i18n="sec_forecast">3-Day Personalized Forecast</span>
+          </h3>
+        </div>
+
+        <div class="forecast-cards-strip" id="forecastCardsStrip"></div>
+
+        <div class="chart-wrapper">
+          <canvas id="forecastChart"></canvas>
+        </div>
+      </section>
+    </div>
+
+    <!-- SECTION 4: SAFETY & SHELTER -->
+    <div class="cit-tab-content" id="cit-sec-safety" style="display: none;">
+      <!-- ACTIONABLE PRECAUTIONS & SAFE HOURS -->
+      <section class="card">
+        <div class="card-title-row">
+          <h3 class="card-title">
+            <span class="card-title-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <polyline points="9 12 11 14 15 10"></polyline>
+              </svg>
+            </span>
+            <span data-i18n="sec_precautions">Personalized Safety Actions</span>
+          </h3>
+        </div>
+
+        <!-- Safe Outdoor Windows -->
+        <div class="hours-box">
+          <div class="hours-row">
+            <span class="hours-badge safe">
+              <span class="dot-indicator green"></span>
+              <span data-i18n="badge_safe_hours">SAFE HOURS</span>
+            </span>
+            <span id="hoursSafeVal" style="font-weight: 600;">Before 9:30 AM and After 6:00 PM only</span>
+          </div>
+          <div class="hours-row">
+            <span class="hours-badge danger">
+              <span class="dot-indicator red"></span>
+              <span data-i18n="badge_danger_hours">AVOID SUN</span>
+            </span>
+            <span id="hoursDangerVal" style="font-weight: 600;">10:30 AM – 5:30 PM (Stay Indoors)</span>
+          </div>
+        </div>
+
+        <!-- Precautions List -->
+        <ul class="precautions-list" id="precautionsList"></ul>
+
+        <!-- Hydration & Work/Rest Callouts -->
+        <div class="guidance-box hydration" id="hydrationAdvice">
+          <svg class="guidance-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+          </svg>
+          <span id="hydrationAdviceText">Minimum 4.0 to 5.0 Liters daily with ORS sachets.</span>
+        </div>
+        <div class="guidance-box workrest" id="workRestCycle">
+          <svg class="guidance-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span id="workRestCycleText">15 minutes rest in deep shade for every 15 minutes of unavoidable light work.</span>
+        </div>
+      </section>
+
+      <!-- NEAREST COOLING SHELTER & RELIEF LOCATOR -->
+      <section class="card">
+        <div class="card-title-row">
+          <h3 class="card-title">
+            <span class="card-title-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 21h18"></path>
+                <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+                <line x1="12" y1="7" x2="12" y2="13"></line>
+                <line x1="9" y1="10" x2="15" y2="10"></line>
+              </svg>
+            </span>
+            <span data-i18n="sec_shelter">Nearest Cooling Shelter</span>
+          </h3>
+        </div>
+
+        <div class="shelter-info-box">
+          <div class="shelter-details">
+            <h4 id="shelterName">Chandrapur City Hospital Cooling Hub</h4>
+            <p id="shelterDesc">Equipped with cold baths, IV fluids &amp; air filtration.</p>
+          </div>
+          <div class="shelter-distance-badge" id="shelterDistance">0.4 km</div>
+        </div>
+
+        <!-- Mini Leaflet Map -->
+        <div class="shelter-map-container" id="shelterMap"></div>
+
+        <a href="#" target="_blank" class="shelter-directions-btn" id="shelterDirectionsBtn" data-i18n="btn_directions">
+          Open Directions in Google Maps ↗
+        </a>
+      </section>
+
+      <!-- ONE-TAP FAMILY EMERGENCY ALERT DISPATCH -->
+      <section class="card family-alert-card">
+        <div class="card-title-row" style="margin-bottom: 10px;">
+          <h3 class="card-title" style="color: #b91c1c;">
+            <span class="card-title-icon" style="color: #ef4444;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+            </span>
+            <span data-i18n="sec_emergency_alert">Emergency Contact Safety Ping</span>
+          </h3>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;" data-i18n="emergency_alert_desc">
+          One-tap automated SMS dispatch to your family with your live heatwave risk tier and location.
+        </p>
+        <button class="alert-action-btn" id="openAlertModalBtn" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span data-i18n="btn_family_alert">Alert My Family / Emergency Contact</span>
+        </button>
+      </section>
+    </div>
+
+  </div><!-- /.app-container -->
+
+  <!-- EMERGENCY ALERT MODAL -->
+  <div class="modal-overlay" id="alertModal" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 data-i18n="modal_title">Send Emergency Heat Alert</h3>
+        <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted);" data-i18n="modal_desc">
+        Sends an instant SMS alert to your family with your personal risk status and recommended precautions.
+      </p>
+
+      <div class="form-group">
+        <label class="form-label" data-i18n="lbl_sender_name">Your Name</label>
+        <input type="text" class="modal-input" id="alertSenderInput" placeholder="e.g. Aditya" value="Citizen">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" data-i18n="lbl_recipient_name">Relative / Contact Name</label>
+        <input type="text" class="modal-input" id="alertRelativeInput" placeholder="e.g. Mother / Father" value="Family">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" data-i18n="lbl_phone">Phone Number (+91)</label>
+        <input type="tel" class="modal-input" id="alertPhoneInput" placeholder="e.g. 9876543210" maxlength="13">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" data-i18n="lbl_note">Optional Note</label>
+        <input type="text" class="modal-input" id="alertNoteInput" placeholder="e.g. I am resting in the shade right now.">
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" id="modalCancelBtn" type="button" data-i18n="btn_cancel">Cancel</button>
+        <button class="modal-btn-send" id="modalSendBtn" type="button" data-i18n="btn_send_sms">Send Alert via SMS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTHENTICATION & PORTAL SELECTION MODAL -->
+  <div class="modal-overlay" id="authPortalModal" role="dialog" aria-modal="true" style="display:none; z-index:9999;">
+    <div class="modal-content" style="max-width: 440px; padding: 24px; border-radius: 16px; background: #ffffff; box-shadow: 0 20px 40px rgba(15,23,42,0.25);">
+      <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:12px; margin-bottom:16px;">
+        <h3 id="authModalTitle" style="font-family:'Plus Jakarta Sans',sans-serif; font-size:16px; font-weight:800; color:#0f172a;">HeatShield Security Portal</h3>
+        <button class="modal-close-btn" onclick="closeAuthModal()" style="background:none; border:none; font-size:22px; cursor:pointer; color:#64748b;">&times;</button>
+      </div>
+
+      <!-- Portal Tab Selector -->
+      <div style="display:flex; background:#f1f5f9; border-radius:8px; padding:3px; margin-bottom:18px;">
+        <button id="tabCitizenAuth" onclick="switchAuthTab('CITIZEN')" style="flex:1; padding:8px; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; background:#ffffff; color:#ea580c; box-shadow:0 1px 3px rgba(0,0,0,0.1);">👤 Citizen Portal</button>
+        <button id="tabAuthorityAuth" onclick="switchAuthTab('AUTHORITY')" style="flex:1; padding:8px; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; background:transparent; color:#64748b;">🏛️ Authority Portal</button>
+      </div>
+
+      <!-- Citizen Auth Container -->
+      <div id="citizenAuthContainer">
+        <div style="display:flex; gap:12px; margin-bottom:14px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
+          <button id="subTabCitizenLogin" onclick="switchCitizenAuthMode('login')" style="font-size:13px; font-weight:700; color:#ea580c; border:none; background:none; cursor:pointer; border-bottom:2px solid #ea580c; padding-bottom:4px;">Citizen Login</button>
+          <button id="subTabCitizenSignup" onclick="switchCitizenAuthMode('signup')" style="font-size:13px; font-weight:700; color:#64748b; border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; padding-bottom:4px;">New Registration</button>
+        </div>
+
+        <!-- Citizen Login Form -->
+        <form id="citizenLoginForm" onsubmit="handleCitizenLogin(event)">
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label" style="font-size:11.5px; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Email Address</label>
+            <input type="email" id="citLoginEmail" required placeholder="e.g. ramesh@example.com" class="modal-input" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px;">
+          </div>
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label" style="font-size:11.5px; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Password</label>
+            <input type="password" id="citLoginPassword" required placeholder="••••••••" class="modal-input" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px;">
+          </div>
+          <button type="submit" style="width:100%; padding:11px; background:#ea580c; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer;">Sign In to Citizen Dashboard</button>
+        </form>
+
+        <!-- Citizen Signup Form -->
+        <form id="citizenSignupForm" onsubmit="handleCitizenSignup(event)" style="display:none;">
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label" style="font-size:11.5px; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Full Name</label>
+            <input type="text" id="citSignupName" required placeholder="e.g. Ramesh Kumar" class="modal-input" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px;">
+          </div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label" style="font-size:11.5px; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Email Address</label>
+            <input type="email" id="citSignupEmail" required placeholder="e.g. ramesh@example.com" class="modal-input" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px;">
+          </div>
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label" style="font-size:11.5px; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Create Password (min 6 characters)</label>
+            <input type="password" id="citSignupPassword" required minlength="6" placeholder="••••••••" class="modal-input" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px;">
+          </div>
+          <button type="submit" style="width:100%; padding:11px; background:#16a34a; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer;">Create Citizen Account</button>
+        </form>
+      </div>
+
+      <!-- Authority Auth Container -->
+      <div id="authorityAuthContainer" style="display:none;">
+        <div style="display:flex; gap:12px; margin-bottom:14px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
+          <button id="subTabAuthLogin" onclick="switchAuthorityAuthMode('login')" style="font-size:13px; font-weight:700; color:#0f172a; border:none; background:none; cursor:pointer; border-bottom:2px solid #0f172a; padding-bottom:4px;">Authority Login</button>
+          <button id="subTabAuthRegister" onclick="switchAuthorityAuthMode('register')" style="font-size:13px; font-weight:700; color:#64748b; border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; padding-bottom:4px;">Officer Registration</button>
+        </div>
+
+        <!-- Authority Login Form -->
+        <form id="authorityLoginForm" onsubmit="handleAuthorityLogin(event)">
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label" style="font-size:11.5px; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Officer Email</label>
+            <input type="email" id="authLoginEmail" required placeholder="authority@heatshield.gov.in" class="modal-input" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px;">
+          </div>
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label" style="font-size:11.5px; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Password</label>
+            <input type="password" id="authLoginPassword" required placeholder="••••••••" class="modal-input" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px;">
+          </div>
+          <button type="submit" style="width:100%; padding:11px; background:#0b1329; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer;">Authenticate as Municipal Authority</button>
+        </form>
+
+        <!-- Authority Registration Form -->
+        <form id="authorityRegisterForm" onsubmit="handleAuthorityRegister(event)" style="display:none;">
+          <div class="form-group" style="margin-bottom:10px;">
+            <label class="form-label" style="font-size:11.5px; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Officer Full Name</label>
+            <input type="text" id="authRegName" required placeholder="e.g. Dr. A. Sharma" class="modal-input" style="width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12.5px;">
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label class="form-label" style="font-size:11.5px; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Official Email</label>
+            <input type="email" id="authRegEmail" required placeholder="officer@heatshield.gov.in" class="modal-input" style="width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12.5px;">
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label class="form-label" style="font-size:11.5px; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Password</label>
+            <input type="password" id="authRegPassword" required minlength="6" placeholder="••••••••" class="modal-input" style="width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12.5px;">
+          </div>
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label" style="font-size:11.5px; font-weight:600; color:#dc2626; display:block; margin-bottom:4px;">Authority Registration Code</label>
+            <input type="password" id="authRegCode" required placeholder="Enter Secret Authority Secret Code" class="modal-input" style="width:100%; padding:9px 12px; border:1px solid #fecaca; background:#fef2f2; border-radius:8px; font-size:12.5px;">
+          </div>
+          <button type="submit" style="width:100%; padding:11px; background:#0b1329; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer;">Register Municipal Authority Account</button>
+        </form>
+      </div>
+
+      <!-- Demo Credentials Helper Banner -->
+      <div style="margin-top:16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; font-size:11px; color:#475569;">
+        <div style="font-weight:700; color:#0f172a; margin-bottom:2px;">🔑 Quick Demo Credentials:</div>
+        <div>• <b>Authority:</b> <code>authority@heatshield.gov.in</code> / <code>HeatShield2026!</code></div>
+        <div>• <b>Secret Code:</b> <code>HEATSHIELD_AUTH_SECRET_2026</code></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Node -->
+  <div class="toast-msg" id="toastMsg"></div>
+
+  <!-- Advisor Client JavaScript -->
+  <script src="config.js"></script>
+  <script src="advisor.js"></script>
+</body>
+</html>

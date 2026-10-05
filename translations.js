@@ -258,7 +258,7 @@ const translations = {
     day_5: "Day 5",
 
     // Form inputs & Placeholders
-    ph_contact_name: "e.g. aditya-g or Sir",
+    ph_contact_name: "e.g. Test Contact 1",
     ph_contact_phone: "Mobile e.g. 9156616395",
     lbl_add_contact_hdr: "Add Citizen / Sir / Team Mobile Number:",
     btn_save_contact: "Save Contact",
@@ -571,7 +571,7 @@ const translations = {
     day_5: "दिवस ५",
 
     // Form inputs & Placeholders
-    ph_contact_name: "उदा. aditya-g किंवा सर",
+    ph_contact_name: "उदा. टेस्ट संपर्क १",
     ph_contact_phone: "मोबाईल उदा. 9156616395",
     lbl_add_contact_hdr: "नागरिक / परीक्षक / पथकाचा मोबाईल क्रमांक जोडा:",
     btn_save_contact: "संपर्क सेव्ह करा",

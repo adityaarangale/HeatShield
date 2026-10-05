@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeatShield - User Authentication & Access Portal</title>
+    <meta name="description" content="Heat Shield Urban Heatwave Risk Intelligence & Action System - Citizen & Authority Authentication Portal">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #0f172a;
+            --border-color: #334155;
+            --brand-primary: #ea580c;
+            --brand-hover: #c2410c;
+            --brand-authority: #2563eb;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(234, 88, 12, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(37, 99, 235, 0.15) 0%, transparent 40%);
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 460px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            padding: 28px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(234, 88, 12, 0.12);
+            border: 1px solid rgba(234, 88, 12, 0.3);
+            color: #fb923c;
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .auth-header h1 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .auth-header p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Account Type Switcher (Citizen vs Authority) */
+        .role-switcher {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: #0f172a;
+            padding: 4px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 18px;
+        }
+
+        .role-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .role-btn.active.citizen {
+            background: var(--brand-primary);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+        }
+
+        .role-btn.active.authority {
+            background: var(--brand-authority);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Mode Switcher (Login vs Sign Up) */
+        .mode-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .mode-tab {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .mode-tab.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--brand-primary);
+        }
+
+        .mode-tab.active.authority-theme {
+            border-bottom-color: var(--brand-authority);
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13.5px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--brand-primary);
+        }
+
+        .authority-mode .form-control:focus {
+            border-color: var(--brand-authority);
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 14px rgba(234, 88, 12, 0.3);
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        .submit-btn.authority-btn {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+        }
+
+        .submit-btn:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .alert-box {
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .alert-box.error {
+            background: rgba(220, 38, 38, 0.15);
+            border: 1px solid rgba(220, 38, 38, 0.4);
+            color: #fca5a5;
+        }
+
+        .alert-box.success {
+            background: rgba(22, 163, 74, 0.15);
+            border: 1px solid rgba(22, 163, 74, 0.4);
+            color: #86efac;
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+
+        .footer-note a {
+            color: #fb923c;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container" id="authCard">
+        <!-- Header -->
+        <div class="auth-header">
+            <div class="brand-badge">
+                <span>🔥</span> <span>HEAT SHIELD PORTAL</span>
+            </div>
+            <h1>Authentication & Access</h1>
+            <p>Urban Heatwave Early Warning & Risk Mitigation System</p>
+        </div>
+
+        <!-- Account Type Switcher -->
+        <div class="role-switcher">
+            <button class="role-btn active citizen" id="btnRoleCitizen" onclick="switchRole('citizen')">
+                <span>👤</span> <span>Citizen</span>
+            </button>
+            <button class="role-btn authority" id="btnRoleAuthority" onclick="switchRole('authority')">
+                <span>🏛️</span> <span>Authority</span>
+            </button>
+        </div>
+
+        <!-- Mode Switcher (Login vs Sign Up) -->
+        <div class="mode-tabs">
+            <button class="mode-tab active" id="tabLogin" onclick="switchMode('login')">Log In</button>
+            <button class="mode-tab" id="tabSignup" onclick="switchMode('signup')">Create Account</button>
+        </div>
+
+        <!-- Status Message Box -->
+        <div class="alert-box" id="alertBox"></div>
+
+        <!-- 1. UNIFIED LOGIN FORM -->
+        <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+            <div class="form-group">
+                <label for="loginPhone">Mobile Number</label>
+                <input type="tel" id="loginPhone" class="form-control" placeholder="+91XXXXXXXXXX" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="submit-btn" id="loginSubmitBtn">
+                ⚡ Log In to HeatShield
+            </button>
+        </form>
+
+        <!-- 2. CITIZEN SIGNUP FORM -->
+        <form id="citizenSignupForm" style="display: none;" onsubmit="handleCitizenSignupSubmit(event)">
+            <div class="form-group">
+                <label for="citName">Full Name</label>
+                <input type="text" id="citName" class="form-control" placeholder="e.g. Ramesh Kumar" required>
+            </div>
+            <div class="form-group">
+                <label for="citPhone">Mobile Number</label>
+                <input type="tel" id="citPhone" class="form-control" placeholder="+91XXXXXXXXXX" required>
+            </div>
+            <div class="form-group">
+                <label for="citPassword">Password</label>
+                <input type="password" id="citPassword" class="form-control" placeholder="Create a secure password" required minlength="4">
+            </div>
+            <div class="form-group">
+                <label for="citWard">Ward / Taluka Location</label>
+                <select id="citWard" class="form-control">
+                    <option value="CHA_001">Chandrapur City (Central Urban Core)</option>
+                    <option value="CHA_002">Ballarpur (Mines & Industrial Zone)</option>
+                    <option value="CHA_003">Rajura (Cement Corridor)</option>
+                    <option value="CHA_004">Warora (Agricultural Junction)</option>
+                    <option value="CHA_005">Bhadravati (Semi-urban Taluka)</option>
+                    <option value="CHA_006">Brahmapuri (Wainganga Basin)</option>
+                    <option value="CHA_007">Nagbhid (Wetland & Lakes Zone)</option>
+                    <option value="CHA_008">Mul (Tadoba Forest Buffer)</option>
+                </select>
+            </div>
+            <button type="submit" class="submit-btn">
+                🟢 Register Citizen Account
+            </button>
+        </form>
+
+        <!-- 3. AUTHORITY SIGNUP FORM -->
+        <form id="authoritySignupForm" style="display: none;" onsubmit="handleAuthoritySignupSubmit(event)">
+            <div class="form-group">
+                <label for="authName">Officer Full Name</label>
+                <input type="text" id="authName" class="form-control" placeholder="e.g. Dr. A. Sharma" required>
+            </div>
+            <div class="form-group">
+                <label for="authPhone">Official Mobile Number</label>
+                <input type="tel" id="authPhone" class="form-control" placeholder="+91XXXXXXXXXX" required>
+            </div>
+            <div class="form-group">
+                <label for="authPassword">Password</label>
+                <input type="password" id="authPassword" class="form-control" placeholder="Create an officer password" required minlength="4">
+            </div>
+            <div class="form-group">
+                <label for="authDept">Department / Designation</label>
+                <select id="authDept" class="form-control">
+                    <option value="DDMA">District Disaster Management Authority (DDMA)</option>
+                    <option value="MUNICIPAL_HEALTH">Municipal Corporation Health Officer</option>
+                    <option value="EMERGENCY_DEPT">Emergency Operations Center (EOC)</option>
+                    <option value="REVENUE_RELIEF">District Collectorate & Relief Cell</option>
+                </select>
+            </div>
+            <button type="submit" class="submit-btn authority-btn">
+                🏛️ Register Authority Account
+            </button>
+        </form>
+
+        <div class="footer-note">
+            Ministry of Earth Sciences (MoES SIH26083)<br>
+            Protected by real-time JWT authentication &amp; encrypted passlib hashing.
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const API_BASE = window.HEATSHIELD_CONFIG ? window.HEATSHIELD_CONFIG.API_BASE : "http://127.0.0.1:8000";
+        let currentRole = "citizen"; // "citizen" | "authority"
+        let currentMode = "login";   // "login" | "signup"
+
+        // In-Memory Token Reference
+        window.heatshieldToken = null;
+
+        function showAlert(msg, isError = true) {
+            const box = document.getElementById("alertBox");
+            box.className = `alert-box ${isError ? 'error' : 'success'}`;
+            box.textContent = msg;
+            box.style.display = "block";
+        }
+
+        function clearAlert() {
+            const box = document.getElementById("alertBox");
+            box.style.display = "none";
+        }
+
+        function switchRole(role) {
+            currentRole = role;
+            clearAlert();
+
+            const citBtn = document.getElementById("btnRoleCitizen");
+            const authBtn = document.getElementById("btnRoleAuthority");
+            const authCard = document.getElementById("authCard");
+            const loginSubmitBtn = document.getElementById("loginSubmitBtn");
+            const tabLogin = document.getElementById("tabLogin");
+            const tabSignup = document.getElementById("tabSignup");
+
+            if (role === "citizen") {
+                citBtn.className = "role-btn active citizen";
+                authBtn.className = "role-btn authority";
+                authCard.classList.remove("authority-mode");
+                loginSubmitBtn.className = "submit-btn";
+                tabLogin.classList.remove("authority-theme");
+                tabSignup.classList.remove("authority-theme");
+            } else {
+                authBtn.className = "role-btn active authority";
+                citBtn.className = "role-btn citizen";
+                authCard.classList.add("authority-mode");
+                loginSubmitBtn.className = "submit-btn authority-btn";
+                tabLogin.classList.add("authority-theme");
+                tabSignup.classList.add("authority-theme");
+            }
+
+            updateVisibleForm();
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            clearAlert();
+
+            const tabLogin = document.getElementById("tabLogin");
+            const tabSignup = document.getElementById("tabSignup");
+
+            if (mode === "login") {
+                tabLogin.classList.add("active");
+                tabSignup.classList.remove("active");
+            } else {
+                tabSignup.classList.add("active");
+                tabLogin.classList.remove("active");
+            }
+
+            updateVisibleForm();
+        }
+
+        function updateVisibleForm() {
+            const loginForm = document.getElementById("loginForm");
+            const citizenSignupForm = document.getElementById("citizenSignupForm");
+            const authoritySignupForm = document.getElementById("authoritySignupForm");
+
+            loginForm.style.display = "none";
+            citizenSignupForm.style.display = "none";
+            authoritySignupForm.style.display = "none";
+
+            if (currentMode === "login") {
+                loginForm.style.display = "block";
+            } else if (currentRole === "citizen") {
+                citizenSignupForm.style.display = "block";
+            } else {
+                authoritySignupForm.style.display = "block";
+            }
+        }
+
+        function storeTokenAndRedirect(token, user) {
+            // 1. Store JWT token in memory
+            window.heatshieldToken = token;
+            
+            // 2. Also keep in sessionStorage for page redirection persistence
+            sessionStorage.setItem("heatshield_token", token);
+            sessionStorage.setItem("heatshield_user", JSON.stringify(user));
+
+            const role = (user && user.role) ? user.role.toLowerCase() : currentRole;
+
+            showAlert("✓ Authentication successful! Redirecting...", false);
+
+            setTimeout(() => {
+                if (role === "citizen") {
+                    window.location.href = "citizen.html";
+                } else {
+                    window.location.href = "index.html";
+                }
+            }, 600);
+        }
+
+        async function handleLoginSubmit(event) {
+            event.preventDefault();
+            clearAlert();
+
+            const phone = document.getElementById("loginPhone").value.trim();
+            const password = document.getElementById("loginPassword").value;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ phone, password })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.detail || "Login failed. Please check your credentials.");
+                }
+
+                storeTokenAndRedirect(data.access_token, data.user);
+            } catch (err) {
+                showAlert(err.message, true);
+            }
+        }
+
+        async function handleCitizenSignupSubmit(event) {
+            event.preventDefault();
+            clearAlert();
+
+            const name = document.getElementById("citName").value.trim();
+            const phone = document.getElementById("citPhone").value.trim();
+            const password = document.getElementById("citPassword").value;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/signup`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, phone, password, role: "citizen" })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.detail || "Citizen registration failed.");
+                }
+
+                storeTokenAndRedirect(data.access_token, data.user);
+            } catch (err) {
+                showAlert(err.message, true);
+            }
+        }
+
+        async function handleAuthoritySignupSubmit(event) {
+            event.preventDefault();
+            clearAlert();
+
+            const name = document.getElementById("authName").value.trim();
+            const phone = document.getElementById("authPhone").value.trim();
+            const password = document.getElementById("authPassword").value;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/signup`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, phone, password, role: "authority" })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.detail || "Authority registration failed.");
+                }
+
+                storeTokenAndRedirect(data.access_token, data.user);
+            } catch (err) {
+                showAlert(err.message, true);
+            }
+        }
+    </script>
+</body>
+</html>

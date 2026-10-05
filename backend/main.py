@@ -1,7 +1,9 @@
 import os
 import logging
-from typing import List
-from fastapi import FastAPI, HTTPException, status
+from datetime import datetime, timedelta
+from typing import List, Optional, Dict, Any
+
+from fastapi import FastAPI, HTTPException, status, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from models import (
     Ward,
@@ -12,9 +14,25 @@ from models import (
     AlertTriggerRequest,
     AlertTriggerResponse,
     BroadcastAlertRequest,
-    BroadcastAlertResponse
+    BroadcastAlertResponse,
+    LiveWeatherResponse,
+    ForecastDay,
+    MLPredictionRequest,
+    MLPredictionResponse,
+    MLModelMetadataResponse,
+    AuthSignupRequest,
+    AuthLoginRequest,
+    UserSignupRequest,
+    UserLoginRequest,
+    AuthorityLoginRequest,
+    AuthorityRegisterRequest,
+    UserResponse,
+    TokenResponse,
+    CitizenProfileSaveRequest
 )
 from personal_risk import router as personal_risk_router
+from weather import fetch_realtime_weather, fetch_realtime_weather_cached
+from ml.predict import predict_single_risk, get_model_and_metadata
 from logic import (
     calculate_heat_index,
     calculate_wbgt,
@@ -24,8 +42,21 @@ from logic import (
     load_wards_dataset,
     evaluate_ward_detail
 )
+import database
+from auth import (
+    hash_password,
+    verify_password,
+    create_access_token,
+    get_current_user,
+    require_citizen,
+    require_authority,
+    AUTHORITY_REGISTRATION_CODE
+)
 
 logger = logging.getLogger("uvicorn.error")
+
+from fastapi.responses import JSONResponse
+from sqlalchemy import text
 
 app = FastAPI(
     title="Heat Shield - Extreme Heatwave Early Warning & Human Thermal Stress Index System",
@@ -41,24 +72,324 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Enable CORS for frontend integration on localhost and all origins
+
+# Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost:8000",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:8000",
-        "*"
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+
+@app.on_event("startup")
+def startup_event():
+    """Initialize database tables and log registered routes banner on startup."""
+    logger.info("Initializing database tables...")
+    database.init_db()
+
+    host = os.getenv("HOST", "127.0.0.1")
+    port = os.getenv("PORT", "8000")
+    base_url = f"http://{host}:{port}"
+
+    print("\n" + "=" * 65)
+    print("  HEAT SHIELD BACKEND API STARTED SUCCESSFULLY")
+    print(f"  URL:  {base_url}")
+
+    print(f"  Docs: {base_url}/docs")
+    print("-" * 65)
+    print("  REGISTERED ROUTES:")
+    for route in app.routes:
+        methods = ", ".join(sorted(list(getattr(route, "methods", [])))) or "INTERNAL"
+        path = getattr(route, "path", str(route))
+        print(f"    [{methods:<12}] {path}")
+    print("=" * 65 + "\n")
+
+
+@app.get("/api/health", tags=["Health"])
+def health_check_endpoint():
+    """Health check endpoint that verifies database connectivity."""
+    try:
+        with database.engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return {"status": "ok", "db": "connected"}
+    except Exception as e:
+        logger.error(f"Database health check failed: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "detail": str(e)}
+        )
+
+
 app.include_router(personal_risk_router)
+
+# ==================== AUTHENTICATION ENDPOINTS ====================
+
+@app.post("/api/auth/signup", status_code=status.HTTP_201_CREATED, tags=["Authentication"])
+def auth_signup(req: AuthSignupRequest):
+    # Field 'name' validation
+    if not req.name or not req.name.strip():
+        raise HTTPException(status_code=422, detail="Field 'name' is required")
+    
+    # Field 'phone' validation (must be 10 digits)
+    raw_phone = (req.phone or "").strip()
+    phone_digits = raw_phone[3:] if raw_phone.startswith("+91") else raw_phone
+    if not phone_digits.isdigit() or len(phone_digits) != 10:
+        raise HTTPException(status_code=422, detail="Field 'phone' must be exactly 10 digits")
+
+    # Field 'password' validation (at least 6 characters)
+    if not req.password or len(req.password.strip()) < 6:
+        raise HTTPException(status_code=422, detail="Field 'password' must be at least 6 characters long")
+
+    # Field 'role' validation (must be exactly 'citizen' or 'authority')
+    role_clean = (req.role or "").strip().lower()
+    if role_clean not in ["citizen", "authority"]:
+        raise HTTPException(status_code=422, detail="Field 'role' must be either 'citizen' or 'authority'")
+
+    # Existing phone check
+    existing = database.get_user_by_phone(raw_phone) or database.get_user_by_phone(phone_digits) or database.get_user_by_phone(f"+91{phone_digits}")
+    if existing:
+        raise HTTPException(status_code=409, detail="An account with this phone number already exists.")
+
+    # Hash password with passlib bcrypt scheme
+    hashed = hash_password(req.password)
+    user = database.create_user_with_phone(
+        name=req.name.strip(),
+        phone=raw_phone,
+        password_hash=hashed,
+        role=role_clean,
+        ward_or_department=req.ward_or_department.strip() if req.ward_or_department else None
+    )
+
+    token = create_access_token(data={"sub": str(user["id"]), "phone": user["phone"], "role": role_clean})
+    user_payload = {
+        "id": user["id"],
+        "name": user["name"],
+        "role": role_clean,
+        "phone": user["phone"],
+        "ward_or_department": user.get("ward_or_department")
+    }
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": user_payload
+    }
+
+
+
+@app.post("/api/auth/login", tags=["Authentication"])
+def auth_login(req: AuthLoginRequest):
+    raw_phone = (req.phone or "").strip()
+    phone_digits = raw_phone[3:] if raw_phone.startswith("+91") else raw_phone
+
+    user = database.get_user_by_phone(raw_phone) or database.get_user_by_phone(phone_digits) or database.get_user_by_phone(f"+91{phone_digits}")
+    if not user or not verify_password(req.password, user["password_hash"]):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid phone number or password")
+
+    user_role = str(user.get("role", "citizen")).lower()
+    token = create_access_token(
+        data={
+            "sub": str(user["id"]),
+            "role": user_role,
+            "name": user["name"]
+        },
+        expires_delta=timedelta(days=7)
+    )
+    return {
+        "access_token": token,
+        "role": user_role,
+        "name": user["name"],
+        "token_type": "bearer",
+        "user": {
+            "id": user["id"],
+            "name": user["name"],
+            "phone": user["phone"],
+            "role": user_role,
+            "ward_or_department": user.get("ward_or_department")
+        }
+    }
+
+
+@app.get("/api/auth/me", tags=["Authentication"])
+def get_current_user_profile(user: dict = Depends(get_current_user)):
+    return {
+        "id": user["id"],
+        "name": user["name"],
+        "phone": user.get("phone") or user.get("email"),
+        "role": str(user.get("role", "citizen")).lower(),
+        "ward_or_department": user.get("ward_or_department"),
+        "email": user.get("email"),
+        "created_at": user.get("created_at")
+    }
+
+
+# ==================== CITIZEN PROFILE MANAGEMENT ====================
+
+@app.get("/api/citizen/profile", tags=["Citizen Profile"])
+def get_citizen_user_profile(current_user: dict = Depends(get_current_user)):
+    """Fetch current logged-in citizen's profile from database."""
+    prof = database.get_citizen_profile(current_user["id"])
+    if prof:
+        return {"has_profile": True, "profile": prof}
+    return {"has_profile": False, "profile": None}
+
+
+@app.put("/api/citizen/profile", tags=["Citizen Profile"])
+def update_citizen_user_profile(req: CitizenProfileSaveRequest, current_user: dict = Depends(get_current_user)):
+    """Save or update logged-in citizen's profile in database."""
+    saved_prof = database.save_citizen_profile(
+        user_id=current_user["id"],
+        age_group=req.age_group,
+        gender=req.gender,
+        occupation_type=req.occupation_type,
+        health_flags=req.health_flags,
+        activity_level=req.activity_level,
+        ward_id=req.ward_id
+    )
+    return {
+        "status": "success",
+        "message": "Profile saved successfully",
+        "has_profile": True,
+        "profile": saved_prof
+    }
+
+
+# ==================== ADMIN ACCOUNTS MANAGEMENT ====================
+
+@app.get("/api/admin/accounts", tags=["Admin Accounts"])
+def list_admin_accounts(
+    role: Optional[str] = Query(None, description="Filter accounts by role: 'citizen' or 'authority'"),
+    current_user: dict = Depends(require_authority)
+):
+    """Retrieve list of all registered accounts (authority-only). Excludes password hashes."""
+    accounts = database.get_all_users(role_filter=role)
+    return accounts
+
+
+@app.delete("/api/admin/accounts/{user_id}", tags=["Admin Accounts"])
+def delete_admin_account(
+    user_id: int,
+    current_user: dict = Depends(require_authority)
+):
+    """Remove a user account by ID (authority-only)."""
+    success = database.delete_user_by_id(user_id)
+    if not success:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User account not found")
+    return {
+        "status": "deleted",
+        "id": user_id,
+        "message": "User account successfully removed"
+    }
+
+
+
+
+@app.post("/api/auth/citizen/signup", response_model=TokenResponse, tags=["Authentication"])
+def citizen_signup(req: UserSignupRequest):
+    if len(req.password.strip()) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters long")
+    existing = database.get_user_by_email(req.email)
+    if existing:
+        raise HTTPException(status_code=400, detail="Email is already registered")
+    
+    hashed = hash_password(req.password)
+    user = database.create_user(
+        name=req.name,
+        email=req.email,
+        password_hash=hashed,
+        role="citizen"
+    )
+    token = create_access_token(data={"sub": str(user["id"]), "role": user["role"]})
+    return TokenResponse(
+        access_token=token,
+        token_type="bearer",
+        user={
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+            "role": user["role"]
+        }
+    )
+
+@app.post("/api/auth/citizen/login", response_model=TokenResponse, tags=["Authentication"])
+def citizen_login(req: UserLoginRequest):
+    user = database.get_user_by_email(req.email)
+    if not user or not verify_password(req.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    if user["role"].lower() != "citizen":
+        raise HTTPException(status_code=403, detail="Please use Authority Login for authority accounts")
+    
+    token = create_access_token(data={"sub": str(user["id"]), "role": user["role"]})
+    return TokenResponse(
+        access_token=token,
+        token_type="bearer",
+        user={
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+            "role": user["role"]
+        }
+    )
+
+@app.post("/api/auth/authority/login", response_model=TokenResponse, tags=["Authentication"])
+def authority_login(req: AuthorityLoginRequest):
+    user = database.get_user_by_email(req.email)
+    if not user or not verify_password(req.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid authority credentials")
+    if user["role"].lower() != "authority":
+        raise HTTPException(status_code=403, detail="Access denied: Not an authority account")
+    
+    token = create_access_token(data={"sub": str(user["id"]), "role": user["role"]})
+    return TokenResponse(
+        access_token=token,
+        token_type="bearer",
+        user={
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+            "role": user["role"]
+        }
+    )
+
+@app.post("/api/auth/authority/register", response_model=TokenResponse, tags=["Authentication"])
+def authority_register(req: AuthorityRegisterRequest):
+    if req.registration_code != AUTHORITY_REGISTRATION_CODE:
+        raise HTTPException(status_code=403, detail="Invalid authority registration code")
+    if len(req.password.strip()) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters long")
+    existing = database.get_user_by_email(req.email)
+    if existing:
+        raise HTTPException(status_code=400, detail="Email is already registered")
+    
+    hashed = hash_password(req.password)
+    user = database.create_user(
+        name=req.name,
+        email=req.email,
+        password_hash=hashed,
+        role="authority"
+    )
+    token = create_access_token(data={"sub": str(user["id"]), "role": user["role"]})
+    return TokenResponse(
+        access_token=token,
+        token_type="bearer",
+        user={
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+            "role": user["role"]
+        }
+    )
+
+# Protected sample routes for testing role authorization
+@app.get("/api/citizen/dashboard", tags=["Citizen Features"])
+def citizen_dashboard(user: dict = Depends(require_citizen)):
+    return {"status": "access_granted", "user": user["name"], "role": user["role"], "message": "Welcome to Citizen Dashboard"}
+
+@app.get("/api/authority/dashboard", tags=["Authority Features"])
+def authority_dashboard(user: dict = Depends(require_authority)):
+    return {"status": "access_granted", "user": user["name"], "role": user["role"], "message": "Welcome to Municipal Authority Dashboard"}
+
 
 
 @app.get("/", tags=["Health"])
@@ -332,8 +663,135 @@ def broadcast_alerts(request: BroadcastAlertRequest):
 
 
 
+@app.get("/api/weather/live", tags=["Weather"])
+@app.get("/weather/live", tags=["Weather"])
+def get_live_weather_cached_endpoint(
+    lat: Optional[float] = Query(None, description="Latitude"),
+    lon: Optional[float] = Query(None, description="Longitude"),
+    latitude: Optional[float] = Query(None, description="Latitude alias"),
+    longitude: Optional[float] = Query(None, description="Longitude alias")
+):
+    """
+    GET /api/weather/live?lat=<lat>&lon=<lon>
+    Fetches live weather from Open-Meteo with a 10-minute server-side in-memory cache TTL.
+    Both Citizen Advisor and Authority views rely on this endpoint for identical weather data.
+    """
+    final_lat = lat if lat is not None else (latitude if latitude is not None else 19.9615)
+    final_lon = lon if lon is not None else (longitude if longitude is not None else 79.2961)
+
+    if not (-90.0 <= final_lat <= 90.0) or not (-180.0 <= final_lon <= 180.0):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid latitude or longitude coordinates."
+        )
+
+    return fetch_realtime_weather_cached(final_lat, final_lon, cache_ttl=600)
+
+
+@app.get("/api/weather", response_model=LiveWeatherResponse, tags=["Weather"])
+def get_live_weather(latitude: float, longitude: float):
+    """
+    GET /api/weather?latitude=<lat>&longitude=<lon>
+    Fetches real-time weather from Open-Meteo API and calculates thermal stress indices
+    and risk scores using the scientific HeatShield engine.
+    """
+    if not (-90.0 <= latitude <= 90.0) or not (-180.0 <= longitude <= 180.0):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid latitude or longitude coordinates."
+        )
+        
+    weather_data = fetch_realtime_weather_cached(latitude, longitude, cache_ttl=600)
+    w = weather_data["weather"]
+    
+    # Calculate scientific HeatShield metrics using live weather values
+    risk_info = calculate_risk_score(
+        temp_c=w["temperature_c"],
+        rh=w["relative_humidity_pct"],
+        elderly_pct=11.0,
+        outdoor_worker_pct=35.0,
+        green_cover_pct=10.0,
+        wind_speed_kmh=w["wind_speed_kmh"],
+        solar_radiation_wm2=w["solar_radiation_wm2"]
+    )
+    
+    # Parse 5-day forecast
+    forecast_list = [
+        ForecastDay(
+            day=item["day"],
+            temp_c=item["temp_c"],
+            humidity_pct=item["humidity_pct"],
+            solar_radiation_wm2=item["solar_radiation_wm2"]
+        ) for item in weather_data.get("forecast_5day", [])
+    ]
+    
+    return LiveWeatherResponse(
+        status=weather_data["status"],
+        source=weather_data["source"],
+        latitude=latitude,
+        longitude=longitude,
+        timestamp=weather_data["timestamp"],
+        is_live=weather_data["is_live"],
+        weather=w,
+        forecast_5day=forecast_list,
+        heat_index_c=risk_info["heat_index_c"],
+        wbgt_c=risk_info["wbgt_c"],
+        solar_adjusted_wbgt=risk_info["solar_adjusted_wbgt"],
+        apparent_temperature_c=risk_info["apparent_temperature_c"],
+        human_thermal_stress_index=risk_info["human_thermal_stress_index"],
+        risk_score=risk_info["risk_score"],
+        risk_band=risk_info["risk_band"],
+        advisories=risk_info["advisories"]
+    )
+
+
+@app.post("/api/predict-risk", response_model=MLPredictionResponse, tags=["Machine Learning Inference"])
+def predict_heat_risk(request: MLPredictionRequest):
+    """
+    POST /api/predict-risk
+    Runs inference using the offline-trained RandomForestRegressor model on provided or live weather features.
+    Returns predicted risk score, risk category, model version, and inference timestamp.
+    """
+    try:
+        result = predict_single_risk(
+            temp_c=request.temp_c,
+            humidity_pct=request.humidity_pct,
+            wind_speed_kmh=request.wind_speed_kmh or 10.0,
+            solar_radiation_wm2=request.solar_radiation_wm2 or 850.0,
+            surface_pressure_hpa=request.surface_pressure_hpa or 1013.25,
+            precipitation_mm=request.precipitation_mm or 0.0,
+            hour=request.hour,
+            month=request.month
+        )
+        return MLPredictionResponse(**result)
+    except Exception as e:
+        logger.error(f"[ML Inference Error] {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"ML Prediction unavailable: {str(e)}"
+        )
+
+
+@app.get("/api/ml-metadata", response_model=MLModelMetadataResponse, tags=["Machine Learning Inference"])
+def get_ml_model_info():
+    """
+    GET /api/ml-metadata
+    Returns transparency metadata about the trained ML model (version, algorithm, training period, records, MAE, RMSE, R²).
+    """
+    try:
+        _, metadata = get_model_and_metadata()
+        return MLModelMetadataResponse(**metadata)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"ML Model metadata unavailable: {str(e)}"
+        )
+
+
 @app.post("/api/calculate", response_model=CalculationResponse, tags=["Calculations"])
 def calculate_custom_risk(input_data: CalculationInput):
+
+
     """
     Calculate custom thermal stress indices, vulnerability score, and health advisory
     given arbitrary meteorological and demographic inputs.

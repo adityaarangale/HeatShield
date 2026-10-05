@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEAT SHIELD — Registered Accounts Directory</title>
+    <meta name="description" content="Municipal Heatwave Intelligence System - Registered Accounts Management">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22><path d=%22M12 2L3 6.2V12C3 17.5 6.8 21.7 12 23C17.2 21.7 21 17.5 21 12V6.2L12 2Z%22 fill=%22%23ea580c%22/><circle cx=%2212%22 cy=%2212%22 r=%223.5%22 fill=%22%23ffffff%22/></svg>">
+
+    <!-- Premium Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Config & Auth Protection Script -->
+    <script src="config.js"></script>
+    <script>
+      (async function checkAuthorityAuth() {
+        const API_BASE = window.HEATSHIELD_CONFIG ? window.HEATSHIELD_CONFIG.API_BASE : "http://127.0.0.1:8000";
+        const token = sessionStorage.getItem("heatshield_token");
+        if (!token) {
+          window.location.href = "auth.html";
+          return;
+        }
+        try {
+          const res = await fetch(`${API_BASE}/api/auth/me`, {
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+          if (!res.ok) {
+            throw new Error("Invalid session token");
+          }
+          const user = await res.json();
+          const role = (user.role || "").toLowerCase();
+          if (role !== "authority") {
+            throw new Error("Access restricted: Authority privileges required");
+          }
+          window.heatshieldToken = token;
+          window.currentUser = user;
+        } catch (err) {
+          sessionStorage.removeItem("heatshield_token");
+          sessionStorage.removeItem("heatshield_user");
+          window.location.href = "auth.html";
+        }
+      })();
+
+      function handleLogout() {
+        sessionStorage.removeItem("heatshield_token");
+        sessionStorage.removeItem("heatshield_user");
+        window.heatshieldToken = null;
+        window.currentUser = null;
+        window.location.href = "auth.html";
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg-page: #f4f6f9;
+            --sidebar-bg: #1f3864;
+            --sidebar-surface: #172b50;
+            --sidebar-text: #b0c4de;
+            --sidebar-hover: #2c4d80;
+            --card-bg: #ffffff;
+            --card-border: #d1d5db;
+            --card-sub: #f8fafc;
+            --card-sub-hover: #f1f5f9;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-tertiary: #6b7280;
+            --brand-primary: #1f3864;
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            font-size: 13px;
+        }
+
+        aside.sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-shrink: 0;
+            border-right: 1px solid #172b50;
+        }
+
+        .brand-block {
+            padding: 20px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo-wrap {
+            width: 38px;
+            height: 38px;
+            background: #172b50;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .brand-title h1 {
+            font-size: 15px;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .brand-title p {
+            font-size: 10.5px;
+            color: var(--sidebar-text);
+        }
+
+        .nav-list {
+            padding: 14px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 12.5px;
+            transition: all 0.15s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--sidebar-hover);
+            color: #ffffff;
+        }
+
+        .nav-btn.active {
+            background: #172b50;
+            color: #ffffff;
+            border-left: 3px solid #60a5fa;
+        }
+
+        .nav-btn svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+        }
+
+        .sidebar-foot {
+            padding: 14px 18px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 11px;
+            color: var(--sidebar-text);
+            background-color: #172b50;
+        }
+
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        header.top-header {
+            height: 64px;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--card-border);
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .page-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-info-pill {
+            background: var(--card-sub);
+            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: #dc2626;
+            color: #ffffff;
+            border: none;
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.15s ease;
+        }
+
+        .logout-btn:hover {
+            opacity: 0.9;
+        }
+
+        .page-body {
+            flex: 1;
+            padding: 24px 28px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .search-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-bar-wrap svg {
+            color: var(--text-tertiary);
+            flex-shrink: 0;
+        }
+
+        .search-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 13.5px;
+            color: var(--text-primary);
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-card span.lbl {
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .stat-card span.val {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--brand-primary);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .table-card {
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .table-header {
+            padding: 14px 20px;
+            background: var(--card-sub);
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-header h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .count-badge {
+            background: #e2e8f0;
+            color: #334155;
+            padding: 2px 8px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        table.tbl {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        table.tbl th {
+            text-align: left;
+            padding: 10px 14px;
+            background-color: var(--card-sub);
+            color: var(--text-secondary);
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        table.tbl td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-primary);
+        }
+
+        table.tbl tr:hover td {
+            background-color: var(--card-sub-hover);
+        }
+
+        .role-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .role-tag.citizen {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+
+        .role-tag.authority {
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+
+        .btn-delete {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+            color: #ffffff;
+        }
+
+        .empty-row {
+            text-align: center;
+            color: var(--text-tertiary);
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+        <div>
+            <div class="brand-block">
+                <div class="brand-logo-wrap">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ffffff" stroke-width="1.5">
+                        <path d="M12 2L3 6.2V12C3 17.5 6.8 21.7 12 23C17.2 21.7 21 17.5 21 12V6.2L12 2Z" fill="#1f3864"/>
+                        <circle cx="12" cy="12" r="3.4" fill="#ffffff" fill-opacity="0.9"/>
+                    </svg>
+                </div>
+                <div class="brand-title">
+                    <h1>HEAT SHIELD</h1>
+                    <p>Municipal Early Warning System</p>
+                </div>
+            </div>
+
+            <nav class="nav-list">
+                <a href="index.html" class="nav-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Control Center</span>
+                </a>
+
+                <a href="accounts.html" class="nav-btn active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span>Registered Accounts</span>
+                </a>
+
+                <a href="citizen.html" target="_blank" class="nav-btn" style="color: #60a5fa; margin-top: 10px; border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(255, 255, 255, 0.05);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span style="font-weight: 600;">Citizen View ↗</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="sidebar-foot">
+            <p><strong>Pilot Region:</strong> Chandrapur District, MH</p>
+            <p style="margin-top: 2px;">Municipal Command Platform</p>
+        </div>
+    </aside>
+
+    <!-- WORKSPACE AREA -->
+    <div class="workspace">
+        <header class="top-header">
+            <h1 class="page-title">Registered Accounts Directory</h1>
+            <div class="user-badge">
+                <div class="user-info-pill">
+                    Authenticated Officer: <strong id="officerName">Authority</strong>
+                </div>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            </div>
+        </header>
+
+        <div class="page-body">
+            <!-- Search Box -->
+            <div class="search-bar-wrap">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search accounts by name or phone number as you type..." oninput="filterAccounts()">
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <span class="lbl">Total Registered Users</span>
+                    <span class="val" id="totalUsersCount">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="lbl">Citizen Accounts</span>
+                    <span class="val" id="citizenUsersCount" style="color: #0284c7;">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="lbl">Authority Accounts</span>
+                    <span class="val" id="authorityUsersCount" style="color: #d97706;">0</span>
+                </div>
+            </div>
+
+            <!-- 1. CITIZEN ACCOUNTS TABLE -->
+            <div class="table-card">
+                <div class="table-header">
+                    <h2>
+                        <span>👤 Citizen Accounts</span>
+                        <span class="count-badge" id="citizenTableBadge">0</span>
+                    </h2>
+                </div>
+                <table class="tbl">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Phone Number</th>
+                            <th>Ward / Location</th>
+                            <th>Registered On</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="citizenTableBody">
+                        <tr><td colspan="6" class="empty-row">Loading citizen accounts...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 2. AUTHORITY ACCOUNTS TABLE -->
+            <div class="table-card">
+                <div class="table-header">
+                    <h2>
+                        <span>🏛️ Authority Accounts</span>
+                        <span class="count-badge" id="authorityTableBadge">0</span>
+                    </h2>
+                </div>
+                <table class="tbl">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Officer Name</th>
+                            <th>Phone Number</th>
+                            <th>Department / Designation</th>
+                            <th>Registered On</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="authorityTableBody">
+                        <tr><td colspan="6" class="empty-row">Loading authority accounts...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.HEATSHIELD_CONFIG ? window.HEATSHIELD_CONFIG.API_BASE : "http://127.0.0.1:8000";
+        let allCitizenAccounts = [];
+        let allAuthorityAccounts = [];
+
+        async function loadAccounts() {
+            const token = sessionStorage.getItem("heatshield_token");
+            if (!token) return;
+
+            // Set logged in officer name
+            if (window.currentUser && window.currentUser.name) {
+                document.getElementById("officerName").textContent = window.currentUser.name;
+            }
+
+            try {
+                const [citRes, authRes] = await Promise.all([
+                    fetch(`${API_BASE}/api/admin/accounts?role=citizen`, {
+                        headers: { "Authorization": `Bearer ${token}` }
+                    }),
+                    fetch(`${API_BASE}/api/admin/accounts?role=authority`, {
+                        headers: { "Authorization": `Bearer ${token}` }
+                    })
+                ]);
+
+                if (citRes.ok) {
+                    allCitizenAccounts = await citRes.json();
+                }
+                if (authRes.ok) {
+                    allAuthorityAccounts = await authRes.json();
+                }
+
+                updateStats();
+                filterAccounts();
+            } catch (err) {
+                console.error("Failed to load registered accounts:", err);
+            }
+        }
+
+        function updateStats() {
+            const total = allCitizenAccounts.length + allAuthorityAccounts.length;
+            document.getElementById("totalUsersCount").textContent = total;
+            document.getElementById("citizenUsersCount").textContent = allCitizenAccounts.length;
+            document.getElementById("authorityUsersCount").textContent = allAuthorityAccounts.length;
+        }
+
+        function formatDate(isoStr) {
+            if (!isoStr) return "N/A";
+            try {
+                const d = new Date(isoStr);
+                return d.toLocaleDateString("en-IN", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                });
+            } catch (e) {
+                return isoStr;
+            }
+        }
+
+        function filterAccounts() {
+            const query = (document.getElementById("searchInput").value || "").toLowerCase().trim();
+
+            const filteredCitizens = allCitizenAccounts.filter(acc => {
+                const name = (acc.name || "").toLowerCase();
+                const phone = (acc.phone || "").toLowerCase();
+                return name.includes(query) || phone.includes(query);
+            });
+
+            const filteredAuthorities = allAuthorityAccounts.filter(acc => {
+                const name = (acc.name || "").toLowerCase();
+                const phone = (acc.phone || "").toLowerCase();
+                return name.includes(query) || phone.includes(query);
+            });
+
+            renderCitizenTable(filteredCitizens);
+            renderAuthorityTable(filteredAuthorities);
+        }
+
+        function renderCitizenTable(citizens) {
+            const tbody = document.getElementById("citizenTableBody");
+            document.getElementById("citizenTableBadge").textContent = citizens.length;
+
+            if (citizens.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-row">No citizen accounts found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = citizens.map(c => `
+                <tr>
+                    <td><strong>#${c.id}</strong></td>
+                    <td><strong>${escapeHtml(c.name || 'N/A')}</strong></td>
+                    <td><code>${escapeHtml(c.phone || c.email || 'N/A')}</code></td>
+                    <td>${escapeHtml(c.ward_or_department || 'Unassigned')}</td>
+                    <td>${formatDate(c.created_at)}</td>
+                    <td>
+                        <button class="btn-delete" onclick="confirmDeleteAccount(${c.id}, '${escapeHtml(c.name)}')">Delete</button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        function renderAuthorityTable(authorities) {
+            const tbody = document.getElementById("authorityTableBody");
+            document.getElementById("authorityTableBadge").textContent = authorities.length;
+
+            if (authorities.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-row">No authority accounts found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = authorities.map(a => `
+                <tr>
+                    <td><strong>#${a.id}</strong></td>
+                    <td><strong>${escapeHtml(a.name || 'N/A')}</strong></td>
+                    <td><code>${escapeHtml(a.phone || a.email || 'N/A')}</code></td>
+                    <td><span class="role-tag authority">${escapeHtml(a.ward_or_department || 'Disaster Management')}</span></td>
+                    <td>${formatDate(a.created_at)}</td>
+                    <td>
+                        <button class="btn-delete" onclick="confirmDeleteAccount(${a.id}, '${escapeHtml(a.name)}')">Delete</button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+
+        async function confirmDeleteAccount(userId, userName) {
+            if (!confirm(`Are you sure you want to delete the account for "${userName}" (#${userId})?`)) {
+                return;
+            }
+
+            const token = sessionStorage.getItem("heatshield_token");
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/accounts/${userId}`, {
+                    method: "DELETE",
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    alert(`Account for "${userName}" was successfully removed.`);
+                    loadAccounts();
+                } else {
+                    const data = await res.json();
+                    alert(`Failed to delete account: ${data.detail || 'Unknown error'}`);
+                }
+            } catch (err) {
+                alert(`Error connecting to server: ${err.message}`);
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", loadAccounts);
+    </script>
+</body>
+</html>
